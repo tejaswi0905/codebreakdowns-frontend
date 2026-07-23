@@ -18,8 +18,14 @@ export const Route = createFileRoute("/profile")({
       },
     ],
   }),
-  component: ProfilePage,
+  component: () => (
+    <ProtectedRoute>
+      <ProfilePage />
+    </ProtectedRoute>
+  ),
 });
+
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 const initial = {
   fullName: "Aditi Kumar",

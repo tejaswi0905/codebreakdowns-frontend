@@ -30,26 +30,33 @@ const links = [
 ] as const;
 
 export function Navbar() {
-  const { theme, toggle } = useTheme();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
   const { user, isAuthenticated, isLoading, logout } = useAuthStore();
 
+  const activeLinks = [
+    { to: "/", label: "Home" },
+    ...(isAuthenticated ? [
+      { to: "/courses", label: "Courses" },
+      { to: "/products", label: "Products" },
+    ] : []),
+  ];
+
   return (
-    <header className="sticky top-0 z-40 border-b border-border/70 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/70">
+    <header className="sticky top-0 z-40 border-b border-white/5 bg-background/50 backdrop-blur-md supports-[backdrop-filter]:bg-background/40">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <Link
           to="/"
           className="flex items-center gap-2 font-semibold tracking-tight"
         >
-          <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-primary-foreground shadow-sm">
+          <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary/20 border border-primary/50 text-primary shadow-[0_0_15px_rgba(var(--color-primary),0.3)]">
             <GraduationCap className="h-4 w-4" />
           </span>
-          <span className="text-[15px]">CodeBreakdowns</span>
+          <span className="text-[15px] text-white">CodeBreakdowns</span>
         </Link>
 
         <nav className="hidden items-center gap-1 md:flex">
-          {links.map((l) => {
+          {activeLinks.map((l) => {
             const active =
               l.to === "/" ? pathname === "/" : pathname.startsWith(l.to);
             return (
@@ -59,13 +66,13 @@ export function Navbar() {
                 className={cn(
                   "relative rounded-md px-3 py-2 text-sm font-medium transition-colors",
                   active
-                    ? "text-foreground"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted",
+                    ? "text-white"
+                    : "text-muted-foreground hover:text-white hover:bg-white/5",
                 )}
               >
                 {l.label}
                 {active && (
-                  <span className="absolute inset-x-3 -bottom-[17px] h-0.5 rounded-full bg-primary" />
+                  <span className="absolute inset-x-3 -bottom-[17px] h-0.5 rounded-full bg-primary shadow-[0_0_10px_rgba(var(--color-primary),1)]" />
                 )}
               </Link>
             );
@@ -73,22 +80,8 @@ export function Navbar() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={toggle}
-            aria-label="Toggle theme"
-            className="rounded-full"
-          >
-            {theme === "dark" ? (
-              <Sun className="h-4 w-4" />
-            ) : (
-              <Moon className="h-4 w-4" />
-            )}
-          </Button>
-
           {isLoading ? (
-            <div className="w-9 h-9 rounded-full bg-muted animate-pulse" />
+            <div className="w-9 h-9 rounded-full bg-white/5 animate-pulse" />
           ) : isAuthenticated && user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -136,7 +129,7 @@ export function Navbar() {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Button asChild variant="default" size="sm" className="hidden md:flex">
+            <Button asChild variant="default" size="sm" className="hidden md:flex bg-white text-black hover:bg-neutral-200 shadow-[0_0_15px_rgba(255,255,255,0.2)]">
               <Link to="/login">Sign In</Link>
             </Button>
           )}

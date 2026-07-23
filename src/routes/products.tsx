@@ -27,8 +27,14 @@ export const Route = createFileRoute("/products")({
       },
     ],
   }),
-  component: ProductsPage,
+  component: () => (
+    <ProtectedRoute>
+      <ProductsPage />
+    </ProtectedRoute>
+  ),
 });
+
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 const fmt = (n: number) => `₹${n.toLocaleString("en-IN")}`;
 

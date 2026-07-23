@@ -114,13 +114,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         },
         {
           property: "og:image",
-          content:
-            "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/2f2d7581-7ef3-4eca-bade-5c74a8427401/id-preview-7a69bef7--49f5209e-8a1f-455f-9f9b-6540274b4a10.lovable.app-1783702640766.png",
+          content: "/og-image.png",
         },
         {
           name: "twitter:image",
-          content:
-            "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/2f2d7581-7ef3-4eca-bade-5c74a8427401/id-preview-7a69bef7--49f5209e-8a1f-455f-9f9b-6540274b4a10.lovable.app-1783702640766.png",
+          content: "/og-image.png",
         },
       ],
       links: [
@@ -138,7 +136,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           rel: "stylesheet",
           href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
         },
-        { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+        { rel: "icon", href: "/favicon-v2.ico", type: "image/x-icon" },
       ],
     }),
     shellComponent: RootShell,

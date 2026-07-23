@@ -6,8 +6,14 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { fetchMyCourses, type ApiCourse } from "@/services/api";
 import { useAuthStore } from "@/store/authStore";
 
+import { ProtectedRoute } from "@/components/ProtectedRoute";
+
 export const Route = createFileRoute("/dashboard")({
-  component: DashboardPage,
+  component: () => (
+    <ProtectedRoute>
+      <DashboardPage />
+    </ProtectedRoute>
+  ),
 });
 
 function DashboardPage() {

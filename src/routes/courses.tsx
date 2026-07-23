@@ -1,3 +1,4 @@
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useMemo, useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -10,6 +11,7 @@ import {
   FileVideo,
   Code2,
   ArrowLeft,
+  ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -42,6 +44,15 @@ export const Route = createFileRoute("/courses")({
 function CoursePlayerPage() {
   const { courseId } = Route.useSearch();
   const navigate = useNavigate();
+
+  return (
+    <ProtectedRoute>
+      <CoursePlayerContent courseId={courseId} />
+    </ProtectedRoute>
+  );
+}
+
+function CoursePlayerContent({ courseId }: { courseId?: string }) {
 
   // If no courseId is provided in URL, show a fallback
   if (!courseId) {
@@ -258,7 +269,7 @@ function CoursePlayer({ courseId }: { courseId: string }) {
                         });
                       }}
                     >
-                      <CheckCircle2 className="mr-2 h-4 w-4" /> Mark Complete
+                      <CheckCircle2 className="w-4 h-4 mr-2" /> Mark Complete
                     </Button>
                   )}
                 </div>

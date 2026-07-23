@@ -12,7 +12,7 @@ export const Route = createFileRoute("/")({
 
 const fadeUpVariant = {
   hidden: { opacity: 0, y: 15 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.3, ease: "easeOut" } },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.3 } },
 };
 
 const staggerContainer = {
@@ -73,7 +73,7 @@ function LandingPage() {
             </motion.p>
 
             <motion.div variants={fadeUpVariant} className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-              <Button size="lg" asChild className="rounded-none px-8 h-14 text-lg font-bold shadow-[4px_4px_0px_0px_rgba(var(--color-primary),1)] hover:translate-y-1 hover:shadow-[0px_0px_0px_0px_rgba(var(--color-primary),1)] transition-all bg-foreground text-background hover:bg-foreground/90 group border border-primary">
+              <Button size="lg" asChild className="rounded-full px-8 h-14 text-lg font-bold shadow-[0_0_25px_rgba(var(--color-primary),0.4)] hover:shadow-[0_0_35px_rgba(var(--color-primary),0.6)] hover:-translate-y-1 transition-all bg-primary text-primary-foreground hover:bg-primary/90 group border-none">
                 <Link to="/courses">
                   Initialize _
                   <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
