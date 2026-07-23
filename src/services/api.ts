@@ -49,9 +49,11 @@ export interface CoursePlayData {
       sortOrder: number;
       isProblem: boolean;
       problemUrl: string | null;
+      description: string | null;
       explanationEndSeconds: number | null;
       isPreview: boolean;
       isLocked?: boolean;
+      progress?: { isCompleted: boolean }[];
     }[];
   }[];
 }
