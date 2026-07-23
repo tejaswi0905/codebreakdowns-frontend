@@ -106,9 +106,32 @@ function CoursePlayer({ courseId }: { courseId: string }) {
 
   useEffect(() => {
     if (course && !lessonId) {
-      if (course.chapters.length > 0 && course.chapters[0].lessons.length > 0) {
+      // 1. Check if we have a saved lesson for this course
+      const savedLessonId = localStorage.getItem(`codebreakdowns_last_lesson_${course.id}`);
+      
+      // Verify the saved lesson actually exists in this course
+      let lessonExists = false;
+      if (savedLessonId) {
+        for (const chapter of course.chapters) {
+          if (chapter.lessons.some((l: any) => l.id === savedLessonId)) {
+            lessonExists = true;
+            break;
+          }
+        }
+      }
+
+      if (lessonExists && savedLessonId) {
+        setLessonId(savedLessonId);
+      } else if (course.chapters.length > 0 && course.chapters[0].lessons.length > 0) {
         setLessonId(course.chapters[0].lessons[0].id);
       }
+    }
+  }, [course, lessonId]);
+
+  // 2. Save lessonId to localStorage whenever it changes
+  useEffect(() => {
+    if (course && lessonId) {
+      localStorage.setItem(`codebreakdowns_last_lesson_${course.id}`, lessonId);
     }
   }, [course, lessonId]);
 
