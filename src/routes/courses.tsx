@@ -67,18 +67,27 @@ function CoursePlayerPage() {
 }
 
 function CoursePlayerContent({ courseId }: { courseId?: string }) {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!courseId) {
+      const lastCourseId = localStorage.getItem("codebreakdowns_last_course");
+      if (lastCourseId) {
+        navigate({ to: "/courses", search: { courseId: lastCourseId }, replace: true });
+      } else {
+        navigate({ to: "/dashboard", replace: true });
+      }
+    } else {
+      // Save the current course to localStorage
+      localStorage.setItem("codebreakdowns_last_course", courseId);
+    }
+  }, [courseId, navigate]);
 
   if (!courseId) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[70vh] text-center px-4">
-        <AlertCircle className="h-12 w-12 text-muted-foreground mb-4 opacity-50" />
-        <h2 className="text-2xl font-bold">No Course Selected</h2>
-        <p className="text-muted-foreground mt-2 max-w-sm">
-          Please select a course from your dashboard to start learning.
-        </p>
-        <Button asChild className="mt-6">
-          <Link to="/dashboard">Go to Dashboard</Link>
-        </Button>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-4"></div>
+        <p className="text-muted-foreground mt-2">Loading course...</p>
       </div>
     );
   }
