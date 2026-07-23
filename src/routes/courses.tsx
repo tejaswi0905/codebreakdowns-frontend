@@ -36,7 +36,7 @@ import {
 } from "@/components/ui/accordion";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { fetchCoursePlayData } from "@/services/api";
+import { fetchCoursePlayData, fetchMyCourses } from "@/services/api";
 import { BunnyPlayer } from "@/components/BunnyPlayer";
 import { toast } from "sonner";
 import { markLessonComplete } from "@/services/api";
@@ -101,6 +101,13 @@ function CoursePlayer({ courseId }: { courseId: string }) {
     queryFn: () => fetchCoursePlayData(courseId),
     retry: 1,
   });
+
+  const { data: myCourses } = useQuery({
+    queryKey: ["my-courses"],
+    queryFn: fetchMyCourses,
+  });
+
+  const navigate = useNavigate();
 
   const [lessonId, setLessonId] = useState<string | null>(null);
 
@@ -211,11 +218,23 @@ function CoursePlayer({ courseId }: { courseId: string }) {
                 Current Course
               </div>
             </div>
-            {/* Fake select that just shows the current course title */}
-            <Select value={course.id} disabled>
-              <SelectTrigger className="mt-2 h-10 w-full bg-black/40 border-white/10 opacity-100 text-foreground">
+            {/* Course Selector */}
+            <Select 
+              value={course.id} 
+              onValueChange={(val) => {
+                navigate({ to: "/courses", search: { courseId: val } });
+              }}
+            >
+              <SelectTrigger className="mt-2 h-10 w-full bg-black/40 border-white/10 text-foreground">
                 <SelectValue>{course.title}</SelectValue>
               </SelectTrigger>
+              <SelectContent>
+                {myCourses?.map((c: any) => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
             </Select>
           </Card>
 
@@ -275,7 +294,7 @@ function CoursePlayer({ courseId }: { courseId: string }) {
                                   type="button"
                                   onClick={() => setLessonId(l.id)}
                                   className={cn(
-                                    "group w-full rounded-md px-2 py-2 text-left transition-colors",
+                                    "group w-full rounded-md px-2 py-2 text-left transition-colors cursor-pointer",
                                     lessonId === l.id
                                       ? "bg-primary/10 text-foreground border border-primary/20"
                                       : "hover:bg-white/5 border border-transparent",

@@ -79,7 +79,7 @@ export function BunnyPlayer({ lessonId, videoUrlOrId, isProblem, explanationEndS
     <div className="w-full aspect-video bg-black rounded-xl border border-white/10 overflow-hidden relative shadow-2xl">
       <iframe
         ref={iframeRef}
-        src={videoUrlOrId}
+        src={videoUrlOrId.replace("autoplay=true", "autoplay=false")}
         className="w-full h-full border-0 absolute inset-0"
         allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
         allowFullScreen
