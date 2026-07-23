@@ -91,6 +91,25 @@ function CoursePlayer({ courseId }: { courseId: string }) {
     }
   }, [course, lessonId]);
 
+  const currentLesson = useMemo(() => {
+    if (!lessonId || !course) return null;
+    for (const chapter of course.chapters) {
+      const found = chapter.lessons.find((l: any) => l.id === lessonId);
+      if (found) return found;
+    }
+    return null;
+  }, [course, lessonId]);
+
+  // Which chapter should the accordion have open by default?
+  const defaultOpenChapter = useMemo(() => {
+    if (!course) return undefined;
+    if (!lessonId) return course.chapters[0]?.id;
+    for (const chapter of course.chapters) {
+      if (chapter.lessons.some((l: any) => l.id === lessonId)) return chapter.id;
+    }
+    return course.chapters[0]?.id;
+  }, [course, lessonId]);
+
   if (isLoading) {
     return (
       <div className="mx-auto max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8 h-screen flex gap-6">
@@ -114,24 +133,6 @@ function CoursePlayer({ courseId }: { courseId: string }) {
       </div>
     );
   }
-
-  const currentLesson = useMemo(() => {
-    if (!lessonId) return null;
-    for (const chapter of course.chapters) {
-      const found = chapter.lessons.find((l) => l.id === lessonId);
-      if (found) return found;
-    }
-    return null;
-  }, [course, lessonId]);
-
-  // Which chapter should the accordion have open by default?
-  const defaultOpenChapter = useMemo(() => {
-    if (!lessonId) return course.chapters[0]?.id;
-    for (const chapter of course.chapters) {
-      if (chapter.lessons.some((l) => l.id === lessonId)) return chapter.id;
-    }
-    return course.chapters[0]?.id;
-  }, [course, lessonId]);
 
   return (
     <div className="mx-auto max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8">
