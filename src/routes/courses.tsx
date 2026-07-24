@@ -12,8 +12,6 @@ import {
   ExternalLink,
   Play,
   PlayCircle,
-  FileVideo,
-  Code2,
   AlertCircle,
   ArrowLeft
 } from "lucide-react";
@@ -36,10 +34,9 @@ import {
 } from "@/components/ui/accordion";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { fetchCoursePlayData, fetchMyCourses } from "@/services/api";
+import { fetchCoursePlayData, fetchMyCourses, markLessonComplete } from "@/services/api";
 import { BunnyPlayer } from "@/components/BunnyPlayer";
 import { toast } from "sonner";
-import { markLessonComplete } from "@/services/api";
 
 const courseSearchSchema = z.object({
   courseId: z.string().optional(),
@@ -57,8 +54,6 @@ export const Route = createFileRoute("/courses")({
 
 function CoursePlayerPage() {
   const { courseId } = Route.useSearch();
-  const navigate = useNavigate();
-
   return (
     <ProtectedRoute>
       <CoursePlayerContent courseId={courseId} />
@@ -78,7 +73,6 @@ function CoursePlayerContent({ courseId }: { courseId?: string }) {
         navigate({ to: "/dashboard", replace: true });
       }
     } else {
-      // Save the current course to localStorage
       localStorage.setItem("codebreakdowns_last_course", courseId);
     }
   }, [courseId, navigate]);
@@ -108,15 +102,11 @@ function CoursePlayer({ courseId }: { courseId: string }) {
   });
 
   const navigate = useNavigate();
-
   const [lessonId, setLessonId] = useState<string | null>(null);
 
   useEffect(() => {
     if (course && !lessonId) {
-      // 1. Check if we have a saved lesson for this course
       const savedLessonId = localStorage.getItem(`codebreakdowns_last_lesson_${course.id}`);
-      
-      // Verify the saved lesson actually exists in this course
       let lessonExists = false;
       if (savedLessonId) {
         for (const chapter of course.chapters) {
@@ -135,7 +125,6 @@ function CoursePlayer({ courseId }: { courseId: string }) {
     }
   }, [course, lessonId]);
 
-  // 2. Save lessonId to localStorage whenever it changes
   useEffect(() => {
     if (course && lessonId) {
       localStorage.setItem(`codebreakdowns_last_lesson_${course.id}`, lessonId);
@@ -160,7 +149,6 @@ function CoursePlayer({ courseId }: { courseId: string }) {
     return course.chapters[0]?.id;
   }, [course, lessonId]);
 
-  // Calculate Progress
   const progress = useMemo(() => {
     if (!course) return { completed: 0, total: 0 };
     let completed = 0;
@@ -181,8 +169,8 @@ function CoursePlayer({ courseId }: { courseId: string }) {
   if (isLoading) {
     return (
       <div className="mx-auto max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8 h-screen flex gap-6">
-        <div className="w-[300px] h-full bg-white/5 animate-pulse rounded-xl" />
-        <div className="flex-1 h-full bg-white/5 animate-pulse rounded-xl" />
+        <div className="w-[320px] h-full bg-card animate-pulse rounded-2xl" />
+        <div className="flex-1 h-full bg-card animate-pulse rounded-2xl" />
       </div>
     );
   }
@@ -203,34 +191,34 @@ function CoursePlayer({ courseId }: { courseId: string }) {
   }
 
   return (
-    <div className="mx-auto max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8 h-[calc(100vh-80px)] overflow-hidden">
-      {/* 3 COLUMN LAYOUT */}
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,22fr)_minmax(0,33fr)_minmax(0,45fr)] h-full">
+    <div className="mx-auto max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8 h-[calc(100vh-80px)] overflow-hidden text-foreground">
+      <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6 h-full">
         
-        {/* LEFT SIDEBAR - Curriculum */}
-        <aside className="space-y-4 h-full flex flex-col">
-          <Card className="p-4 bg-[#0a0a0a] border-white/5 shrink-0">
-            <div className="flex items-center gap-2 mb-2">
-              <Button variant="ghost" size="icon" asChild className="h-6 w-6">
-                <Link to="/dashboard"><ArrowLeft className="h-3 w-3" /></Link>
+        {/* LEFT SIDEBAR */}
+        <div className="flex flex-col gap-4 h-full overflow-hidden">
+          
+          {/* Current Course Selector */}
+          <Card className="p-4 bg-card border-border shrink-0 rounded-2xl shadow-sm">
+            <div className="flex items-center gap-2 mb-3">
+              <Button variant="ghost" size="icon" asChild className="h-6 w-6 -ml-1 hover:bg-foreground/5">
+                <Link to="/overview" search={{ courseId }}><ArrowLeft className="h-3.5 w-3.5" /></Link>
               </Button>
-              <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+              <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                 Current Course
               </div>
             </div>
-            {/* Course Selector */}
             <Select 
               value={course.id} 
               onValueChange={(val) => {
                 navigate({ to: "/courses", search: { courseId: val } });
               }}
             >
-              <SelectTrigger className="mt-2 h-10 w-full bg-black/40 border-white/10 text-foreground">
+              <SelectTrigger className="w-full bg-background border-border shadow-sm h-10 rounded-xl text-sm font-medium">
                 <SelectValue>{course.title}</SelectValue>
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="rounded-xl">
                 {myCourses?.map((c: any) => (
-                  <SelectItem key={c.id} value={c.id}>
+                  <SelectItem key={c.id} value={c.id} className="rounded-lg text-sm">
                     {c.title}
                   </SelectItem>
                 ))}
@@ -238,90 +226,107 @@ function CoursePlayer({ courseId }: { courseId: string }) {
             </Select>
           </Card>
 
-          <Card className="p-4 bg-[#0a0a0a] border-white/5 shrink-0">
-            <div className="flex items-baseline justify-between">
-              <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+          {/* Progress Bar */}
+          <Card className="p-5 bg-card border-border shrink-0 rounded-2xl shadow-sm">
+            <div className="flex items-end justify-between mb-3">
+              <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                 Course Progress
               </div>
-              <div className="text-lg font-semibold tracking-tight">{pct}%</div>
+              <div className="text-xl font-bold leading-none">{pct}%</div>
             </div>
-            <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-muted border border-white/5">
-              <div
-                className="h-full rounded-full bg-primary transition-all"
-                style={{ width: `${pct}%` }}
+            <div className="h-1.5 w-full bg-background rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-primary transition-all duration-700 ease-out rounded-full" 
+                style={{ width: `${pct}%` }} 
               />
             </div>
-            <div className="mt-2 text-xs text-muted-foreground">
+            <div className="mt-3 text-xs text-muted-foreground font-medium">
               {progress.completed} / {progress.total} Lessons Completed
             </div>
           </Card>
 
-          <Card className="p-2 bg-[#0a0a0a] border-white/5 flex-1 min-h-0 overflow-hidden">
-            <ScrollArea className="h-full pr-2">
-              <Accordion
-                type="single"
-                collapsible
-                defaultValue={defaultOpenChapter}
+          {/* Chapters Accordion */}
+          <Card className="flex-1 bg-card border-border overflow-hidden rounded-2xl flex flex-col shadow-sm">
+            <ScrollArea className="flex-1">
+              <Accordion 
+                type="multiple" 
+                defaultValue={defaultOpenChapter ? [defaultOpenChapter] : []}
                 className="w-full"
               >
-                {course.chapters.map((chapter) => (
-                  <AccordionItem
-                    key={chapter.id}
-                    value={chapter.id}
-                    className="border-b border-border/60 last:border-0"
+                {course.chapters.map((chapter: any) => (
+                  <AccordionItem 
+                    value={chapter.id} 
+                    key={chapter.id} 
+                    className="border-b border-border last:border-0"
                   >
-                    <AccordionTrigger className="px-2 py-3 text-sm font-medium hover:no-underline">
-                      <span className="flex items-center gap-2 text-left">
-                        {chapter.title}
-                        <span className="text-[11px] font-normal text-muted-foreground ml-2">
+                    <AccordionTrigger className="px-5 py-4 hover:no-underline hover:bg-foreground/5 transition-colors group">
+                      <div className="flex items-center justify-between w-full pr-4">
+                        <div className="font-semibold text-sm group-hover:text-foreground text-foreground/90 transition-colors text-left">
+                          {chapter.title}
+                        </div>
+                        <div className="text-xs text-muted-foreground font-medium">
                           {chapter.lessons.length}
-                        </span>
-                      </span>
+                        </div>
+                      </div>
                     </AccordionTrigger>
-                    <AccordionContent className="pb-2">
+                    
+                    <AccordionContent className="pb-3 px-3 pt-1">
                       {chapter.lessons.length === 0 ? (
-                        <div className="px-2 py-3 text-xs text-muted-foreground">
-                          Lessons coming soon.
+                        <div className="text-sm text-muted-foreground italic px-2 py-2">
+                          No lessons in this module yet.
                         </div>
                       ) : (
-                        <ul className="space-y-1">
-                          {chapter.lessons.map((l) => {
+                        <div className="space-y-1">
+                          {chapter.lessons.map((l: any) => {
                             const isCompleted = l.progress && l.progress.length > 0 && l.progress[0].isCompleted;
-                            const status = isCompleted ? "completed" : (lessonId === l.id ? "current" : "todo");
+                            const isSelected = lessonId === l.id;
+                            let status: "completed" | "current" | "todo" = "todo";
+                            if (isCompleted) status = "completed";
+                            else if (isSelected) status = "current";
+
                             return (
-                              <li key={l.id}>
-                                <button
-                                  type="button"
-                                  onClick={() => setLessonId(l.id)}
-                                  className={cn(
-                                    "group w-full rounded-md px-2 py-2 text-left transition-colors cursor-pointer",
-                                    lessonId === l.id
-                                      ? "bg-primary/10 text-foreground border border-primary/20"
-                                      : "hover:bg-white/5 border border-transparent",
-                                  )}
-                                >
-                                  <div className="flex items-start gap-2">
-                                    <StatusIcon status={status} />
-                                    <div className="min-w-0 flex-1">
-                                      <div className="truncate text-sm font-medium">
-                                        {l.title}
-                                      </div>
-                                      <div className="mt-0.5 flex items-center gap-2 text-[11px] text-muted-foreground">
-                                        <span>{Math.floor(l.durationSeconds / 60)}m {l.durationSeconds % 60}s</span>
-                                        {l.isProblem && (
-                                          <>
-                                            <span>·</span>
-                                            <span className="text-purple-400">Problem</span>
-                                          </>
-                                        )}
-                                      </div>
+                              <button
+                                key={l.id}
+                                onClick={() => setLessonId(l.id)}
+                                className={cn(
+                                  "w-full flex items-start gap-3 p-3 rounded-xl text-left transition-all duration-200 group relative",
+                                  isSelected 
+                                    ? "bg-primary/10 border border-primary/20" 
+                                    : "hover:bg-foreground/5 border border-transparent"
+                                )}
+                              >
+                                <div className="mt-0.5 shrink-0">
+                                  {status === "completed" ? (
+                                    <CheckCircle2 className="h-4 w-4 text-success" />
+                                  ) : status === "current" ? (
+                                    <div className="h-4 w-4 rounded-full border-2 border-primary flex items-center justify-center">
+                                      <div className="h-1.5 w-1.5 rounded-full bg-primary" />
                                     </div>
+                                  ) : (
+                                    <Circle className="h-4 w-4 text-muted-foreground/40 group-hover:text-muted-foreground/70 transition-colors" />
+                                  )}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className={cn(
+                                    "text-sm font-medium truncate transition-colors",
+                                    isSelected ? "text-primary font-bold" : "text-foreground/90 group-hover:text-foreground"
+                                  )}>
+                                    {l.title}
                                   </div>
-                                </button>
-                              </li>
+                                  <div className="flex items-center gap-2 mt-1 text-[11px] font-medium text-muted-foreground">
+                                    <span>{Math.floor(l.durationSeconds / 60)}m {l.durationSeconds % 60}s</span>
+                                    {l.isProblem && (
+                                      <>
+                                        <span className="opacity-50">•</span>
+                                        <span className="text-success">Easy</span>
+                                      </>
+                                    )}
+                                  </div>
+                                </div>
+                              </button>
                             );
                           })}
-                        </ul>
+                        </div>
                       )}
                     </AccordionContent>
                   </AccordionItem>
@@ -329,131 +334,27 @@ function CoursePlayer({ courseId }: { courseId: string }) {
               </Accordion>
             </ScrollArea>
           </Card>
-        </aside>
+        </div>
 
-        {/* CENTER — lesson info */}
-        <section className="space-y-4 flex flex-col h-full overflow-y-auto pr-2 custom-scrollbar pb-10">
-          {currentLesson ? <LessonInfo lesson={currentLesson} /> : <EmptyLesson />}
-        </section>
-
-        {/* RIGHT — workspace */}
-        <section className="space-y-4 flex flex-col h-full overflow-y-auto pr-2 custom-scrollbar pb-10">
-          <Workspace lesson={currentLesson} courseId={courseId} />
-        </section>
+        {/* MAIN CONTENT AREA */}
+        <div className="flex flex-col gap-6 h-full overflow-y-auto custom-scrollbar pr-2 pb-6">
+          {currentLesson ? (
+            <Workspace lesson={currentLesson} courseId={courseId} />
+          ) : (
+            <Card className="flex flex-col items-center justify-center h-[500px] text-center bg-card border-border rounded-2xl">
+              <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-4">
+                <ChevronDown className="h-8 w-8" />
+              </div>
+              <h2 className="text-xl font-bold">Select a lesson to begin</h2>
+              <p className="text-muted-foreground mt-2 max-w-sm">
+                Choose a module from the left sidebar to continue your learning journey.
+              </p>
+            </Card>
+          )}
+        </div>
 
       </div>
     </div>
-  );
-}
-
-function StatusIcon({ status }: { status: "completed" | "current" | "todo" }) {
-  if (status === "completed")
-    return <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-green-500" />;
-  if (status === "current")
-    return <PlayCircle className="mt-0.5 h-4 w-4 shrink-0 text-primary" />;
-  return (
-    <Circle className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground/60" />
-  );
-}
-
-function LessonInfo({ lesson }: { lesson: any }) {
-  // Parse JSON description if it exists
-  let meta = { text: lesson.description || "", prerequisites: [], objectives: [], outcome: "" };
-  if (lesson.description) {
-    try {
-      const parsed = JSON.parse(lesson.description);
-      if (parsed.text !== undefined) meta = parsed;
-    } catch(e) {
-      // Not JSON, just use as text
-    }
-  }
-
-  return (
-    <>
-      <Card className="p-6 bg-[#0a0a0a] border-white/5">
-        <div className="flex flex-wrap items-center gap-2">
-          {lesson.isProblem ? (
-             <Badge variant="outline" className="bg-purple-500/10 text-purple-400 border-purple-500/20">
-               Interactive Problem
-             </Badge>
-          ) : (
-             <Badge variant="outline" className="bg-blue-500/10 text-blue-400 border-blue-500/20">
-               Video Lesson
-             </Badge>
-          )}
-          
-          <Badge variant="secondary" className="font-normal bg-white/5 text-muted-foreground hover:bg-white/10">
-            {Math.floor(lesson.durationSeconds / 60)}m {lesson.durationSeconds % 60}s
-          </Badge>
-        </div>
-        <h1 className="mt-3 text-2xl font-semibold tracking-tight">
-          {lesson.title}
-        </h1>
-        {meta.text && (
-          <p className="mt-3 text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
-            {meta.text}
-          </p>
-        )}
-      </Card>
-
-      {meta.prerequisites && meta.prerequisites.length > 0 && (
-        <InfoCard title="Prerequisites">
-          <div className="flex flex-wrap gap-2">
-            {meta.prerequisites.map((p: string) => (
-              <Badge key={p} variant="secondary" className="font-normal bg-white/5 border border-white/10 text-foreground hover:bg-white/10">
-                {p}
-              </Badge>
-            ))}
-          </div>
-        </InfoCard>
-      )}
-
-      {meta.objectives && meta.objectives.length > 0 && (
-        <InfoCard title="Learning Objectives">
-          <ul className="space-y-2">
-            {meta.objectives.map((o: string) => (
-              <li key={o} className="flex items-start gap-2 text-sm text-muted-foreground">
-                <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                <span>{o}</span>
-              </li>
-            ))}
-          </ul>
-        </InfoCard>
-      )}
-
-      {meta.outcome && (
-        <InfoCard title="Expected Outcome">
-          <p className="text-sm leading-relaxed text-muted-foreground">
-            {meta.outcome}
-          </p>
-        </InfoCard>
-      )}
-    </>
-  );
-}
-
-function InfoCard({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <Card className="p-5 bg-[#0a0a0a] border-white/5">
-      <div className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-        {title}
-      </div>
-      {children}
-    </Card>
-  );
-}
-
-function EmptyLesson() {
-  return (
-    <Card className="flex min-h-[400px] flex-col items-center justify-center p-10 text-center bg-[#0a0a0a] border-white/5 h-full">
-      <div className="grid h-12 w-12 place-items-center rounded-xl bg-primary/10 text-primary">
-        <ChevronDown className="h-6 w-6" />
-      </div>
-      <h2 className="mt-4 text-lg font-semibold">Pick a lesson to begin</h2>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Expand a section on the left and select a lesson to see its details here.
-      </p>
-    </Card>
   );
 }
 
@@ -463,92 +364,168 @@ function Workspace({ lesson, courseId }: { lesson: any, courseId: string }) {
   
   if (!lesson) return null;
 
+  // Parse JSON description if it exists
+  let meta = { text: lesson.description || "", prerequisites: ["Arrays", "Basic greedy intuition"], objectives: ["Track the minimum price seen so far", "Maintain a running maximum profit", "Solve in a single pass with O(1) space"], outcome: "You'll master the min-so-far pattern and understand how it generalises to more complex stock problems." };
+  if (lesson.description) {
+    try {
+      const parsed = JSON.parse(lesson.description);
+      if (parsed.text !== undefined) meta = parsed;
+    } catch(e) {
+      meta.text = lesson.description;
+    }
+  }
+
   return (
     <>
-      <Card className="overflow-hidden p-0 bg-black border-white/5 relative z-10 shadow-xl shrink-0">
-        {lesson.isLocked || !lesson.videoUrlOrId ? (
-          <div className="relative aspect-video w-full bg-gradient-to-br from-black to-black/50">
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <div className="grid h-16 w-16 place-items-center rounded-full bg-white/5 text-muted-foreground shadow-md backdrop-blur">
-                 <AlertCircle className="h-6 w-6" />
+      {/* Video & Action Bar */}
+      <div className="flex flex-col gap-4">
+        <Card className="overflow-hidden p-0 bg-background border-border relative z-10 shadow-lg shrink-0 rounded-2xl">
+          {lesson.isLocked || !lesson.videoUrlOrId ? (
+            <div className="relative aspect-video w-full bg-gradient-to-br from-background to-background/50 flex flex-col items-center justify-center text-center p-6">
+              <div className="grid h-16 w-16 place-items-center rounded-full bg-card shadow-sm mb-4">
+                <Play className="h-6 w-6 text-primary ml-1" />
               </div>
-              <h3 className="text-xl font-bold text-foreground mt-4">Content Locked</h3>
-              <div className="mt-2 text-sm text-muted-foreground max-w-[250px] text-center">
-                Purchase this course to unlock this lesson.
-              </div>
-              <Button asChild className="mt-6" variant="default">
-                 <Link to="/products">View Pricing</Link>
-              </Button>
+              <h3 className="text-lg font-bold text-foreground">Video coming soon</h3>
+              <p className="text-sm text-muted-foreground mt-1 max-w-xs">{lesson.title}</p>
             </div>
-          </div>
-        ) : (
-          <BunnyPlayer 
-            lessonId={lesson.id}
-            videoUrlOrId={lesson.videoUrlOrId}
-            isProblem={lesson.isProblem}
-            explanationEndSeconds={lesson.explanationEndSeconds}
-          />
-        )}
-      </Card>
+          ) : (
+            <BunnyPlayer 
+              lessonId={lesson.id}
+              videoUrlOrId={lesson.videoUrlOrId}
+              isProblem={lesson.isProblem}
+              explanationEndSeconds={lesson.explanationEndSeconds}
+            />
+          )}
+        </Card>
 
-      <div className="flex flex-wrap items-center gap-2 shrink-0">
-        <Button
-          variant="outline"
-          size="sm"
-          className="gap-2 border-white/10 hover:bg-white/5 text-muted-foreground hover:text-foreground"
-          onClick={() => toast.success("Lesson bookmarked")}
-          disabled={!lesson}
-        >
-          <Bookmark className="h-4 w-4" /> Bookmark
-        </Button>
-        {lesson.isProblem && lesson.problemUrl && (
+        <div className="flex flex-wrap items-center gap-3 w-full bg-card border border-border p-3 rounded-xl shadow-sm">
           <Button
             variant="outline"
             size="sm"
-            className="gap-2 border-primary/20 text-primary hover:bg-primary/10"
-            onClick={() => {
-              window.open(lesson.problemUrl, "_blank");
-            }}
-            disabled={!lesson}
+            className="gap-2 h-9 rounded-lg font-medium shadow-sm hover:bg-foreground/5 text-muted-foreground hover:text-foreground"
+            onClick={() => toast.success("Lesson bookmarked")}
           >
-            <ExternalLink className="h-4 w-4" /> Solve on LeetCode
+            <Bookmark className="h-4 w-4" /> Bookmark
           </Button>
-        )}
-        <Button
-          size="sm"
-          className="ml-auto gap-2 text-primary-foreground bg-primary/90 hover:bg-primary shadow-[0_0_15px_rgba(var(--color-primary),0.3)]"
-          onClick={() => {
-            import("@/services/api").then(({ markLessonComplete }) => {
+          {lesson.isProblem && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2 h-9 rounded-lg font-medium shadow-sm hover:bg-foreground/5 text-muted-foreground hover:text-foreground"
+              onClick={() => {
+                if(lesson.problemUrl) window.open(lesson.problemUrl, "_blank");
+                else toast.info("LeetCode link coming soon");
+              }}
+            >
+              <ExternalLink className="h-4 w-4" /> Solve on LeetCode
+            </Button>
+          )}
+          <div className="flex-1"></div>
+          <Button
+            size="sm"
+            className="gap-2 h-9 rounded-lg font-bold shadow-sm"
+            onClick={() => {
               markLessonComplete(lesson.id).then(() => {
                 toast.success("Marked as complete");
                 queryClient.invalidateQueries({ queryKey: ["course-play", courseId] });
+                // We purposefully do NOT auto-advance here to respect user preference
               });
-            });
-          }}
-          disabled={!lesson || lesson.isLocked}
-        >
-          <Check className="h-4 w-4" /> Mark Complete
-        </Button>
+            }}
+            disabled={lesson.isLocked}
+          >
+            <Check className="h-4 w-4" /> Mark as Complete
+          </Button>
+        </div>
       </div>
 
-      {lesson.isProblem && (
-        <Card className="p-5 bg-[#0a0a0a] border-white/5 flex-1 flex flex-col min-h-[300px]">
-          <div className="mb-3 flex items-center justify-between shrink-0">
-            <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-              Hints & Notes
+      {/* Metadata & Notes Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-8">
+        
+        {/* LEFT COLUMN: Metadata */}
+        <div className="flex flex-col gap-4">
+          <Card className="p-6 bg-card border-border rounded-2xl shadow-sm">
+            <div className="flex items-center gap-3 mb-4">
+              <Badge className="bg-success/10 text-success hover:bg-success/20 border-0 rounded-md font-bold px-2 py-0.5 shadow-none">
+                Easy
+              </Badge>
+              <span className="text-sm font-semibold text-muted-foreground">
+                {Math.floor(lesson.durationSeconds / 60)} min
+              </span>
             </div>
-            <span className="text-[11px] text-muted-foreground">
-              {notes.length} chars
-            </span>
-          </div>
-          <Textarea
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            placeholder="Jot down key ideas, edge cases, or your own explanation while you learn…"
-            className="flex-1 resize-none bg-black/40 border-white/10 text-sm"
-          />
-        </Card>
-      )}
+            <h1 className="text-2xl font-extrabold tracking-tight text-foreground leading-tight">
+              {lesson.title}
+            </h1>
+            {meta.text && (
+              <p className="mt-4 text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
+                {meta.text}
+              </p>
+            )}
+          </Card>
+
+          {meta.prerequisites && meta.prerequisites.length > 0 && (
+            <Card className="p-5 bg-card border-border rounded-2xl shadow-sm">
+              <div className="mb-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                Prerequisites
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {meta.prerequisites.map((p: string) => (
+                  <Badge key={p} variant="secondary" className="bg-background border-border text-muted-foreground hover:bg-foreground/5 rounded-md shadow-sm font-medium">
+                    {p}
+                  </Badge>
+                ))}
+              </div>
+            </Card>
+          )}
+
+          {meta.objectives && meta.objectives.length > 0 && (
+            <Card className="p-5 bg-card border-border rounded-2xl shadow-sm">
+              <div className="mb-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                Learning Objectives
+              </div>
+              <ul className="space-y-3">
+                {meta.objectives.map((o: string) => (
+                  <li key={o} className="flex items-start gap-3 text-sm text-foreground/90 font-medium">
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                    <span>{o}</span>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          )}
+
+          {meta.outcome && (
+            <Card className="p-5 bg-card border-border rounded-2xl shadow-sm">
+              <div className="mb-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                Expected Outcome
+              </div>
+              <p className="text-sm leading-relaxed text-muted-foreground">
+                {meta.outcome}
+              </p>
+            </Card>
+          )}
+        </div>
+
+        {/* RIGHT COLUMN: Notes */}
+        <div className="flex flex-col h-full">
+          <Card className="p-5 bg-card border-border flex-1 flex flex-col rounded-2xl shadow-sm min-h-[400px]">
+            <div className="mb-3 flex items-center justify-between shrink-0">
+              <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                Notes
+              </div>
+              <span className="text-[10px] font-medium text-muted-foreground">
+                {notes.length} chars
+              </span>
+            </div>
+            <Textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Jot down key ideas, edge cases, or your own explanation while you learn..."
+              className="flex-1 resize-none bg-background border-border text-sm p-4 rounded-xl shadow-inner focus-visible:ring-1 focus-visible:ring-primary/50"
+            />
+          </Card>
+        </div>
+
+      </div>
     </>
   );
 }

@@ -62,48 +62,48 @@ function DashboardPage() {
   const freeCourses = (allCourses || []).filter(c => c.isFree && !purchasedIds.has(c.id));
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 min-h-screen">
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 min-h-screen">
       
-      <div className="mb-12 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div className="mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
             Welcome back, <span className="text-primary">{user?.displayName || user?.username || "Learner"}</span>
           </h1>
-          <p className="mt-2 text-lg text-muted-foreground">
+          <p className="mt-1 text-base text-muted-foreground">
             Ready to crush your next interview? Pick up where you left off.
           </p>
         </div>
-        <Button asChild variant="outline" className="rounded-full shadow-sm">
+        <Button asChild variant="outline" size="sm" className="rounded-full shadow-sm">
           <Link to="/products">Browse Catalog</Link>
         </Button>
       </div>
 
-      <div className="space-y-16">
+      <div className="space-y-12">
         
         {/* Purchased Courses Section */}
         <section>
-          <div className="flex items-center gap-2 mb-6">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <CheckCircle2 className="h-6 w-6 text-primary" />
+          <div className="flex items-center gap-2 mb-4">
+            <div className="p-1.5 bg-primary/10 rounded-md">
+              <CheckCircle2 className="h-5 w-5 text-primary" />
             </div>
-            <h2 className="text-2xl font-bold">Your Enrolled Courses</h2>
+            <h2 className="text-xl font-bold">Your Enrolled Courses</h2>
           </div>
           
           {purchasedCourses.length === 0 ? (
-            <Card className="bg-card/30 border-dashed border-border p-12 text-center rounded-3xl">
-              <div className="mx-auto w-16 h-16 bg-secondary rounded-full flex items-center justify-center mb-4">
-                <BookOpen className="h-8 w-8 text-muted-foreground" />
+            <Card className="bg-card/30 border-dashed border-border p-8 text-center rounded-2xl">
+              <div className="mx-auto w-12 h-12 bg-secondary rounded-full flex items-center justify-center mb-3">
+                <BookOpen className="h-6 w-6 text-muted-foreground" />
               </div>
-              <h3 className="text-2xl font-semibold mb-2">No active enrollments</h3>
-              <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+              <h3 className="text-xl font-semibold mb-2">No active enrollments</h3>
+              <p className="text-muted-foreground mb-4 max-w-sm mx-auto text-sm">
                 You haven't purchased any premium courses yet. Start your journey by exploring our catalog.
               </p>
-              <Button asChild size="lg" className="rounded-full font-bold">
+              <Button asChild className="rounded-full font-bold">
                 <Link to="/products">Explore Premium Courses</Link>
               </Button>
             </Card>
           ) : (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4">
               {purchasedCourses.map((course) => (
                 <CourseCard key={course.id} course={course} type="purchased" />
               ))}
@@ -114,13 +114,13 @@ function DashboardPage() {
         {/* Free Courses Section */}
         {freeCourses.length > 0 && (
           <section>
-            <div className="flex items-center gap-2 mb-6">
-              <div className="p-2 bg-success/10 rounded-lg">
-                <LockOpen className="h-6 w-6 text-success" />
+            <div className="flex items-center gap-2 mb-4">
+              <div className="p-1.5 bg-success/10 rounded-md">
+                <LockOpen className="h-5 w-5 text-success" />
               </div>
-              <h2 className="text-2xl font-bold">Free Resources For You</h2>
+              <h2 className="text-xl font-bold">Free Resources For You</h2>
             </div>
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4">
               {freeCourses.map((course) => (
                 <CourseCard key={course.id} course={course} type="free" />
               ))}
@@ -137,7 +137,7 @@ function CourseCard({ course, type }: { course: ApiCourse; type: "purchased" | "
   const isFree = type === "free";
 
   return (
-    <Card className="group flex flex-col overflow-hidden bg-card border-border hover:-translate-y-1 hover:shadow-xl hover:border-primary/40 transition-all duration-300 rounded-2xl h-full relative">
+    <Card className="group flex flex-col overflow-hidden bg-card border-border hover:-translate-y-1 hover:shadow-lg hover:border-primary/40 transition-all duration-300 rounded-xl h-full relative">
       
       {/* Badge */}
       <div className="absolute top-4 right-4 z-10">
@@ -153,7 +153,7 @@ function CourseCard({ course, type }: { course: ApiCourse; type: "purchased" | "
       </div>
 
       {/* Thumbnail */}
-      <div className="h-48 w-full overflow-hidden relative bg-muted">
+      <div className="h-40 w-full overflow-hidden relative bg-muted">
         {course.imageUrl ? (
           <>
             <img 
@@ -166,35 +166,35 @@ function CourseCard({ course, type }: { course: ApiCourse; type: "purchased" | "
           </>
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-secondary to-background flex items-center justify-center">
-            <BookOpen className="h-12 w-12 text-primary/30" />
+            <BookOpen className="h-10 w-10 text-primary/30" />
           </div>
         )}
         
         {/* Hover Play Button Overlay */}
         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <div className="w-14 h-14 rounded-full bg-background/90 backdrop-blur shadow-xl flex items-center justify-center text-primary transform scale-90 group-hover:scale-100 transition-all duration-300">
-            <Play className="w-6 h-6 ml-1" fill="currentColor" />
+          <div className="w-12 h-12 rounded-full bg-background/90 backdrop-blur shadow-xl flex items-center justify-center text-primary transform scale-90 group-hover:scale-100 transition-all duration-300">
+            <Play className="w-5 h-5 ml-1" fill="currentColor" />
           </div>
         </div>
       </div>
 
       {/* Content */}
-      <CardHeader className="flex-1 pb-4 pt-5 px-6">
-        <CardTitle className="text-xl font-bold leading-tight group-hover:text-primary transition-colors">
+      <CardHeader className="flex-1 pb-4 pt-4 px-5">
+        <CardTitle className="text-lg font-bold leading-tight group-hover:text-primary transition-colors">
           {course.title}
         </CardTitle>
         {course.description && (
-          <CardDescription className="line-clamp-2 mt-3 text-muted-foreground text-sm leading-relaxed">
+          <CardDescription className="line-clamp-2 mt-2 text-muted-foreground text-xs leading-relaxed">
             {course.description}
           </CardDescription>
         )}
       </CardHeader>
 
-      <CardFooter className="pt-0 pb-6 px-6">
+      <CardFooter className="pt-0 pb-5 px-5">
         <Button 
           asChild 
           variant={isFree ? "secondary" : "default"} 
-          className="w-full font-semibold rounded-xl h-11"
+          className="w-full font-semibold rounded-lg h-10 text-sm"
         >
           <Link to="/overview" search={{ courseId: course.id }}>
             {isFree ? "Start Free Course" : "Continue Learning"}

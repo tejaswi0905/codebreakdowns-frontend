@@ -136,7 +136,7 @@ function CourseOverviewContent({ courseId }: { courseId: string }) {
         
         {/* LEFT COLUMN: Progress & CTA */}
         <div className="lg:col-span-4 flex flex-col gap-6">
-          <Card className="bg-[#111113] border-white/5 p-8 flex flex-col items-center shadow-2xl rounded-2xl">
+          <Card className="bg-card border-border p-8 flex flex-col items-center shadow-2xl rounded-2xl">
             
             {/* Circular Progress SVG */}
             <div className="relative flex items-center justify-center w-[220px] h-[220px] mb-8">
@@ -173,11 +173,11 @@ function CourseOverviewContent({ courseId }: { courseId: string }) {
 
             {/* Course Info */}
             <div className="w-full space-y-4 mb-8">
-              <div className="flex justify-between items-center border-b border-white/5 pb-3">
+              <div className="flex justify-between items-center border-b border-border pb-3">
                 <span className="text-sm text-muted-foreground">Current Course</span>
                 <span className="text-sm font-semibold">{courseTitle}</span>
               </div>
-              <div className="flex justify-between items-center border-b border-white/5 pb-3">
+              <div className="flex justify-between items-center border-b border-border pb-3">
                 <span className="text-sm text-muted-foreground">Current Module</span>
                 <span className="text-sm font-semibold">{currentModuleTitle}</span>
               </div>
@@ -202,7 +202,7 @@ function CourseOverviewContent({ courseId }: { courseId: string }) {
           
           {/* Top Stat Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card className="bg-[#111113] border-white/5 p-5 flex flex-col rounded-2xl">
+            <Card className="bg-card border-border p-5 flex flex-col rounded-2xl">
               <div className="flex items-center gap-2 text-success mb-2">
                 <CheckCircle2 className="w-4 h-4" />
                 <span className="text-4xl font-bold text-foreground">{solvedProblems}</span>
@@ -210,7 +210,7 @@ function CourseOverviewContent({ courseId }: { courseId: string }) {
               <span className="text-sm text-muted-foreground">Problems Solved</span>
             </Card>
 
-            <Card className="bg-[#111113] border-white/5 p-5 flex flex-col rounded-2xl">
+            <Card className="bg-card border-border p-5 flex flex-col rounded-2xl">
               <div className="flex items-center gap-2 text-blue-400 mb-2">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
                 <span className="text-4xl font-bold text-foreground">{remainingProblems}</span>
@@ -218,7 +218,7 @@ function CourseOverviewContent({ courseId }: { courseId: string }) {
               <span className="text-sm text-muted-foreground">Problems Remaining</span>
             </Card>
 
-            <Card className="bg-[#111113] border-white/5 p-5 flex flex-col rounded-2xl">
+            <Card className="bg-card border-border p-5 flex flex-col rounded-2xl">
               <div className="flex items-center gap-2 text-orange-400 mb-2">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                 <span className="text-4xl font-bold text-foreground">{isUsingMock ? "48h" : "0h"}</span>
@@ -228,8 +228,8 @@ function CourseOverviewContent({ courseId }: { courseId: string }) {
           </div>
 
           {/* DSA Roadmap List */}
-          <Card className="bg-[#111113] border-white/5 rounded-2xl flex-1 flex flex-col">
-            <div className="p-6 border-b border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <Card className="bg-card border-border rounded-2xl flex-1 flex flex-col">
+            <div className="p-6 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <h2 className="text-xl font-bold">DSA Roadmap</h2>
                 <p className="text-sm text-muted-foreground mt-1">Your interview prep learning path</p>
@@ -273,7 +273,7 @@ function CourseOverviewContent({ courseId }: { courseId: string }) {
                 return (
                   <div 
                     key={chapter.id} 
-                    className={`flex items-center justify-between p-4 rounded-xl mb-1 transition-colors hover:bg-white/[0.02] ${status === 'current' ? 'bg-primary/5' : ''}`}
+                    className={`flex items-center justify-between p-4 rounded-xl mb-1 transition-colors hover:bg-foreground/5 ${status === 'current' ? 'bg-primary/5' : ''}`}
                   >
                     <div className="flex items-center gap-4">
                       {status === "done" ? (
