@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Play, CheckCircle2, ChevronRight, Lock } from "lucide-react";
+import { ArrowRight, Play, CheckCircle2, ChevronRight, Lock, Code2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { motion } from "framer-motion";
