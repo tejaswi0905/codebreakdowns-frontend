@@ -4,6 +4,9 @@ import { Github, MapPin, Code2, Users, GraduationCap, Quote, ArrowRight, Play, B
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useState, useEffect } from "react";
+import { GlobeMap, calculateDistanceKm } from "../components/GlobeMap";
+
+const HQ_LOCATION = { lat: 17.4480, lng: 78.3812, city: "Hyderabad" };
 
 export const Route = createFileRoute("/about")({
   component: AboutPage,
@@ -27,15 +30,35 @@ const fadeUpVariant: Variants = {
 function AboutPage() {
   const [distance, setDistance] = useState<number | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
+  const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
+  const [userCity, setUserCity] = useState<string | null>(null);
 
-  const calculateMockDistance = () => {
+  const calculateDistance = async () => {
     setIsCalculating(true);
-    // Simulate network/gps delay for "wow" factor
-    setTimeout(() => {
-      // Generate a random believable distance between 50 and 8000 miles
-      setDistance(Math.floor(Math.random() * (8000 - 50 + 1) + 50));
+    try {
+      const res = await fetch("https://ipapi.co/json/");
+      if (!res.ok) throw new Error("Failed to fetch location");
+      const data = await res.json();
+      
+      if (data.latitude && data.longitude) {
+        setUserLocation({ lat: data.latitude, lng: data.longitude });
+        setUserCity(data.city || data.country_name || "your location");
+        const dist = calculateDistanceKm(
+          HQ_LOCATION.lat,
+          HQ_LOCATION.lng,
+          data.latitude,
+          data.longitude
+        );
+        setDistance(dist);
+      }
+    } catch (error) {
+      console.error("Geolocation failed:", error);
+      // Fallback if adblockers block ipapi
+      setDistance(8420);
+      setUserCity("a mysterious land");
+    } finally {
       setIsCalculating(false);
-    }, 1200);
+    }
   };
 
   return (
@@ -112,22 +135,8 @@ function AboutPage() {
           <motion.div variants={fadeUpVariant} className="col-span-1 md:col-span-2 lg:col-span-1">
             <Card className="h-full overflow-hidden border-border bg-card shadow-sm hover:shadow-md transition-shadow flex flex-col group min-h-[300px]">
               {/* Map Visual Area */}
-              <div className="flex-1 bg-secondary/10 relative flex items-center justify-center overflow-hidden">
-                {/* Mock Grid / Globe pattern */}
-                <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(var(--color-primary),0.1)_1px,transparent_1px),linear-gradient(to_bottom,rgba(var(--color-primary),0.1)_1px,transparent_1px)] bg-[size:1rem_1rem] [mask-image:radial-gradient(ellipse_100%_100%_at_50%_50%,#000_20%,transparent_100%)] group-hover:scale-105 transition-transform duration-700"></div>
-                
-                {/* Target Ping */}
-                <div className="absolute w-4 h-4 bg-primary rounded-full shadow-[0_0_15px_rgba(var(--color-primary),1)]">
-                   <div className="absolute inset-0 rounded-full bg-primary animate-ping opacity-75"></div>
-                </div>
-
-                {/* Connection Line (renders when distance is calculated) */}
-                {distance && (
-                  <svg className="absolute inset-0 w-full h-full" style={{ zIndex: 1 }}>
-                    <path d="M 50% 50% Q 70% 30% 85% 75%" fill="none" stroke="currentColor" className="text-primary/50" strokeWidth="2" strokeDasharray="4 4" />
-                    <circle cx="85%" cy="75%" r="4" className="fill-foreground" />
-                  </svg>
-                )}
+              <div className="flex-1 bg-secondary/10 relative flex items-center justify-center overflow-hidden min-h-[300px]">
+                <GlobeMap userLocation={userLocation} hqLocation={HQ_LOCATION} />
               </div>
               
               {/* Map Interaction Area */}
@@ -135,10 +144,12 @@ function AboutPage() {
                 <div className="flex items-start justify-between mb-2">
                   <div>
                     <h3 className="font-bold text-foreground flex items-center gap-2">
-                      <MapPin className="w-4 h-4 text-primary" /> HQ Location
+                      <MapPin className="w-4 h-4 text-primary" /> HQ: {HQ_LOCATION.city}
                     </h3>
                     <p className="text-sm text-muted-foreground mt-1">
-                      {distance === null ? "Calculate distance from your browser to our servers." : `You are approximately ${distance.toLocaleString()} miles away!`}
+                      {distance === null 
+                        ? "Calculate distance from your browser to our servers." 
+                        : `You are approximately ${distance.toLocaleString()} km away in ${userCity}!`}
                     </p>
                   </div>
                 </div>
@@ -147,7 +158,7 @@ function AboutPage() {
                     variant="outline" 
                     size="sm" 
                     className="w-full mt-4" 
-                    onClick={calculateMockDistance}
+                    onClick={calculateDistance}
                     disabled={isCalculating}
                   >
                     {isCalculating ? "Calculating..." : "Ping HQ"}
