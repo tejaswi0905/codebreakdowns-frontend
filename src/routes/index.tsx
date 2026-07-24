@@ -34,7 +34,7 @@ function LandingPage() {
       </div>
 
       {/* Hero Section */}
-      <section className="relative px-6 pt-24 pb-20 md:pt-32 md:pb-32 max-w-7xl mx-auto w-full">
+      <section className="relative px-6 pt-10 pb-16 md:pt-16 md:pb-24 max-w-7xl mx-auto w-full">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center">
           
           {/* Left Column: Copy & CTA */}
@@ -49,11 +49,11 @@ function LandingPage() {
               Your Blueprint for Tech Internships & Dev Roles
             </motion.div>
 
-            <motion.h1 variants={fadeUpVariant} className="text-5xl md:text-6xl font-extrabold tracking-tight mb-6 text-foreground leading-[1.1]">
+            <motion.h1 variants={fadeUpVariant} className="text-3xl md:text-4xl font-extrabold tracking-tight mb-6 text-foreground leading-[1.1]">
               Crack Your Tech Interviews and <span className="text-primary">Land the Internship.</span>
             </motion.h1>
 
-            <motion.p variants={fadeUpVariant} className="text-lg text-muted-foreground max-w-xl mb-10 leading-relaxed">
+            <motion.p variants={fadeUpVariant} className="text-base text-muted-foreground max-w-xl mb-10 leading-relaxed">
               Landing a top-tier tech internship isn't about blindly grinding 1,000 random LeetCode problems. We break down the Blind 75 & 150, essential backend concepts, and real-world resume projects into structured playbooks so you build the mental models required to succeed.
             </motion.p>
 
@@ -121,8 +121,8 @@ function LandingPage() {
       {/* Features Section */}
       <section className="py-24 px-6 max-w-7xl mx-auto">
         <div className="text-center mb-16 max-w-2xl mx-auto">
-          <h2 className="text-3xl font-bold mb-4 text-foreground">Why This Approach Works</h2>
-          <p className="text-lg text-muted-foreground">
+          <h2 className="text-xl md:text-2xl font-bold mb-4 text-foreground">Why This Approach Works</h2>
+          <p className="text-base text-muted-foreground">
             We focus on structured learning and pattern recognition, bridging the gap between theoretical algorithms and passing the actual interview.
           </p>
         </div>
@@ -135,8 +135,8 @@ function LandingPage() {
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-6">
                   <Icon className="w-6 h-6 text-primary" />
                 </div>
-                <h3 className="text-xl font-bold mb-3 text-foreground">{feature.title}</h3>
-                <p className="text-muted-foreground leading-relaxed">
+                <h3 className="text-lg font-bold mb-3 text-foreground">{feature.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
                   {feature.description}
                 </p>
               </Card>
@@ -150,8 +150,8 @@ function LandingPage() {
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 space-y-4 md:space-y-0">
             <div>
-              <h2 className="text-3xl font-bold mb-4 text-foreground">The Complete Roadmap</h2>
-              <p className="text-lg text-muted-foreground max-w-xl">
+              <h2 className="text-xl md:text-2xl font-bold mb-4 text-foreground">The Complete Roadmap</h2>
+              <p className="text-base text-muted-foreground max-w-xl">
                 Everything you need to secure the internship and excel in your first role.
               </p>
             </div>
@@ -191,8 +191,8 @@ function LandingPage() {
                     
                     {/* Card Content */}
                     <div className="p-6 flex flex-col flex-1">
-                      <h3 className="text-xl font-bold mb-2 text-foreground group-hover:text-primary transition-colors">{course.title}</h3>
-                      <p className="text-muted-foreground text-sm flex-1 leading-relaxed">
+                      <h3 className="text-lg font-bold mb-2 text-foreground group-hover:text-primary transition-colors">{course.title}</h3>
+                      <p className="text-muted-foreground text-xs flex-1 leading-relaxed">
                         {course.description}
                       </p>
                       <div className="mt-6 pt-4 border-t border-border flex items-center text-sm font-medium text-foreground group-hover:text-primary transition-colors">

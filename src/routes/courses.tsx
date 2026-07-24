@@ -192,7 +192,7 @@ function CoursePlayer({ courseId }: { courseId: string }) {
 
   return (
     <div className="mx-auto max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8 h-[calc(100vh-80px)] overflow-hidden text-foreground">
-      <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6 h-full">
+      <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr_1fr] xl:grid-cols-[320px_minmax(350px,1.2fr)_minmax(500px,1.5fr)] gap-6 h-full">
         
         {/* LEFT SIDEBAR */}
         <div className="flex flex-col gap-4 h-full overflow-hidden">
@@ -337,21 +337,21 @@ function CoursePlayer({ courseId }: { courseId: string }) {
         </div>
 
         {/* MAIN CONTENT AREA */}
-        <div className="flex flex-col gap-6 h-full overflow-y-auto custom-scrollbar pr-2 pb-6">
-          {currentLesson ? (
-            <Workspace lesson={currentLesson} courseId={courseId} />
-          ) : (
-            <Card className="flex flex-col items-center justify-center h-[500px] text-center bg-card border-border rounded-2xl">
+        {currentLesson ? (
+          <Workspace lesson={currentLesson} courseId={courseId} />
+        ) : (
+          <div className="lg:col-span-2 h-full flex flex-col justify-center items-center pb-20">
+            <Card className="flex flex-col items-center justify-center p-12 text-center bg-card border-border rounded-2xl max-w-lg">
               <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-4">
                 <ChevronDown className="h-8 w-8" />
               </div>
               <h2 className="text-xl font-bold">Select a lesson to begin</h2>
-              <p className="text-muted-foreground mt-2 max-w-sm">
+              <p className="text-muted-foreground mt-2">
                 Choose a module from the left sidebar to continue your learning journey.
               </p>
             </Card>
-          )}
-        </div>
+          </div>
+        )}
 
       </div>
     </div>
@@ -359,7 +359,6 @@ function CoursePlayer({ courseId }: { courseId: string }) {
 }
 
 function Workspace({ lesson, courseId }: { lesson: any, courseId: string }) {
-  const [notes, setNotes] = useState("");
   const queryClient = useQueryClient();
   
   if (!lesson) return null;
@@ -377,8 +376,72 @@ function Workspace({ lesson, courseId }: { lesson: any, courseId: string }) {
 
   return (
     <>
-      {/* Video & Action Bar */}
-      <div className="flex flex-col gap-4">
+      {/* COLUMN 2: Metadata (Left of Video) */}
+      <div className="flex flex-col gap-4 h-full overflow-y-auto custom-scrollbar pr-2 pb-6">
+        <Card className="p-6 bg-card border-border rounded-2xl shadow-sm shrink-0">
+          <div className="flex items-center gap-3 mb-4">
+            <Badge className="bg-success/10 text-success hover:bg-success/20 border-0 rounded-md font-bold px-2 py-0.5 shadow-none">
+              Easy
+            </Badge>
+            <span className="text-sm font-semibold text-muted-foreground">
+              {Math.floor(lesson.durationSeconds / 60)} min
+            </span>
+          </div>
+          <h1 className="text-2xl font-extrabold tracking-tight text-foreground leading-tight">
+            {lesson.title}
+          </h1>
+          {meta.text && (
+            <p className="mt-4 text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
+              {meta.text}
+            </p>
+          )}
+        </Card>
+
+        {meta.prerequisites && meta.prerequisites.length > 0 && (
+          <Card className="p-5 bg-card border-border rounded-2xl shadow-sm shrink-0">
+            <div className="mb-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              Prerequisites
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {meta.prerequisites.map((p: string) => (
+                <Badge key={p} variant="secondary" className="bg-background border-border text-muted-foreground hover:bg-foreground/5 rounded-md shadow-sm font-medium">
+                  {p}
+                </Badge>
+              ))}
+            </div>
+          </Card>
+        )}
+
+        {meta.objectives && meta.objectives.length > 0 && (
+          <Card className="p-5 bg-card border-border rounded-2xl shadow-sm shrink-0">
+            <div className="mb-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              Learning Objectives
+            </div>
+            <ul className="space-y-3">
+              {meta.objectives.map((o: string) => (
+                <li key={o} className="flex items-start gap-3 text-sm text-foreground/90 font-medium">
+                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                  <span>{o}</span>
+                </li>
+              ))}
+            </ul>
+          </Card>
+        )}
+
+        {meta.outcome && (
+          <Card className="p-5 bg-card border-border rounded-2xl shadow-sm shrink-0">
+            <div className="mb-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              Expected Outcome
+            </div>
+            <p className="text-sm leading-relaxed text-muted-foreground">
+              {meta.outcome}
+            </p>
+          </Card>
+        )}
+      </div>
+
+      {/* COLUMN 3: Video Player & Action Bar (Right side) */}
+      <div className="flex flex-col gap-4 h-full overflow-y-auto custom-scrollbar pr-2 pb-6">
         <Card className="overflow-hidden p-0 bg-background border-border relative z-10 shadow-lg shrink-0 rounded-2xl">
           {lesson.isLocked || !lesson.videoUrlOrId ? (
             <div className="relative aspect-video w-full bg-gradient-to-br from-background to-background/50 flex flex-col items-center justify-center text-center p-6">
@@ -398,7 +461,7 @@ function Workspace({ lesson, courseId }: { lesson: any, courseId: string }) {
           )}
         </Card>
 
-        <div className="flex flex-wrap items-center gap-3 w-full bg-card border border-border p-3 rounded-xl shadow-sm">
+        <div className="flex flex-wrap items-center gap-3 w-full bg-card border border-border p-3 rounded-xl shadow-sm shrink-0">
           <Button
             variant="outline"
             size="sm"
@@ -428,7 +491,6 @@ function Workspace({ lesson, courseId }: { lesson: any, courseId: string }) {
               markLessonComplete(lesson.id).then(() => {
                 toast.success("Marked as complete");
                 queryClient.invalidateQueries({ queryKey: ["course-play", courseId] });
-                // We purposefully do NOT auto-advance here to respect user preference
               });
             }}
             disabled={lesson.isLocked}
@@ -436,95 +498,17 @@ function Workspace({ lesson, courseId }: { lesson: any, courseId: string }) {
             <Check className="h-4 w-4" /> Mark as Complete
           </Button>
         </div>
-      </div>
 
-      {/* Metadata & Notes Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-8">
-        
-        {/* LEFT COLUMN: Metadata */}
-        <div className="flex flex-col gap-4">
-          <Card className="p-6 bg-card border-border rounded-2xl shadow-sm">
-            <div className="flex items-center gap-3 mb-4">
-              <Badge className="bg-success/10 text-success hover:bg-success/20 border-0 rounded-md font-bold px-2 py-0.5 shadow-none">
-                Easy
-              </Badge>
-              <span className="text-sm font-semibold text-muted-foreground">
-                {Math.floor(lesson.durationSeconds / 60)} min
-              </span>
+        {lesson.isProblem && (
+          <Card className="p-5 bg-card border-border rounded-2xl shadow-sm mt-2 shrink-0">
+            <div className="mb-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              Hints
             </div>
-            <h1 className="text-2xl font-extrabold tracking-tight text-foreground leading-tight">
-              {lesson.title}
-            </h1>
-            {meta.text && (
-              <p className="mt-4 text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
-                {meta.text}
-              </p>
-            )}
+            <p className="text-sm text-muted-foreground italic">
+              No hints available for this problem yet.
+            </p>
           </Card>
-
-          {meta.prerequisites && meta.prerequisites.length > 0 && (
-            <Card className="p-5 bg-card border-border rounded-2xl shadow-sm">
-              <div className="mb-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                Prerequisites
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {meta.prerequisites.map((p: string) => (
-                  <Badge key={p} variant="secondary" className="bg-background border-border text-muted-foreground hover:bg-foreground/5 rounded-md shadow-sm font-medium">
-                    {p}
-                  </Badge>
-                ))}
-              </div>
-            </Card>
-          )}
-
-          {meta.objectives && meta.objectives.length > 0 && (
-            <Card className="p-5 bg-card border-border rounded-2xl shadow-sm">
-              <div className="mb-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                Learning Objectives
-              </div>
-              <ul className="space-y-3">
-                {meta.objectives.map((o: string) => (
-                  <li key={o} className="flex items-start gap-3 text-sm text-foreground/90 font-medium">
-                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                    <span>{o}</span>
-                  </li>
-                ))}
-              </ul>
-            </Card>
-          )}
-
-          {meta.outcome && (
-            <Card className="p-5 bg-card border-border rounded-2xl shadow-sm">
-              <div className="mb-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                Expected Outcome
-              </div>
-              <p className="text-sm leading-relaxed text-muted-foreground">
-                {meta.outcome}
-              </p>
-            </Card>
-          )}
-        </div>
-
-        {/* RIGHT COLUMN: Notes */}
-        <div className="flex flex-col h-full">
-          <Card className="p-5 bg-card border-border flex-1 flex flex-col rounded-2xl shadow-sm min-h-[400px]">
-            <div className="mb-3 flex items-center justify-between shrink-0">
-              <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                Notes
-              </div>
-              <span className="text-[10px] font-medium text-muted-foreground">
-                {notes.length} chars
-              </span>
-            </div>
-            <Textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Jot down key ideas, edge cases, or your own explanation while you learn..."
-              className="flex-1 resize-none bg-background border-border text-sm p-4 rounded-xl shadow-inner focus-visible:ring-1 focus-visible:ring-primary/50"
-            />
-          </Card>
-        </div>
-
+        )}
       </div>
     </>
   );
