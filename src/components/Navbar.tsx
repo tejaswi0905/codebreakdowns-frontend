@@ -24,9 +24,9 @@ import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/authStore";
 
 const links = [
-  { to: "/", label: "Home" },
-  { to: "/courses", label: "Courses" },
+  { to: "/dashboard", label: "Dashboard" },
   { to: "/products", label: "Products" },
+  { to: "/", label: "About" }, // Links to home for now as requested
 ] as const;
 
 export function Navbar() {
@@ -34,12 +34,12 @@ export function Navbar() {
   const [open, setOpen] = useState(false);
   const { user, isAuthenticated, isLoading, logout } = useAuthStore();
 
+  const { theme, toggle } = useTheme();
+
   const activeLinks = [
-    { to: "/", label: "Home" },
-    ...(isAuthenticated ? [
-      { to: "/courses", label: "Courses" },
-      { to: "/products", label: "Products" },
-    ] : []),
+    { to: "/dashboard", label: "Dashboard" },
+    { to: "/products", label: "Products" },
+    { to: "/", label: "About" }, // Temporary link
   ];
 
   return (
@@ -133,6 +133,16 @@ export function Navbar() {
               <Link to="/login">Sign In</Link>
             </Button>
           )}
+
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggle}
+            className="rounded-full text-muted-foreground hover:text-foreground"
+            aria-label="Toggle theme"
+          >
+            {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+          </Button>
 
           <Button
             variant="ghost"
