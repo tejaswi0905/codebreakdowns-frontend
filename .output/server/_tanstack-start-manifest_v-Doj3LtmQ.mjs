@@ -1,9 +1,10 @@
-//#region node_modules/.nitro/vite/services/ssr/assets/_tanstack-start-manifest_v-BrPdE4D_.js
+//#region node_modules/.nitro/vite/services/ssr/assets/_tanstack-start-manifest_v-Doj3LtmQ.js
 var tsrStartManifest = () => ({ routes: {
 	__root__: {
 		filePath: "C:/Users/surek/OneDrive/Desktop/Coding/codebreakdowns-frontend/src/routes/__root.tsx",
 		children: [
 			"/",
+			"/about",
 			"/courses",
 			"/dashboard",
 			"/login",
@@ -11,77 +12,79 @@ var tsrStartManifest = () => ({ routes: {
 			"/profile"
 		],
 		preloads: [
-			"/assets/index-CeCQH8Mj.js",
-			"/assets/button-C88fU23l.js",
-			"/assets/react-dom-DCwV671j.js"
+			"/assets/index-Bbl-WnUb.js",
+			"/assets/button-DVZbYzNr.js",
+			"/assets/react-dom-BUVAeu7x.js"
 		],
 		scripts: [{ attrs: {
 			type: "module",
 			async: !0,
-			src: "/assets/index-CeCQH8Mj.js"
+			src: "/assets/index-Bbl-WnUb.js"
 		} }]
 	},
 	"/": {
 		filePath: "C:/Users/surek/OneDrive/Desktop/Coding/codebreakdowns-frontend/src/routes/index.tsx",
 		children: void 0,
 		preloads: [
-			"/assets/routes-DtfgKhGu.js",
-			"/assets/proxy-BH3_mQZd.js",
-			"/assets/code-xml-C-JnWMh3.js",
-			"/assets/sparkles-D5lxzfle.js",
-			"/assets/card-_qF5nkUF.js"
+			"/assets/routes-RkpBSdOs.js",
+			"/assets/proxy-Cidd4uvq.js",
+			"/assets/code-xml-DGLK_E1O.js",
+			"/assets/database-Do9VQ3pR.js",
+			"/assets/play-CFh1kqWs.js",
+			"/assets/card-CMrCZ_SM.js"
 		]
 	},
 	"/courses": {
 		filePath: "C:/Users/surek/OneDrive/Desktop/Coding/codebreakdowns-frontend/src/routes/courses.tsx",
 		children: void 0,
 		preloads: [
-			"/assets/courses-BhloMR2I.js",
-			"/assets/useQuery-D4V3N2lC.js",
-			"/assets/circle-alert-C73llYbx.js",
-			"/assets/ProtectedRoute-DHrmOea-.js",
-			"/assets/card-_qF5nkUF.js"
+			"/assets/courses-B6l03yp9.js",
+			"/assets/useQuery-CP6V_-bb.js",
+			"/assets/circle-alert-BglgYywm.js",
+			"/assets/ProtectedRoute-CopL96Cm.js",
+			"/assets/card-CMrCZ_SM.js"
 		]
 	},
 	"/dashboard": {
 		filePath: "C:/Users/surek/OneDrive/Desktop/Coding/codebreakdowns-frontend/src/routes/dashboard.tsx",
 		children: void 0,
 		preloads: [
-			"/assets/dashboard-G0hLmFok.js",
-			"/assets/useQuery-D4V3N2lC.js",
-			"/assets/circle-alert-C73llYbx.js",
-			"/assets/ProtectedRoute-DHrmOea-.js",
-			"/assets/card-_qF5nkUF.js"
+			"/assets/dashboard-DmSKKzgf.js",
+			"/assets/useQuery-CP6V_-bb.js",
+			"/assets/circle-alert-BglgYywm.js",
+			"/assets/ProtectedRoute-CopL96Cm.js",
+			"/assets/play-CFh1kqWs.js",
+			"/assets/card-CMrCZ_SM.js"
 		]
 	},
 	"/login": {
 		filePath: "C:/Users/surek/OneDrive/Desktop/Coding/codebreakdowns-frontend/src/routes/login.tsx",
 		children: void 0,
 		preloads: [
-			"/assets/login-DvWgZEru.js",
-			"/assets/proxy-BH3_mQZd.js",
-			"/assets/code-xml-C-JnWMh3.js"
+			"/assets/login-Btkl4Fzo.js",
+			"/assets/proxy-Cidd4uvq.js",
+			"/assets/code-xml-DGLK_E1O.js"
 		]
 	},
 	"/products": {
 		filePath: "C:/Users/surek/OneDrive/Desktop/Coding/codebreakdowns-frontend/src/routes/products.tsx",
 		children: void 0,
 		preloads: [
-			"/assets/products-CDoGq9R7.js",
-			"/assets/useQuery-D4V3N2lC.js",
-			"/assets/code-xml-C-JnWMh3.js",
-			"/assets/sparkles-D5lxzfle.js",
-			"/assets/ProtectedRoute-DHrmOea-.js",
-			"/assets/card-_qF5nkUF.js"
+			"/assets/products-CIipRfWE.js",
+			"/assets/useQuery-CP6V_-bb.js",
+			"/assets/code-xml-DGLK_E1O.js",
+			"/assets/database-Do9VQ3pR.js",
+			"/assets/ProtectedRoute-CopL96Cm.js",
+			"/assets/card-CMrCZ_SM.js"
 		]
 	},
 	"/profile": {
 		filePath: "C:/Users/surek/OneDrive/Desktop/Coding/codebreakdowns-frontend/src/routes/profile.tsx",
 		children: void 0,
 		preloads: [
-			"/assets/profile-IBwxAv8Y.js",
-			"/assets/ProtectedRoute-DHrmOea-.js",
-			"/assets/card-_qF5nkUF.js"
+			"/assets/profile-CN38H0cc.js",
+			"/assets/ProtectedRoute-CopL96Cm.js",
+			"/assets/card-CMrCZ_SM.js"
 		]
 	}
 } });

@@ -3,18 +3,18 @@ import { u as require_react } from "../_libs/@floating-ui/react-dom+[...].mjs";
 import { g as require_jsx_runtime } from "../_libs/@radix-ui/react-accordion+[...].mjs";
 import { n as cn, t as Button } from "./button-BpE9Czok.mjs";
 import { c as HeadContent, d as createRouter, f as Outlet, g as Link, h as createRootRouteWithContext, l as useRouterState, m as createFileRoute, p as lazyRouteComponent, s as Scripts, y as useRouter } from "../_libs/@tanstack/react-router+[...].mjs";
-import { t as Route$6 } from "./courses-DmKfAVIM.mjs";
-import { t as useAuthStore } from "./authStore-C2pVoj2B.mjs";
-import { C as ChevronRight, T as Check, c as LogOut, f as GraduationCap, s as Menu, t as User, u as LifeBuoy, v as Circle } from "../_libs/lucide-react.mjs";
+import { t as Route$6 } from "./courses-BoVIOzLD.mjs";
+import { t as useAuthStore } from "./authStore-VMDWpkku.mjs";
+import { E as Check, c as Menu, f as LifeBuoy, l as LogOut, m as GraduationCap, r as Sun, s as Moon, t as User, w as ChevronRight, y as Circle } from "../_libs/lucide-react.mjs";
 import { t as QueryClient } from "../_libs/tanstack__query-core.mjs";
 import { n as QueryClientProvider } from "../_libs/tanstack__react-query.mjs";
 import { t as Toaster } from "../_libs/sonner.mjs";
 import { a as Label2, c as Root2, d as SubTrigger2, f as Trigger, i as ItemIndicator2, l as Separator2, n as Content2, o as Portal2, r as Item2, s as RadioItem2, t as CheckboxItem2, u as SubContent2 } from "../_libs/@radix-ui/react-dropdown-menu+[...].mjs";
 import { n as AvatarFallback, t as Avatar } from "./avatar-DpxNuZ9Y.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-CRZUkVof.js
+//#region node_modules/.nitro/vite/services/ssr/assets/router-B4g4bLZv.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
-var styles_default = "/assets/styles-C08ZWtaT.css";
+var styles_default = "/assets/styles-LGX1A9eb.css";
 function reportLovableError(error, context = {}) {
 	if (typeof window === "undefined") return;
 	window.__lovableEvents?.captureException?.(error, {
@@ -50,9 +50,11 @@ function ThemeProvider({ children }) {
 			toggle: () => setTheme(theme === "dark" ? "light" : "dark"),
 			setTheme
 		},
+		"data-tsd-source": "/src/lib/theme.tsx:39:5",
 		children
 	});
 }
+var useTheme = () => (0, import_react.useContext)(ThemeCtx);
 var themeInitScript = `(function(){try{var t=localStorage.getItem('theme');if(!t){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}if(t==='dark'){document.documentElement.classList.add('dark');}}catch(e){}})();`;
 var DropdownMenu = Root2;
 var DropdownMenuTrigger = Trigger;
@@ -128,136 +130,233 @@ var links = [
 		label: "Home"
 	},
 	{
-		to: "/courses",
-		label: "Courses"
+		to: "/dashboard",
+		label: "Dashboard"
 	},
 	{
 		to: "/products",
 		label: "Products"
+	},
+	{
+		to: "#opportunities",
+		label: "Opportunities"
+	},
+	{
+		to: "/about",
+		label: "About"
 	}
 ];
 function Navbar() {
 	const pathname = useRouterState({ select: (s) => s.location.pathname });
 	const [open, setOpen] = (0, import_react.useState)(false);
 	const { user, isAuthenticated, isLoading, logout } = useAuthStore();
-	const activeLinks = [{
-		to: "/",
-		label: "Home"
-	}, ...isAuthenticated ? [{
-		to: "/courses",
-		label: "Courses"
-	}, {
-		to: "/products",
-		label: "Products"
-	}] : []];
+	const { theme, toggle } = useTheme();
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("header", {
-		className: "sticky top-0 z-40 border-b border-white/5 bg-background/50 backdrop-blur-md supports-[backdrop-filter]:bg-background/40",
+		className: "sticky top-0 z-40 border-b border-border bg-background/50 backdrop-blur-md supports-[backdrop-filter]:bg-background/40",
+		"data-tsd-source": "/src/components/Navbar.tsx:50:5",
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 			className: "mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8",
+			"data-tsd-source": "/src/components/Navbar.tsx:51:7",
 			children: [
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Link, {
 					to: "/",
 					className: "flex items-center gap-2 font-semibold tracking-tight",
+					"data-tsd-source": "/src/components/Navbar.tsx:52:9",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "grid h-8 w-8 place-items-center rounded-lg bg-primary/20 border border-primary/50 text-primary shadow-[0_0_15px_rgba(var(--color-primary),0.3)]",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(GraduationCap, { className: "h-4 w-4" })
+						className: "grid h-8 w-8 place-items-center rounded-lg bg-primary/20 border border-primary/50 text-primary shadow-sm",
+						"data-tsd-source": "/src/components/Navbar.tsx:56:11",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(GraduationCap, {
+							className: "h-4 w-4",
+							"data-tsd-source": "/src/components/Navbar.tsx:57:13"
+						})
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "text-[15px] text-white",
+						className: "text-[15px] text-foreground",
+						"data-tsd-source": "/src/components/Navbar.tsx:59:11",
 						children: "CodeBreakdowns"
 					})]
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("nav", {
 					className: "hidden items-center gap-1 md:flex",
-					children: activeLinks.map((l) => {
-						const active = l.to === "/" ? pathname === "/" : pathname.startsWith(l.to);
+					"data-tsd-source": "/src/components/Navbar.tsx:62:9",
+					children: [
+						{
+							to: "/",
+							label: "Home"
+						},
+						{
+							to: "/dashboard",
+							label: "Dashboard"
+						},
+						{
+							to: "/products",
+							label: "Products"
+						},
+						{
+							to: "#opportunities",
+							label: "Opportunities"
+						},
+						{
+							to: "/about",
+							label: "About"
+						}
+					].map((l) => {
+						const active = l.to.startsWith("#") ? false : l.to === "/" ? pathname === "/" : pathname.startsWith(l.to);
 						return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Link, {
 							to: l.to,
-							className: cn("relative rounded-md px-3 py-2 text-sm font-medium transition-colors", active ? "text-white" : "text-muted-foreground hover:text-white hover:bg-white/5"),
-							children: [l.label, active && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "absolute inset-x-3 -bottom-[17px] h-0.5 rounded-full bg-primary shadow-[0_0_10px_rgba(var(--color-primary),1)]" })]
+							className: cn("relative rounded-md px-3 py-2 text-sm font-medium transition-colors", active ? "text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-accent"),
+							"data-tsd-source": "/src/components/Navbar.tsx:67:15",
+							children: [l.label, active && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "absolute inset-x-3 -bottom-[17px] h-0.5 rounded-full bg-primary shadow-[0_0_10px_rgba(var(--color-primary),1)]",
+								"data-tsd-source": "/src/components/Navbar.tsx:79:19"
+							})]
 						}, l.to);
 					})
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "flex items-center gap-2",
-					children: [isLoading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-9 h-9 rounded-full bg-white/5 animate-pulse" }) : isAuthenticated && user ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DropdownMenu, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DropdownMenuTrigger, {
-						asChild: true,
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-							"aria-label": "Account menu",
-							className: "rounded-full ring-offset-background transition-all hover:ring-2 hover:ring-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Avatar, {
-								className: "h-9 w-9 border border-border",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AvatarFallback, {
-									className: "bg-primary/10 text-sm font-medium text-primary",
-									children: user.displayName?.charAt(0) || user.username?.charAt(0) || "U"
+					"data-tsd-source": "/src/components/Navbar.tsx:86:9",
+					children: [
+						isLoading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							className: "w-9 h-9 rounded-full bg-muted animate-pulse",
+							"data-tsd-source": "/src/components/Navbar.tsx:88:13"
+						}) : isAuthenticated && user ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DropdownMenu, {
+							"data-tsd-source": "/src/components/Navbar.tsx:90:13",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DropdownMenuTrigger, {
+								asChild: true,
+								"data-tsd-source": "/src/components/Navbar.tsx:91:15",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+									"aria-label": "Account menu",
+									className: "rounded-full ring-offset-background transition-all hover:ring-2 hover:ring-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+									"data-tsd-source": "/src/components/Navbar.tsx:92:17",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Avatar, {
+										className: "h-9 w-9 border border-border",
+										"data-tsd-source": "/src/components/Navbar.tsx:96:19",
+										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AvatarFallback, {
+											className: "bg-primary/10 text-sm font-medium text-primary",
+											"data-tsd-source": "/src/components/Navbar.tsx:97:21",
+											children: user.displayName?.charAt(0) || user.username?.charAt(0) || "U"
+										})
+									})
 								})
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DropdownMenuContent, {
+								align: "end",
+								className: "w-56",
+								"data-tsd-source": "/src/components/Navbar.tsx:103:15",
+								children: [
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DropdownMenuLabel, {
+										"data-tsd-source": "/src/components/Navbar.tsx:104:17",
+										children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+											className: "flex flex-col",
+											"data-tsd-source": "/src/components/Navbar.tsx:105:19",
+											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+												className: "text-sm font-medium",
+												"data-tsd-source": "/src/components/Navbar.tsx:106:21",
+												children: user.displayName || user.username
+											}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+												className: "text-xs text-muted-foreground",
+												"data-tsd-source": "/src/components/Navbar.tsx:107:21",
+												children: ["@", user.username]
+											})]
+										})
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DropdownMenuSeparator, { "data-tsd-source": "/src/components/Navbar.tsx:112:17" }),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DropdownMenuItem, {
+										asChild: true,
+										"data-tsd-source": "/src/components/Navbar.tsx:113:17",
+										children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Link, {
+											to: "/profile",
+											className: "cursor-pointer",
+											"data-tsd-source": "/src/components/Navbar.tsx:114:19",
+											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(User, {
+												className: "mr-2 h-4 w-4",
+												"data-tsd-source": "/src/components/Navbar.tsx:115:21"
+											}), " My Profile"]
+										})
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DropdownMenuItem, {
+										asChild: true,
+										"data-tsd-source": "/src/components/Navbar.tsx:118:17",
+										children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Link, {
+											to: "/dashboard",
+											className: "cursor-pointer",
+											"data-tsd-source": "/src/components/Navbar.tsx:119:19",
+											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(GraduationCap, {
+												className: "mr-2 h-4 w-4",
+												"data-tsd-source": "/src/components/Navbar.tsx:120:21"
+											}), " My Purchases"]
+										})
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DropdownMenuItem, {
+										"data-tsd-source": "/src/components/Navbar.tsx:123:17",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(LifeBuoy, {
+											className: "mr-2 h-4 w-4",
+											"data-tsd-source": "/src/components/Navbar.tsx:124:19"
+										}), " Help & Support"]
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DropdownMenuSeparator, { "data-tsd-source": "/src/components/Navbar.tsx:126:17" }),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DropdownMenuItem, {
+										className: "text-destructive focus:text-destructive cursor-pointer",
+										onClick: () => logout(),
+										"data-tsd-source": "/src/components/Navbar.tsx:127:17",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(LogOut, {
+											className: "mr-2 h-4 w-4",
+											"data-tsd-source": "/src/components/Navbar.tsx:131:19"
+										}), " Logout"]
+									})
+								]
+							})]
+						}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+							asChild: true,
+							variant: "default",
+							size: "sm",
+							className: "hidden md:flex shadow-sm",
+							"data-tsd-source": "/src/components/Navbar.tsx:136:13",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Link, {
+								to: "/login",
+								"data-tsd-source": "/src/components/Navbar.tsx:137:15",
+								children: "Sign In"
+							})
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+							variant: "ghost",
+							size: "icon",
+							onClick: toggle,
+							className: "rounded-full text-muted-foreground hover:text-foreground",
+							"aria-label": "Toggle theme",
+							"data-tsd-source": "/src/components/Navbar.tsx:141:11",
+							children: theme === "dark" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Sun, {
+								className: "h-5 w-5",
+								"data-tsd-source": "/src/components/Navbar.tsx:148:33"
+							}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Moon, {
+								className: "h-5 w-5",
+								"data-tsd-source": "/src/components/Navbar.tsx:148:63"
+							})
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+							variant: "ghost",
+							size: "icon",
+							className: "md:hidden",
+							onClick: () => setOpen((o) => !o),
+							"aria-label": "Menu",
+							"data-tsd-source": "/src/components/Navbar.tsx:151:11",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Menu, {
+								className: "h-5 w-5",
+								"data-tsd-source": "/src/components/Navbar.tsx:158:13"
 							})
 						})
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DropdownMenuContent, {
-						align: "end",
-						className: "w-56",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DropdownMenuLabel, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "flex flex-col",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-									className: "text-sm font-medium",
-									children: user.displayName || user.username
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-									className: "text-xs text-muted-foreground",
-									children: ["@", user.username]
-								})]
-							}) }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DropdownMenuSeparator, {}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DropdownMenuItem, {
-								asChild: true,
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Link, {
-									to: "/profile",
-									className: "cursor-pointer",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(User, { className: "mr-2 h-4 w-4" }), " My Profile"]
-								})
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DropdownMenuItem, {
-								asChild: true,
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Link, {
-									to: "/dashboard",
-									className: "cursor-pointer",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(GraduationCap, { className: "mr-2 h-4 w-4" }), " My Purchases"]
-								})
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DropdownMenuItem, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(LifeBuoy, { className: "mr-2 h-4 w-4" }), " Help & Support"] }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DropdownMenuSeparator, {}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DropdownMenuItem, {
-								className: "text-destructive focus:text-destructive cursor-pointer",
-								onClick: () => logout(),
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(LogOut, { className: "mr-2 h-4 w-4" }), " Logout"]
-							})
-						]
-					})] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-						asChild: true,
-						variant: "default",
-						size: "sm",
-						className: "hidden md:flex bg-white text-black hover:bg-neutral-200 shadow-[0_0_15px_rgba(255,255,255,0.2)]",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Link, {
-							to: "/login",
-							children: "Sign In"
-						})
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-						variant: "ghost",
-						size: "icon",
-						className: "md:hidden",
-						onClick: () => setOpen((o) => !o),
-						"aria-label": "Menu",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Menu, { className: "h-5 w-5" })
-					})]
+					]
 				})
 			]
 		}), open && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("nav", {
 			className: "border-t border-border/70 bg-background px-4 py-2 md:hidden",
+			"data-tsd-source": "/src/components/Navbar.tsx:164:9",
 			children: links.map((l) => {
 				const active = l.to === "/" ? pathname === "/" : pathname.startsWith(l.to);
 				return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Link, {
 					to: l.to,
 					onClick: () => setOpen(false),
 					className: cn("block rounded-md px-3 py-2 text-sm font-medium", active ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"),
+					"data-tsd-source": "/src/components/Navbar.tsx:169:15",
 					children: l.label
 				}, l.to);
 			})
@@ -279,26 +378,33 @@ var Toaster$1 = ({ ...props }) => {
 function NotFoundComponent() {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 		className: "flex min-h-screen items-center justify-center bg-background px-4",
+		"data-tsd-source": "/src/routes/__root.tsx:21:5",
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 			className: "max-w-md text-center",
+			"data-tsd-source": "/src/routes/__root.tsx:22:7",
 			children: [
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
 					className: "text-7xl font-bold text-foreground",
+					"data-tsd-source": "/src/routes/__root.tsx:23:9",
 					children: "404"
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
 					className: "mt-4 text-xl font-semibold text-foreground",
+					"data-tsd-source": "/src/routes/__root.tsx:24:9",
 					children: "Page not found"
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 					className: "mt-2 text-sm text-muted-foreground",
+					"data-tsd-source": "/src/routes/__root.tsx:27:9",
 					children: "The page you're looking for doesn't exist or has been moved."
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 					className: "mt-6",
+					"data-tsd-source": "/src/routes/__root.tsx:30:9",
 					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Link, {
 						to: "/",
 						className: "inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90",
+						"data-tsd-source": "/src/routes/__root.tsx:31:11",
 						children: "Go home"
 					})
 				})
@@ -314,29 +420,36 @@ function ErrorComponent({ error, reset }) {
 	}, [error]);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 		className: "flex min-h-screen items-center justify-center bg-background px-4",
+		"data-tsd-source": "/src/routes/__root.tsx:51:5",
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 			className: "max-w-md text-center",
+			"data-tsd-source": "/src/routes/__root.tsx:52:7",
 			children: [
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
 					className: "text-xl font-semibold tracking-tight text-foreground",
+					"data-tsd-source": "/src/routes/__root.tsx:53:9",
 					children: "This page didn't load"
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 					className: "mt-2 text-sm text-muted-foreground",
+					"data-tsd-source": "/src/routes/__root.tsx:56:9",
 					children: "Something went wrong on our end. You can try refreshing or head back home."
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "mt-6 flex flex-wrap justify-center gap-2",
+					"data-tsd-source": "/src/routes/__root.tsx:60:9",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 						onClick: () => {
 							router.invalidate();
 							reset();
 						},
 						className: "inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90",
+						"data-tsd-source": "/src/routes/__root.tsx:61:11",
 						children: "Try again"
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
 						href: "/",
 						className: "inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent",
+						"data-tsd-source": "/src/routes/__root.tsx:70:11",
 						children: "Go home"
 					})]
 				})
@@ -428,7 +541,17 @@ function RootShell({ children }) {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("html", {
 		lang: "en",
 		suppressHydrationWarning: true,
-		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("head", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("script", { dangerouslySetInnerHTML: { __html: themeInitScript } }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(HeadContent, {})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("body", { children: [children, /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Scripts, {})] })]
+		"data-tsd-source": "/src/routes/__root.tsx:151:5",
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("head", {
+			"data-tsd-source": "/src/routes/__root.tsx:152:7",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("script", {
+				dangerouslySetInnerHTML: { __html: themeInitScript },
+				"data-tsd-source": "/src/routes/__root.tsx:153:9"
+			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(HeadContent, { "data-tsd-source": "/src/routes/__root.tsx:154:9" })]
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("body", {
+			"data-tsd-source": "/src/routes/__root.tsx:156:7",
+			children: [children, /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Scripts, { "data-tsd-source": "/src/routes/__root.tsx:158:9" })]
+		})]
 	});
 }
 function RootComponent() {
@@ -439,22 +562,28 @@ function RootComponent() {
 	}, [checkAuth]);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(QueryClientProvider, {
 		client: queryClient,
-		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(ThemeProvider, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "flex min-h-screen flex-col bg-background text-foreground",
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Navbar, {}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("main", {
-				className: "flex-1",
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Outlet, {})
-			})]
-		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Toaster$1, {})] })
+		"data-tsd-source": "/src/routes/__root.tsx:173:5",
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(ThemeProvider, {
+			"data-tsd-source": "/src/routes/__root.tsx:174:7",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "flex min-h-screen flex-col bg-background text-foreground",
+				"data-tsd-source": "/src/routes/__root.tsx:175:9",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Navbar, { "data-tsd-source": "/src/routes/__root.tsx:176:11" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("main", {
+					className: "flex-1",
+					"data-tsd-source": "/src/routes/__root.tsx:177:11",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Outlet, { "data-tsd-source": "/src/routes/__root.tsx:179:13" })
+				})]
+			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Toaster$1, { "data-tsd-source": "/src/routes/__root.tsx:182:9" })]
+		})
 	});
 }
-var $$splitComponentImporter$4 = () => import("./routes-CmAjEVea.mjs");
+var $$splitComponentImporter$4 = () => import("./routes-BqhfcHWX.mjs");
 var Route$4 = createFileRoute("/")({ component: lazyRouteComponent($$splitComponentImporter$4, "component") });
-var $$splitComponentImporter$3 = () => import("./dashboard-DJb6DO3Q.mjs");
+var $$splitComponentImporter$3 = () => import("./dashboard-jM9wWMwk.mjs");
 var Route$3 = createFileRoute("/dashboard")({ component: lazyRouteComponent($$splitComponentImporter$3, "component") });
-var $$splitComponentImporter$2 = () => import("./login-CxsIJiRn.mjs");
+var $$splitComponentImporter$2 = () => import("./login-BooFd92a.mjs");
 var Route$2 = createFileRoute("/login")({ component: lazyRouteComponent($$splitComponentImporter$2, "component") });
-var $$splitComponentImporter$1 = () => import("./profile-DGg3PtEa.mjs");
+var $$splitComponentImporter$1 = () => import("./profile-DKsnAriA.mjs");
 var Route$1 = createFileRoute("/profile")({
 	head: () => ({ meta: [{ title: "My Profile — CodeBreakdowns" }, {
 		name: "description",
@@ -462,7 +591,7 @@ var Route$1 = createFileRoute("/profile")({
 	}] }),
 	component: lazyRouteComponent($$splitComponentImporter$1, "component")
 });
-var $$splitComponentImporter = () => import("./products-Bu4m71UV.mjs");
+var $$splitComponentImporter = () => import("./products-B-FLf9Cq.mjs");
 var Route = createFileRoute("/products")({
 	head: () => ({ meta: [{ title: "Products — CodeBreakdowns" }, {
 		name: "description",

@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, ChevronRight, Lock } from "lucide-react";
+import { ArrowRight, ChevronRight, Lock, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { motion, Variants } from "framer-motion";
@@ -33,40 +33,75 @@ function LandingPage() {
         <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(var(--color-border),0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(var(--color-border),0.05)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
       </div>
 
-      {/* Editorial Hero Section */}
-      <section className="relative px-6 pt-24 pb-20 md:pt-32 md:pb-24 max-w-4xl mx-auto w-full text-center">
-        <motion.div
-          variants={staggerContainer}
-          initial="hidden"
-          animate="visible"
-          className="flex flex-col items-center"
-        >
-          <motion.div variants={fadeUpVariant} className="mb-6 inline-flex items-center rounded-full border border-border bg-card/50 px-4 py-1.5 text-sm font-medium text-foreground shadow-sm backdrop-blur-md">
-            Your Blueprint for Tech Internships & Dev Roles
+      {/* Hero Section */}
+      <section className="relative px-6 pt-24 pb-20 md:pt-32 md:pb-32 max-w-7xl mx-auto w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center">
+          
+          {/* Left Column: Copy & CTA */}
+          <motion.div
+            variants={staggerContainer}
+            initial="hidden"
+            animate="visible"
+            className="flex flex-col items-start text-left lg:pr-8"
+          >
+            <motion.div variants={fadeUpVariant} className="mb-6 inline-flex items-center rounded-full border border-border bg-card/50 px-4 py-1.5 text-sm font-medium text-foreground shadow-sm backdrop-blur-md">
+              <span className="flex h-2 w-2 rounded-full bg-primary mr-2 animate-pulse"></span>
+              Your Blueprint for Tech Internships & Dev Roles
+            </motion.div>
+
+            <motion.h1 variants={fadeUpVariant} className="text-5xl md:text-6xl font-extrabold tracking-tight mb-6 text-foreground leading-[1.1]">
+              Crack Your Tech Interviews and <span className="text-primary">Land the Internship.</span>
+            </motion.h1>
+
+            <motion.p variants={fadeUpVariant} className="text-lg text-muted-foreground max-w-xl mb-10 leading-relaxed">
+              Landing a top-tier tech internship isn't about blindly grinding 1,000 random LeetCode problems. We break down the Blind 75 & 150, essential backend concepts, and real-world resume projects into structured playbooks so you build the mental models required to succeed.
+            </motion.p>
+
+            <motion.div variants={fadeUpVariant} className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+              <Button size="lg" asChild className="rounded-lg px-8 h-14 text-base font-semibold shadow-md hover:shadow-lg transition-all bg-primary text-primary-foreground">
+                <Link to="/courses">
+                  Start the Playbook
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Link>
+              </Button>
+            </motion.div>
           </motion.div>
 
-          <motion.h1 variants={fadeUpVariant} className="text-4xl md:text-5xl font-bold tracking-tight mb-8 text-foreground leading-[1.2]">
-            Crack Your Tech Interviews and Land the Internship.
-          </motion.h1>
-
-          <motion.div variants={fadeUpVariant} className="text-lg md:text-xl text-muted-foreground max-w-2xl mb-10 leading-relaxed space-y-6 text-left md:text-center">
-            <p>
-              Landing a top-tier tech internship isn't about blindly grinding 1,000 random LeetCode problems. It's about recognizing the core patterns that repeat in 90% of technical rounds.
-            </p>
-            <p>
-              We break down the <strong>Blind 75 & 150</strong>, essential backend concepts, and real-world resume projects into structured playbooks so you actually build the mental models required to succeed.
-            </p>
+          {/* Right Column: Elegant Video Preview */}
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
+            className="relative w-full aspect-video rounded-xl overflow-hidden shadow-2xl border border-border bg-card flex items-center justify-center group cursor-pointer"
+          >
+            {/* Subtle Gradient Background for the placeholder */}
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-secondary/10 z-0"></div>
+            
+            {/* Mock Player UI */}
+            <div className="relative z-10 flex flex-col items-center justify-center">
+              <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors duration-300">
+                <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-300">
+                  <Play className="w-6 h-6 text-primary-foreground ml-1" fill="currentColor" />
+                </div>
+              </div>
+              <p className="font-medium text-foreground">Watch a breakdown</p>
+              <p className="text-sm text-muted-foreground">Blind 75: Two Sum Pattern</p>
+            </div>
+            
+            {/* Decorative Mock UI Elements */}
+            <div className="absolute bottom-4 left-4 right-4 h-12 bg-background/80 backdrop-blur-sm rounded-lg border border-border flex items-center px-4 space-x-4">
+              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                 <div className="w-2 h-2 rounded-full bg-primary"></div>
+              </div>
+              <div className="flex-1 space-y-2">
+                <div className="h-1.5 w-full bg-border rounded-full overflow-hidden">
+                  <div className="h-full w-1/3 bg-primary rounded-full"></div>
+                </div>
+              </div>
+              <div className="text-xs font-mono text-muted-foreground">08:45 / 22:10</div>
+            </div>
           </motion.div>
-
-          <motion.div variants={fadeUpVariant} className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-center">
-            <Button size="lg" asChild className="rounded-lg px-8 h-14 text-base font-semibold shadow-md hover:shadow-lg transition-all bg-primary text-primary-foreground">
-              <Link to="/courses">
-                Start the Playbook
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
-            </Button>
-          </motion.div>
-        </motion.div>
+        </div>
       </section>
 
       {/* Social Proof / Stats Section */}

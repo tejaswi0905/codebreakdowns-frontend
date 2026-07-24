@@ -1,14 +1,13 @@
 import { r as __exportAll$1 } from "../_runtime.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/api-C0X-qdL4.js
-var api_C0X_qdL4_exports = /* @__PURE__ */ __exportAll$1({
-	a: () => fetchMyCourses,
-	c: () => markLessonComplete,
-	i: () => fetchCurrentUser,
-	l: () => API_BASE_URL,
+//#region node_modules/.nitro/vite/services/ssr/assets/api-Cul2JKM0.js
+var api_Cul2JKM0_exports = /* @__PURE__ */ __exportAll$1({
+	a: () => fetchProducts,
+	c: () => API_BASE_URL,
+	i: () => fetchMyCourses,
 	n: () => fetchCoursePlayData,
-	o: () => fetchProducts,
-	r: () => fetchCourses,
-	s: () => logoutUser,
+	o: () => logoutUser,
+	r: () => fetchCurrentUser,
+	s: () => markLessonComplete,
 	t: () => api_exports
 });
 var __defProp = Object.defineProperty;
@@ -24,7 +23,6 @@ var __exportAll = (all, no_symbols) => {
 var API_BASE_URL = "http://localhost:3000/api/v1";
 var api_exports = /* @__PURE__ */ __exportAll({
 	fetchCoursePlayData: () => fetchCoursePlayData,
-	fetchCourses: () => fetchCourses,
 	fetchCurrentUser: () => fetchCurrentUser,
 	fetchMyCourses: () => fetchMyCourses,
 	fetchProducts: () => fetchProducts,
@@ -41,11 +39,6 @@ async function authFetch(endpoint, options = {}) {
 		}
 	});
 }
-var fetchCourses = async () => {
-	const response = await authFetch(`/courses`);
-	if (!response.ok) throw new Error("Failed to fetch courses");
-	return (await response.json()).data;
-};
 var fetchProducts = async () => {
 	const response = await authFetch(`/products`);
 	if (!response.ok) throw new Error("Failed to fetch products");
@@ -97,4 +90,4 @@ var logoutUser = async () => {
 	}
 };
 //#endregion
-export { fetchCurrentUser as a, logoutUser as c, fetchCourses as i, markLessonComplete as l, api_C0X_qdL4_exports as n, fetchMyCourses as o, fetchCoursePlayData as r, fetchProducts as s, API_BASE_URL as t };
+export { fetchMyCourses as a, markLessonComplete as c, fetchCurrentUser as i, api_Cul2JKM0_exports as n, fetchProducts as o, fetchCoursePlayData as r, logoutUser as s, API_BASE_URL as t };

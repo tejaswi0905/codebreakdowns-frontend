@@ -24,10 +24,11 @@ import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/authStore";
 
 const links = [
+  { to: "/", label: "Home" },
   { to: "/dashboard", label: "Dashboard" },
   { to: "/products", label: "Products" },
-  { to: "/", label: "Opportunities" }, // Temporary link
-  { to: "/", label: "About" }, // Links to home for now as requested
+  { to: "#opportunities", label: "Opportunities" },
+  { to: "/about", label: "About" },
 ] as const;
 
 export function Navbar() {
@@ -38,10 +39,11 @@ export function Navbar() {
   const { theme, toggle } = useTheme();
 
   const activeLinks = [
+    { to: "/", label: "Home" },
     { to: "/dashboard", label: "Dashboard" },
     { to: "/products", label: "Products" },
-    { to: "/", label: "Opportunities" }, // Temporary link
-    { to: "/", label: "About" }, // Temporary link
+    { to: "#opportunities", label: "Opportunities" },
+    { to: "/about", label: "About" },
   ];
 
   return (
@@ -59,18 +61,28 @@ export function Navbar() {
 
         <nav className="hidden items-center gap-1 md:flex">
           {activeLinks.map((l) => {
-            const active =
-              l.to === "/" ? pathname === "/" : pathname.startsWith(l.to);
+            const isHash = l.to.startsWith("#");
+            const active = isHash ? false : (l.to === "/" ? pathname === "/" : pathname.startsWith(l.to));
+            const className = cn(
+              "relative rounded-md px-3 py-2 text-sm font-medium transition-colors",
+              active
+                ? "text-foreground"
+                : "text-muted-foreground hover:text-foreground hover:bg-accent",
+            );
+
+            if (isHash) {
+              return (
+                <a key={l.to} href={l.to} className={className}>
+                  {l.label}
+                </a>
+              );
+            }
+
             return (
               <Link
                 key={l.to}
-                to={l.to}
-                className={cn(
-                  "relative rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                  active
-                    ? "text-foreground"
-                    : "text-muted-foreground hover:text-foreground hover:bg-accent",
-                )}
+                to={l.to as any}
+                className={className}
               >
                 {l.label}
                 {active && (
@@ -161,19 +173,34 @@ export function Navbar() {
       {open && (
         <nav className="border-t border-border/70 bg-background px-4 py-2 md:hidden">
           {links.map((l) => {
-            const active =
-              l.to === "/" ? pathname === "/" : pathname.startsWith(l.to);
+            const isHash = l.to.startsWith("#");
+            const active = isHash ? false : (l.to === "/" ? pathname === "/" : pathname.startsWith(l.to));
+            const className = cn(
+              "block rounded-md px-3 py-2 text-sm font-medium",
+              active
+                ? "bg-accent text-accent-foreground"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground",
+            );
+
+            if (isHash) {
+              return (
+                <a
+                  key={l.to}
+                  href={l.to}
+                  onClick={() => setOpen(false)}
+                  className={className}
+                >
+                  {l.label}
+                </a>
+              );
+            }
+
             return (
               <Link
                 key={l.to}
-                to={l.to}
+                to={l.to as any}
                 onClick={() => setOpen(false)}
-                className={cn(
-                  "block rounded-md px-3 py-2 text-sm font-medium",
-                  active
-                    ? "bg-accent text-accent-foreground"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                )}
+                className={className}
               >
                 {l.label}
               </Link>
