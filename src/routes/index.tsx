@@ -26,8 +26,15 @@ const staggerContainer = {
 
 function LandingPage() {
   return (
-    <div className="flex flex-col min-h-screen bg-background selection:bg-primary/20 selection:text-primary">
+    <div className="flex flex-col min-h-screen bg-background selection:bg-primary/20 selection:text-primary relative overflow-hidden">
       
+      {/* Premium Atmospheric Background */}
+      <div className="absolute top-0 left-0 w-full h-[800px] overflow-hidden -z-10 pointer-events-none">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(var(--color-border),0.1)_1px,transparent_1px),linear-gradient(to_bottom,rgba(var(--color-border),0.1)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-[100px] opacity-50 mix-blend-screen"></div>
+        <div className="absolute top-40 right-1/4 w-96 h-96 bg-secondary/30 rounded-full blur-[100px] opacity-50 mix-blend-screen"></div>
+      </div>
+
       {/* Hero Section */}
       <section className="relative px-6 pt-24 pb-20 md:pt-32 md:pb-32 max-w-7xl mx-auto w-full">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center">
