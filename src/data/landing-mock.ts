@@ -1,49 +1,76 @@
-import { Code2, Video, Blocks, Layout, Zap, Users } from "lucide-react";
+import { Code2, Briefcase, Database, BrainCircuit, Blocks, Terminal } from "lucide-react";
 
 export const landingFeatures = [
   {
-    title: "Deep-Dive Video Breakdowns",
-    description: "Don't just look at code. Watch experienced engineers break down the reasoning, architecture, and edge cases line by line.",
-    icon: Video,
+    title: "Master the Core Patterns (Blind 75 & 150)",
+    description: "Don't grind 1,000 random problems. Learn the underlying frameworks that solve 90% of technical interview questions.",
+    icon: BrainCircuit,
   },
   {
-    title: "Interactive System Design",
-    description: "Build mental models of complex systems. Explore architectures from the database layer all the way to the frontend UI.",
-    icon: Blocks,
+    title: "Standout Resume Projects",
+    description: "Build actual, end-to-end production systems that recruiters look for, rather than generic to-do apps.",
+    icon: Briefcase,
   },
   {
-    title: "Real-World Engineering",
-    description: "No more 'todo app' tutorials. Learn how to structure scalable, production-ready applications using modern patterns.",
-    icon: Code2,
+    title: "Backend & Systems Depth",
+    description: "From essential SQL queries to modern Agentic Development, gain the deep technical knowledge required for top-tier internships.",
+    icon: Database,
   },
 ];
 
 export const landingStats = [
-  { value: "10k+", label: "Engineers Upskilled" },
-  { value: "50+", label: "Deep-Dive Breakdowns" },
+  { value: "10k+", label: "Internships Landed" },
+  { value: "Blind 75", label: "Core Patterns Covered" },
   { value: "4.9/5", label: "Average Rating" },
 ];
 
 export const landingCourses = [
   {
-    id: "frontend-architecture",
-    title: "Advanced Frontend Architecture",
-    description: "Master React, state management, and large-scale component design. Build UIs that scale effortlessly.",
-    isPremium: true,
-    category: "Architecture",
-  },
-  {
-    id: "system-design-basics",
-    title: "Practical System Design",
-    description: "Learn how to design scalable backend systems, databases, and APIs without the theoretical fluff.",
+    id: "blind-75",
+    title: "Blind 75 Breakdown",
+    description: "The absolute foundation. Master the core problem-solving frameworks required for every technical interview.",
     isPremium: false,
-    category: "Backend",
+    category: "DSA / Interviews",
+    icon: Blocks
   },
   {
-    id: "modern-css-patterns",
-    title: "Modern CSS & UI Patterns",
-    description: "Stop wrestling with CSS. Learn the systematic approach to building beautiful, accessible user interfaces.",
+    id: "blind-150",
+    title: "Blind 150 Extension",
+    description: "Ready for FAANG? Expand your pattern recognition to tackle the hardest, most complex edge cases.",
     isPremium: true,
-    category: "UI/UX",
+    category: "Advanced DSA",
+    icon: BrainCircuit
   },
+  {
+    id: "sql-25",
+    title: "Blind SQL 25",
+    description: "The 25 critical SQL patterns you must know. From basic aggregations to complex window functions.",
+    isPremium: true,
+    category: "Backend / Database",
+    icon: Database
+  },
+  {
+    id: "backend-essentials",
+    title: "Backend Essentials for Interviews",
+    description: "Understand the end-to-end flow. Learn APIs, caching, databases, and system design basics.",
+    isPremium: true,
+    category: "Backend",
+    icon: Terminal
+  },
+  {
+    id: "resume-project-1",
+    title: "Resume Project: Real-Time Collab",
+    description: "Build a production-ready real-time collaboration tool to anchor your resume and impress recruiters.",
+    isPremium: true,
+    category: "Resume Project",
+    icon: Code2
+  },
+  {
+    id: "agentic-dev",
+    title: "Modern Agentic Development",
+    description: "Stay ahead of the curve. Learn how to build and integrate AI agents into modern software systems.",
+    isPremium: true,
+    category: "Advanced Tech",
+    icon: BrainCircuit
+  }
 ];

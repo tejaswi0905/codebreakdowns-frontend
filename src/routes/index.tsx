@@ -1,20 +1,20 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Play, CheckCircle2, ChevronRight, Lock, Code2 } from "lucide-react";
+import { ArrowRight, ChevronRight, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 import { landingFeatures, landingStats, landingCourses } from "../data/landing-mock";
 
 export const Route = createFileRoute("/")({
   component: LandingPage,
 });
 
-const fadeUpVariant = {
-  hidden: { opacity: 0, y: 20 },
+const fadeUpVariant: Variants = {
+  hidden: { opacity: 0, y: 15 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
 };
 
-const staggerContainer = {
+const staggerContainer: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -30,83 +30,43 @@ function LandingPage() {
       
       {/* Premium Structural Background (No 'AI' Glows) */}
       <div className="absolute top-0 left-0 w-full h-[800px] overflow-hidden -z-10 pointer-events-none">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(var(--color-border),0.1)_1px,transparent_1px),linear-gradient(to_bottom,rgba(var(--color-border),0.1)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(var(--color-border),0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(var(--color-border),0.05)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
       </div>
 
-      {/* Hero Section */}
-      <section className="relative px-6 pt-24 pb-20 md:pt-32 md:pb-32 max-w-7xl mx-auto w-full">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center">
-          
-          {/* Left Column: Copy & CTA */}
-          <motion.div
-            variants={staggerContainer}
-            initial="hidden"
-            animate="visible"
-            className="flex flex-col items-start text-left lg:pr-8"
-          >
-            <motion.div variants={fadeUpVariant} className="mb-6 inline-flex items-center rounded-full border border-border bg-card/50 px-4 py-1.5 text-sm font-medium text-foreground shadow-sm backdrop-blur-md">
-              <span className="flex h-2 w-2 rounded-full bg-primary mr-2 animate-pulse"></span>
-              The New Standard for Engineering Education
-            </motion.div>
-
-            <motion.h1 variants={fadeUpVariant} className="text-5xl md:text-6xl font-extrabold tracking-tight mb-6 text-foreground leading-[1.1]">
-              Master Frontend Engineering through <span className="text-primary">Real-World</span> Breakdowns.
-            </motion.h1>
-
-            <motion.p variants={fadeUpVariant} className="text-lg text-muted-foreground max-w-xl mb-10 leading-relaxed">
-              Stop watching generic tutorials. Build deep mental models by watching experienced engineers break down the reasoning, architecture, and edge cases of production-grade systems.
-            </motion.p>
-
-            <motion.div variants={fadeUpVariant} className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-              <Button size="lg" asChild className="rounded-lg px-8 h-14 text-base font-semibold shadow-md hover:shadow-lg transition-all bg-primary text-primary-foreground">
-                <Link to="/login">
-                  Start Learning Now
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
-              </Button>
-              <Button size="lg" variant="outline" asChild className="rounded-lg px-8 h-14 text-base font-semibold border-border hover:bg-secondary/50">
-                <Link to="/courses">
-                  View Curriculum
-                </Link>
-              </Button>
-            </motion.div>
+      {/* Editorial Hero Section */}
+      <section className="relative px-6 pt-24 pb-20 md:pt-32 md:pb-24 max-w-4xl mx-auto w-full text-center">
+        <motion.div
+          variants={staggerContainer}
+          initial="hidden"
+          animate="visible"
+          className="flex flex-col items-center"
+        >
+          <motion.div variants={fadeUpVariant} className="mb-6 inline-flex items-center rounded-full border border-border bg-card/50 px-4 py-1.5 text-sm font-medium text-foreground shadow-sm backdrop-blur-md">
+            Your Blueprint for Tech Internships & Dev Roles
           </motion.div>
 
-          {/* Right Column: Elegant UI Preview */}
-          <motion.div 
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
-            className="relative w-full aspect-video rounded-xl overflow-hidden shadow-2xl border border-border bg-card flex items-center justify-center group cursor-pointer"
-          >
-            {/* Subtle Gradient Background for the placeholder */}
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-secondary/20 z-0"></div>
-            
-            {/* Mock Player UI */}
-            <div className="relative z-10 flex flex-col items-center justify-center">
-              <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors duration-300">
-                <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-300">
-                  <Play className="w-6 h-6 text-primary-foreground ml-1" fill="currentColor" />
-                </div>
-              </div>
-              <p className="font-medium text-foreground">Watch a breakdown</p>
-              <p className="text-sm text-muted-foreground">React Architecture Patterns</p>
-            </div>
-            
-            {/* Decorative Mock UI Elements */}
-            <div className="absolute bottom-4 left-4 right-4 h-12 bg-background/80 backdrop-blur-sm rounded-lg border border-border flex items-center px-4 space-x-4">
-              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-                 <div className="w-2 h-2 rounded-full bg-primary"></div>
-              </div>
-              <div className="flex-1 space-y-2">
-                <div className="h-1.5 w-full bg-border rounded-full overflow-hidden">
-                  <div className="h-full w-1/3 bg-primary rounded-full"></div>
-                </div>
-              </div>
-              <div className="text-xs font-mono text-muted-foreground">12:45 / 38:20</div>
-            </div>
+          <motion.h1 variants={fadeUpVariant} className="text-4xl md:text-5xl font-bold tracking-tight mb-8 text-foreground leading-[1.2]">
+            Crack Your Tech Interviews and Land the Internship.
+          </motion.h1>
+
+          <motion.div variants={fadeUpVariant} className="text-lg md:text-xl text-muted-foreground max-w-2xl mb-10 leading-relaxed space-y-6 text-left md:text-center">
+            <p>
+              Landing a top-tier tech internship isn't about blindly grinding 1,000 random LeetCode problems. It's about recognizing the core patterns that repeat in 90% of technical rounds.
+            </p>
+            <p>
+              We break down the <strong>Blind 75 & 150</strong>, essential backend concepts, and real-world resume projects into structured playbooks so you actually build the mental models required to succeed.
+            </p>
           </motion.div>
-        </div>
+
+          <motion.div variants={fadeUpVariant} className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-center">
+            <Button size="lg" asChild className="rounded-lg px-8 h-14 text-base font-semibold shadow-md hover:shadow-lg transition-all bg-primary text-primary-foreground">
+              <Link to="/courses">
+                Start the Playbook
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+            </Button>
+          </motion.div>
+        </motion.div>
       </section>
 
       {/* Social Proof / Stats Section */}
@@ -126,9 +86,9 @@ function LandingPage() {
       {/* Features Section */}
       <section className="py-24 px-6 max-w-7xl mx-auto">
         <div className="text-center mb-16 max-w-2xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">Why Codebreakdowns?</h2>
+          <h2 className="text-3xl font-bold mb-4 text-foreground">Why This Approach Works</h2>
           <p className="text-lg text-muted-foreground">
-            We focus on the "why" and "how" of software engineering, bridging the gap between beginner tutorials and senior-level architecture.
+            We focus on structured learning and pattern recognition, bridging the gap between theoretical algorithms and passing the actual interview.
           </p>
         </div>
 
@@ -155,60 +115,59 @@ function LandingPage() {
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 space-y-4 md:space-y-0">
             <div>
-              <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">Featured Curriculum</h2>
+              <h2 className="text-3xl font-bold mb-4 text-foreground">The Complete Roadmap</h2>
               <p className="text-lg text-muted-foreground max-w-xl">
-                Structured learning paths designed to take you from competent coder to architectural thinker.
+                Everything you need to secure the internship and excel in your first role.
               </p>
             </div>
             <Button variant="ghost" asChild className="hover:bg-transparent hover:text-primary p-0">
               <Link to="/courses" className="flex items-center text-foreground font-medium">
-                View all courses <ChevronRight className="ml-1 w-4 h-4" />
+                View all content <ChevronRight className="ml-1 w-4 h-4" />
               </Link>
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {landingCourses.map((course) => (
-              <Link key={course.id} to="/courses" className="group h-full">
-                <Card className="h-full flex flex-col overflow-hidden border-border bg-card hover:border-primary/40 transition-all duration-300 shadow-sm hover:shadow-lg">
-                  {/* Card Image Placeholder */}
-                  <div className="aspect-video bg-muted relative overflow-hidden flex items-center justify-center">
-                    <div className="absolute inset-0 bg-gradient-to-tr from-secondary to-background opacity-50"></div>
-                    {/* Category Badge */}
-                    <div className="absolute top-4 left-4">
-                       <span className="bg-background/90 backdrop-blur-sm text-foreground text-xs font-semibold px-2.5 py-1 rounded-md border border-border shadow-sm">
-                         {course.category}
-                       </span>
-                    </div>
-                    {/* Status Badge */}
-                    <div className="absolute top-4 right-4">
-                      {course.isPremium ? (
-                        <span className="flex items-center bg-background/90 backdrop-blur-sm text-foreground text-xs font-semibold px-2.5 py-1 rounded-md border border-border shadow-sm">
-                          <Lock className="w-3 h-3 mr-1" /> Premium
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {landingCourses.map((course) => {
+              const Icon = course.icon;
+              return (
+                <Link key={course.id} to="/courses" className="group h-full">
+                  <Card className="h-full flex flex-col overflow-hidden border-border bg-card hover:border-primary/40 transition-all duration-300 shadow-sm hover:shadow-lg">
+                    {/* Minimal Header */}
+                    <div className="p-6 pb-0 flex justify-between items-start">
+                      <div className="w-10 h-10 rounded-md bg-secondary flex items-center justify-center border border-border">
+                        <Icon className="w-5 h-5 text-muted-foreground" />
+                      </div>
+                      <div className="flex flex-col items-end gap-2">
+                        <span className="bg-background/90 text-foreground text-xs font-semibold px-2.5 py-1 rounded-md border border-border">
+                          {course.category}
                         </span>
-                      ) : (
-                        <span className="flex items-center bg-success/10 text-success text-xs font-semibold px-2.5 py-1 rounded-md border border-success/20 shadow-sm">
-                          Free
-                        </span>
-                      )}
+                        {course.isPremium ? (
+                          <span className="flex items-center text-muted-foreground text-xs font-semibold">
+                            <Lock className="w-3 h-3 mr-1" /> Premium
+                          </span>
+                        ) : (
+                          <span className="text-success text-xs font-semibold">
+                            Free Trial
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    {/* Icon placeholder for course */}
-                    <Code2 className="w-12 h-12 text-muted-foreground/50" />
-                  </div>
-                  
-                  {/* Card Content */}
-                  <div className="p-6 flex flex-col flex-1">
-                    <h3 className="text-xl font-bold mb-2 text-foreground group-hover:text-primary transition-colors">{course.title}</h3>
-                    <p className="text-muted-foreground text-sm flex-1 leading-relaxed">
-                      {course.description}
-                    </p>
-                    <div className="mt-6 pt-4 border-t border-border flex items-center text-sm font-medium text-foreground group-hover:text-primary transition-colors">
-                      View Syllabus <ArrowRight className="ml-2 w-4 h-4" />
+                    
+                    {/* Card Content */}
+                    <div className="p-6 flex flex-col flex-1">
+                      <h3 className="text-xl font-bold mb-2 text-foreground group-hover:text-primary transition-colors">{course.title}</h3>
+                      <p className="text-muted-foreground text-sm flex-1 leading-relaxed">
+                        {course.description}
+                      </p>
+                      <div className="mt-6 pt-4 border-t border-border flex items-center text-sm font-medium text-foreground group-hover:text-primary transition-colors">
+                        Explore module <ArrowRight className="ml-2 w-4 h-4" />
+                      </div>
                     </div>
-                  </div>
-                </Card>
-              </Link>
-            ))}
+                  </Card>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </section>

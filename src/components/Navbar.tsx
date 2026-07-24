@@ -26,6 +26,7 @@ import { useAuthStore } from "@/store/authStore";
 const links = [
   { to: "/dashboard", label: "Dashboard" },
   { to: "/products", label: "Products" },
+  { to: "/", label: "Opportunities" }, // Temporary link
   { to: "/", label: "About" }, // Links to home for now as requested
 ] as const;
 
@@ -39,6 +40,7 @@ export function Navbar() {
   const activeLinks = [
     { to: "/dashboard", label: "Dashboard" },
     { to: "/products", label: "Products" },
+    { to: "/", label: "Opportunities" }, // Temporary link
     { to: "/", label: "About" }, // Temporary link
   ];
 
