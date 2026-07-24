@@ -1,11 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Play, BookOpen, Clock, AlertCircle } from "lucide-react";
+import { Play, BookOpen, AlertCircle, CheckCircle2, Sparkles, LockOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { fetchMyCourses, type ApiCourse } from "@/services/api";
+import { fetchMyCourses, fetchCourses, type ApiCourse } from "@/services/api";
 import { useAuthStore } from "@/store/authStore";
-
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 export const Route = createFileRoute("/dashboard")({
@@ -18,19 +17,27 @@ export const Route = createFileRoute("/dashboard")({
 
 function DashboardPage() {
   const { user } = useAuthStore();
-  const { data: myCourses, isLoading, error } = useQuery({
+  
+  // Fetch purchased courses
+  const { data: myCourses, isLoading: loadingMy, error: myError } = useQuery({
     queryKey: ["my-courses"],
     queryFn: fetchMyCourses,
   });
 
-  if (isLoading) {
+  // Fetch all courses (to find free ones)
+  const { data: allCourses, isLoading: loadingAll } = useQuery({
+    queryKey: ["all-courses"],
+    queryFn: fetchCourses,
+  });
+
+  if (loadingMy || loadingAll) {
     return (
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="animate-pulse space-y-8">
-          <div className="h-8 w-48 bg-white/10 rounded"></div>
+          <div className="h-10 w-64 bg-secondary rounded-lg"></div>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-48 bg-white/5 rounded-xl"></div>
+              <div key={i} className="h-72 bg-secondary rounded-2xl"></div>
             ))}
           </div>
         </div>
@@ -38,7 +45,7 @@ function DashboardPage() {
     );
   }
 
-  if (error) {
+  if (myError) {
     return (
       <div className="mx-auto max-w-7xl px-4 py-20 text-center sm:px-6 lg:px-8">
         <AlertCircle className="mx-auto h-12 w-12 text-destructive opacity-80 mb-4" />
@@ -48,64 +55,149 @@ function DashboardPage() {
     );
   }
 
+  const purchasedCourses = myCourses || [];
+  const purchasedIds = new Set(purchasedCourses.map(c => c.id));
+  
+  // Find courses that are marked free and haven't been purchased
+  const freeCourses = (allCourses || []).filter(c => c.isFree && !purchasedIds.has(c.id));
+
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mb-8">
-        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-          Welcome back, {user?.displayName || user?.username || "Learner"}
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Access your enrolled courses and continue learning.
-        </p>
+    <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 min-h-screen">
+      
+      <div className="mb-12 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">
+            Welcome back, <span className="text-primary">{user?.displayName || user?.username || "Learner"}</span>
+          </h1>
+          <p className="mt-2 text-lg text-muted-foreground">
+            Ready to crush your next interview? Pick up where you left off.
+          </p>
+        </div>
+        <Button asChild variant="outline" className="rounded-full shadow-sm">
+          <Link to="/products">Browse Catalog</Link>
+        </Button>
       </div>
 
-      <div className="space-y-6">
-        <h2 className="text-lg font-semibold flex items-center gap-2">
-          <BookOpen className="h-5 w-5 text-primary" /> My Purchases
-        </h2>
+      <div className="space-y-16">
         
-        {!myCourses || myCourses.length === 0 ? (
-          <Card className="bg-black/20 border border-white/5 p-12 text-center">
-            <h3 className="text-xl font-medium mb-2">No courses yet</h3>
-            <p className="text-muted-foreground mb-6">Explore our catalog to start your learning journey.</p>
-            <Button asChild>
-              <Link to="/products">Browse Products</Link>
-            </Button>
-          </Card>
-        ) : (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {myCourses.map((course) => (
-              <CourseCard key={course.id} course={course} />
-            ))}
+        {/* Purchased Courses Section */}
+        <section>
+          <div className="flex items-center gap-2 mb-6">
+            <div className="p-2 bg-primary/10 rounded-lg">
+              <CheckCircle2 className="h-6 w-6 text-primary" />
+            </div>
+            <h2 className="text-2xl font-bold">Your Enrolled Courses</h2>
           </div>
+          
+          {purchasedCourses.length === 0 ? (
+            <Card className="bg-card/30 border-dashed border-border p-12 text-center rounded-3xl">
+              <div className="mx-auto w-16 h-16 bg-secondary rounded-full flex items-center justify-center mb-4">
+                <BookOpen className="h-8 w-8 text-muted-foreground" />
+              </div>
+              <h3 className="text-2xl font-semibold mb-2">No active enrollments</h3>
+              <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                You haven't purchased any premium courses yet. Start your journey by exploring our catalog.
+              </p>
+              <Button asChild size="lg" className="rounded-full font-bold">
+                <Link to="/products">Explore Premium Courses</Link>
+              </Button>
+            </Card>
+          ) : (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {purchasedCourses.map((course) => (
+                <CourseCard key={course.id} course={course} type="purchased" />
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* Free Courses Section */}
+        {freeCourses.length > 0 && (
+          <section>
+            <div className="flex items-center gap-2 mb-6">
+              <div className="p-2 bg-success/10 rounded-lg">
+                <LockOpen className="h-6 w-6 text-success" />
+              </div>
+              <h2 className="text-2xl font-bold">Free Resources For You</h2>
+            </div>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {freeCourses.map((course) => (
+                <CourseCard key={course.id} course={course} type="free" />
+              ))}
+            </div>
+          </section>
         )}
+
       </div>
     </div>
   );
 }
 
-function CourseCard({ course }: { course: ApiCourse }) {
+function CourseCard({ course, type }: { course: ApiCourse; type: "purchased" | "free" }) {
+  const isFree = type === "free";
+
   return (
-    <Card className="flex flex-col overflow-hidden bg-[#0a0a0a] border-white/10 hover:-translate-y-1 hover:shadow-md hover:border-primary/30 transition-all">
-      {course.imageUrl ? (
-        <div className="h-32 w-full overflow-hidden">
-          <img src={course.imageUrl} alt={course.title} className="w-full h-full object-cover opacity-80" />
+    <Card className="group flex flex-col overflow-hidden bg-card border-border hover:-translate-y-1 hover:shadow-xl hover:border-primary/40 transition-all duration-300 rounded-2xl h-full relative">
+      
+      {/* Badge */}
+      <div className="absolute top-4 right-4 z-10">
+        {isFree ? (
+          <span className="px-3 py-1 bg-success text-success-foreground text-xs font-bold uppercase tracking-wider rounded-full shadow-lg backdrop-blur-md bg-opacity-90 flex items-center gap-1">
+            <Sparkles className="w-3 h-3" /> Free
+          </span>
+        ) : (
+          <span className="px-3 py-1 bg-primary text-primary-foreground text-xs font-bold uppercase tracking-wider rounded-full shadow-lg backdrop-blur-md bg-opacity-90">
+            Pro
+          </span>
+        )}
+      </div>
+
+      {/* Thumbnail */}
+      <div className="h-48 w-full overflow-hidden relative bg-muted">
+        {course.imageUrl ? (
+          <>
+            <img 
+              src={course.imageUrl} 
+              alt={course.title} 
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+            />
+            {/* Subtle gradient overlay to ensure text readability if any, and premium feel */}
+            <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          </>
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-secondary to-background flex items-center justify-center">
+            <BookOpen className="h-12 w-12 text-primary/30" />
+          </div>
+        )}
+        
+        {/* Hover Play Button Overlay */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <div className="w-14 h-14 rounded-full bg-background/90 backdrop-blur shadow-xl flex items-center justify-center text-primary transform scale-90 group-hover:scale-100 transition-all duration-300">
+            <Play className="w-6 h-6 ml-1" fill="currentColor" />
+          </div>
         </div>
-      ) : (
-        <div className="h-32 w-full bg-gradient-to-br from-indigo-500/10 to-indigo-500/5 border-b border-white/5 flex items-center justify-center">
-          <BookOpen className="h-8 w-8 text-indigo-400 opacity-50" />
-        </div>
-      )}
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg leading-tight">{course.title}</CardTitle>
+      </div>
+
+      {/* Content */}
+      <CardHeader className="flex-1 pb-4 pt-5 px-6">
+        <CardTitle className="text-xl font-bold leading-tight group-hover:text-primary transition-colors">
+          {course.title}
+        </CardTitle>
         {course.description && (
-          <CardDescription className="line-clamp-2 mt-1">{course.description}</CardDescription>
+          <CardDescription className="line-clamp-2 mt-3 text-muted-foreground text-sm leading-relaxed">
+            {course.description}
+          </CardDescription>
         )}
       </CardHeader>
-      <CardFooter className="mt-auto pt-4 pb-6 px-6">
-        <Button asChild className="w-full gap-2 font-medium">
-          <Link to="/courses" search={{ courseId: course.id }}>
-            <Play className="h-4 w-4" /> Start Learning
+
+      <CardFooter className="pt-0 pb-6 px-6">
+        <Button 
+          asChild 
+          variant={isFree ? "secondary" : "default"} 
+          className="w-full font-semibold rounded-xl h-11"
+        >
+          <Link to="/overview" search={{ courseId: course.id }}>
+            {isFree ? "Start Free Course" : "Continue Learning"}
           </Link>
         </Button>
       </CardFooter>

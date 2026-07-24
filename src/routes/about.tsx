@@ -78,7 +78,7 @@ function AboutPage() {
           transition={{ duration: 0.5 }}
           className="mb-16"
         >
-          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-foreground mb-4">
+          <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-foreground mb-4">
             Built by engineers, <br/>
             <span className="text-primary">for future engineers.</span>
           </h1>
@@ -105,7 +105,7 @@ function AboutPage() {
                 <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-6">
                   <MonitorPlay className="w-6 h-6 text-primary" />
                 </div>
-                <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3 leading-tight">
+                <h2 className="text-xl md:text-2xl font-bold text-foreground mb-3 leading-tight">
                   We left our software jobs <br/> for full-time teaching.
                 </h2>
                 <p className="text-muted-foreground text-lg">
@@ -120,7 +120,7 @@ function AboutPage() {
             <Card className="h-full border-border bg-primary/5 group p-8 flex flex-col justify-between shadow-sm hover:border-primary/30 transition-colors min-h-[250px]">
               <Quote className="w-10 h-10 text-primary/40 mb-4 group-hover:scale-110 transition-transform origin-top-left" />
               <div>
-                <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-4 leading-snug">
+                <h2 className="text-xl md:text-2xl font-bold text-foreground mb-4 leading-snug">
                   "You miss 100% of the shots you don't take."
                 </h2>
                 <div className="flex items-center gap-3">
@@ -175,7 +175,7 @@ function AboutPage() {
                 <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center mb-6">
                   <Users className="w-6 h-6 text-success" />
                 </div>
-                <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3 leading-tight">
+                <h2 className="text-xl md:text-2xl font-bold text-foreground mb-3 leading-tight">
                   We've coached hundreds offline.<br/> Now we're moving online.
                 </h2>
                 <p className="text-muted-foreground text-lg mb-6">
@@ -199,7 +199,7 @@ function AboutPage() {
       {/* Massive Bottom CTA */}
       <section className="bg-card/50 border-y border-border py-24 md:py-32 px-6 text-center">
         <div className="max-w-3xl mx-auto">
-          <h2 className="text-4xl md:text-6xl font-extrabold text-foreground mb-6 tracking-tight">
+          <h2 className="text-3xl md:text-5xl font-extrabold text-foreground mb-6 tracking-tight">
             Ready to stop grinding <br/> and start learning?
           </h2>
           <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
