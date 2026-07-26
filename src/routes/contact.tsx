@@ -49,7 +49,7 @@ function ContactPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start max-w-6xl mx-auto">
         {/* Contact Info Cards */}
         <div className="space-y-6 lg:col-span-1">
-          <Card className="p-6 border border-white/10 bg-[#0a0a0d] hover:border-primary/30 transition-all">
+          <Card className="p-6 border border-border bg-card text-card-foreground hover:border-primary/30 transition-all">
             <div className="flex items-start gap-4">
               <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary">
                 <Mail className="h-5 w-5" />
@@ -57,14 +57,14 @@ function ContactPage() {
               <div>
                 <h3 className="font-semibold text-foreground">Email Support</h3>
                 <p className="text-xs text-muted-foreground mt-1">Our team responds within 24 hours.</p>
-                <a href="mailto:support@codebreakdowns.in" className="text-sm text-primary font-medium mt-2 inline-block hover:underline">
-                  support@codebreakdowns.in
+                <a href="mailto:codebreakdowns@gmail.com" className="text-sm text-primary font-medium mt-2 inline-block hover:underline">
+                  codebreakdowns@gmail.com
                 </a>
               </div>
             </div>
           </Card>
 
-          <Card className="p-6 border border-white/10 bg-[#0a0a0d] hover:border-primary/30 transition-all">
+          <Card className="p-6 border border-border bg-card text-card-foreground hover:border-primary/30 transition-all">
             <div className="flex items-start gap-4">
               <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-emerald-500/10 text-emerald-500">
                 <MapPin className="h-5 w-5" />
@@ -81,7 +81,7 @@ function ContactPage() {
             </div>
           </Card>
 
-          <Card className="p-6 border border-white/10 bg-[#0a0a0d] hover:border-primary/30 transition-all">
+          <Card className="p-6 border border-border bg-card text-card-foreground hover:border-primary/30 transition-all">
             <div className="flex items-start gap-4">
               <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-amber-500/10 text-amber-500">
                 <Clock className="h-5 w-5" />
@@ -99,7 +99,7 @@ function ContactPage() {
         </div>
 
         {/* Contact Form */}
-        <Card className="p-8 border border-white/10 bg-[#0a0a0d] lg:col-span-2 shadow-xl">
+        <Card className="p-8 border border-border bg-card text-card-foreground lg:col-span-2 shadow-xl">
           <div className="flex items-center gap-2 mb-6">
             <MessageSquare className="h-5 w-5 text-primary" />
             <h2 className="text-xl font-bold text-foreground">Send us a Message</h2>
@@ -113,7 +113,7 @@ function ContactPage() {
                   type="text"
                   required
                   placeholder="John Doe"
-                  className="w-full rounded-md border border-white/10 bg-black/40 px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="w-full rounded-md border border-border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
               <div className="space-y-2">
@@ -122,7 +122,7 @@ function ContactPage() {
                   type="email"
                   required
                   placeholder="john@example.com"
-                  className="w-full rounded-md border border-white/10 bg-black/40 px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="w-full rounded-md border border-border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
             </div>
@@ -131,13 +131,13 @@ function ContactPage() {
               <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Subject / Topic</label>
               <select
                 required
-                className="w-full rounded-md border border-white/10 bg-black/40 px-3 py-2.5 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                className="w-full rounded-md border border-border bg-background px-3 py-2.5 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
               >
-                <option value="" className="bg-[#0a0a0d]">Select a topic...</option>
-                <option value="course-support" className="bg-[#0a0a0d]">Course Access / Technical Support</option>
-                <option value="billing" className="bg-[#0a0a0d]">Billing / Payment / Refund Issue</option>
-                <option value="partnership" className="bg-[#0a0a0d]">Business / Partnership Inquiry</option>
-                <option value="other" className="bg-[#0a0a0d]">Other Question</option>
+                <option value="" className="bg-background text-foreground">Select a topic...</option>
+                <option value="course-support" className="bg-background text-foreground">Course Access / Technical Support</option>
+                <option value="billing" className="bg-background text-foreground">Billing / Payment / Refund Issue</option>
+                <option value="partnership" className="bg-background text-foreground">Business / Partnership Inquiry</option>
+                <option value="other" className="bg-background text-foreground">Other Question</option>
               </select>
             </div>
 
@@ -147,7 +147,7 @@ function ContactPage() {
                 required
                 rows={5}
                 placeholder="How can we help you today? Please provide details such as your registered email or transaction ID if applicable."
-                className="w-full rounded-md border border-white/10 bg-black/40 px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary resize-none"
+                className="w-full rounded-md border border-border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary resize-none"
               ></textarea>
             </div>
 

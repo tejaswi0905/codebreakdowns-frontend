@@ -167,10 +167,10 @@ function ProductsPage() {
     return (
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="animate-pulse space-y-8">
-          <div className="h-8 w-48 bg-white/10 rounded"></div>
+          <div className="h-8 w-48 bg-muted rounded"></div>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-64 bg-white/5 rounded-xl"></div>
+              <div key={i} className="h-64 bg-muted rounded-xl"></div>
             ))}
           </div>
         </div>
@@ -203,7 +203,7 @@ function ProductsPage() {
           <Sparkles className="h-4 w-4 text-primary" /> Available Offerings
         </h2>
         {products.length === 0 ? (
-          <div className="text-center py-12 border border-white/5 rounded-xl bg-black/20">
+          <div className="text-center py-12 border border-border rounded-xl bg-muted/30">
             <h3 className="text-lg font-medium">Coming Soon</h3>
             <p className="text-muted-foreground text-sm mt-1">We are actively building our catalog.</p>
           </div>
@@ -243,7 +243,7 @@ function ProductCard({
   const { icon: Icon, tint } = getVisualsForProduct(product.title);
 
   return (
-    <Card className="group flex flex-col overflow-hidden p-0 transition-all hover:-translate-y-0.5 hover:shadow-md border border-white/10 bg-[#0a0a0a]">
+    <Card className="group flex flex-col overflow-hidden p-0 transition-all hover:-translate-y-0.5 hover:shadow-md border border-border bg-card text-card-foreground">
       <div className={cn("relative h-28 bg-gradient-to-br", tint)}>
         {product.imageUrl ? (
           <img src={product.imageUrl} alt={product.title} className="w-full h-full object-cover opacity-80" />

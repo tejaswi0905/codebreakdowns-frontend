@@ -49,7 +49,7 @@ function RefundPolicyPage() {
             <span className="flex h-6 w-6 items-center justify-center rounded bg-primary/10 text-xs text-primary font-bold">2</span>
             Eligibility for Refunds
           </h2>
-          <Card className="p-5 border border-white/10 bg-[#0a0a0d] space-y-3 mt-2">
+          <Card className="p-5 border border-border bg-card text-card-foreground space-y-3 mt-2">
             <p className="text-xs">
               We offer a <strong className="text-foreground">7-Day Refund Window</strong> from the date and time of your original purchase, subject to the following fair-use conditions:
             </p>
@@ -75,8 +75,8 @@ function RefundPolicyPage() {
           <p>
             To initiate a refund request, please send an email from your registered account email address to our support team with the following details:
           </p>
-          <Card className="p-5 border border-white/10 bg-[#0a0a0d] font-mono text-xs text-foreground/90 space-y-1 bg-black/40">
-            <p className="text-primary font-bold mb-2">// Send email to: support@codebreakdowns.in</p>
+          <Card className="p-5 border border-border bg-card text-card-foreground font-mono text-xs space-y-1 bg-muted/40">
+            <p className="text-primary font-bold mb-2">// Send email to: codebreakdowns@gmail.com</p>
             <p>Subject: Refund Request - [Your Course / Bundle Title]</p>
             <p>1. Registered Email Address:</p>
             <p>2. Razorpay Payment ID / Order ID (found in receipt):</p>
@@ -123,9 +123,9 @@ function RefundPolicyPage() {
           <p>
             If you have any questions about your transaction or need assistance with a refund, we are always here to help:
           </p>
-          <Card className="p-4 border border-white/10 bg-[#0a0a0d] inline-block">
+          <Card className="p-4 border border-border bg-card text-card-foreground inline-block">
             <p className="text-xs text-foreground font-medium">CodeBreakdowns Billing & Support</p>
-            <p className="text-xs text-primary mt-0.5">Email: support@codebreakdowns.in</p>
+            <p className="text-xs text-primary mt-0.5">Email: codebreakdowns@gmail.com</p>
             <p className="text-[11px] text-muted-foreground mt-1">Working Hours: Mon–Sat, 10:00 AM – 7:00 PM IST</p>
           </Card>
         </section>

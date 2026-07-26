@@ -23,8 +23,8 @@ export function Footer() {
               <span className="flex items-center gap-1.5 text-xs text-muted-foreground/80">
                 <MapPin className="h-3.5 w-3.5 text-primary" /> Hyderabad, India
               </span>
-              <a href="mailto:support@codebreakdowns.in" className="flex items-center gap-1.5 text-xs hover:text-foreground transition-colors">
-                <Mail className="h-3.5 w-3.5 text-primary" /> support@codebreakdowns.in
+              <a href="mailto:codebreakdowns@gmail.com" className="flex items-center gap-1.5 text-xs hover:text-foreground transition-colors">
+                <Mail className="h-3.5 w-3.5 text-primary" /> codebreakdowns@gmail.com
               </a>
             </div>
           </div>

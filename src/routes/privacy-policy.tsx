@@ -52,7 +52,7 @@ function PrivacyPolicyPage() {
             <span className="flex h-6 w-6 items-center justify-center rounded bg-primary/10 text-xs text-primary font-bold">2</span>
             Information We Collect
           </h2>
-          <Card className="p-5 border border-white/10 bg-[#0a0a0d] space-y-3 mt-2">
+          <Card className="p-5 border border-border bg-card text-card-foreground space-y-3 mt-2">
             <div>
               <h4 className="font-medium text-foreground text-xs uppercase tracking-wider">A. Personal Information Provided by You</h4>
               <p className="text-xs mt-1">
@@ -135,9 +135,9 @@ function PrivacyPolicyPage() {
           <p>
             You have the right to request access to, correction of, or deletion of your account and personal data stored on our platform. To exercise your privacy rights or ask questions regarding this policy, please contact our Data Protection Officer at:
           </p>
-          <Card className="p-4 border border-white/10 bg-[#0a0a0d] inline-block">
+          <Card className="p-4 border border-border bg-card text-card-foreground inline-block">
             <p className="text-xs text-foreground font-medium">CodeBreakdowns Support Team</p>
-            <p className="text-xs text-primary mt-0.5">Email: support@codebreakdowns.in</p>
+            <p className="text-xs text-primary mt-0.5">Email: codebreakdowns@gmail.com</p>
             <p className="text-[11px] text-muted-foreground mt-1">Location: Hyderabad, Telangana, India</p>
           </Card>
         </section>

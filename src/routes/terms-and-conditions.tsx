@@ -64,7 +64,7 @@ function TermsPage() {
             <span className="flex h-6 w-6 items-center justify-center rounded bg-primary/10 text-xs text-primary font-bold">3</span>
             Intellectual Property & License to Use
           </h2>
-          <Card className="p-5 border border-white/10 bg-[#0a0a0d] space-y-3 mt-2">
+          <Card className="p-5 border border-border bg-card text-card-foreground space-y-3 mt-2">
             <p className="text-xs">
               All materials hosted on CodeBreakdowns—including video lectures, source code breakdowns, system design schematics, architectural diagrams, text lessons, and graphics—are the exclusive intellectual property of CodeBreakdowns and are protected by international copyright and trade secret laws.
             </p>
@@ -121,9 +121,9 @@ function TermsPage() {
           <p>
             For any questions, clarifications, or notices concerning these Terms and Conditions, please reach out to us at:
           </p>
-          <Card className="p-4 border border-white/10 bg-[#0a0a0d] inline-block">
+          <Card className="p-4 border border-border bg-card text-card-foreground inline-block">
             <p className="text-xs text-foreground font-medium">CodeBreakdowns Legal Team</p>
-            <p className="text-xs text-primary mt-0.5">Email: support@codebreakdowns.in</p>
+            <p className="text-xs text-primary mt-0.5">Email: codebreakdowns@gmail.com</p>
             <p className="text-[11px] text-muted-foreground mt-1">Location: Hyderabad, Telangana, India</p>
           </Card>
         </section>
