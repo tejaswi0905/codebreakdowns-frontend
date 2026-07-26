@@ -1,5 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Check,
   Sparkles,
@@ -15,7 +15,14 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { fetchProducts, type ApiProduct } from "@/services/api";
+import {
+  fetchProducts,
+  fetchMyCourses,
+  fetchCurrentUser,
+  createCheckoutOrder,
+  verifyPayment,
+  type ApiProduct,
+} from "@/services/api";
 
 export const Route = createFileRoute("/products")({
   head: () => ({
@@ -53,15 +60,106 @@ const getVisualsForProduct = (title: string): { icon: LucideIcon, tint: string }
   return { icon: Code2, tint: "from-blue-500/15 to-blue-500/5" };
 };
 
+// Dynamic SDK loader to keep initial bundle size small
+function loadScript(src: string): Promise<boolean> {
+  return new Promise((resolve) => {
+    if (document.querySelector(`script[src="${src}"]`)) {
+      resolve(true);
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = src;
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+}
+
 function ProductsPage() {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
   const { data: products, isLoading, error } = useQuery({
     queryKey: ["products"],
     queryFn: fetchProducts,
   });
 
-  const handlePurchase = (productId: string) => {
-    toast("Checkout flow initializing...");
-    // Future: Call Stripe / Razorpay checkout session here
+  const { data: myCourses } = useQuery({
+    queryKey: ["my-courses"],
+    queryFn: fetchMyCourses,
+  });
+
+  const { data: user } = useQuery({
+    queryKey: ["current-user"],
+    queryFn: fetchCurrentUser,
+  });
+
+  const myCourseIds = new Set((myCourses || []).map((c) => c.id));
+
+  const handlePurchase = async (product: ApiProduct) => {
+    if (!user) {
+      toast.error("Please login to purchase courses");
+      navigate({ to: "/login" });
+      return;
+    }
+
+    toast.loading("Loading Razorpay checkout...", { id: "rzp-checkout" });
+    const res = await loadScript("https://checkout.razorpay.com/v1/checkout.js");
+    if (!res) {
+      toast.error("Razorpay SDK failed to load. Are you online?", { id: "rzp-checkout" });
+      return;
+    }
+
+    try {
+      const orderData = await createCheckoutOrder(product.id);
+      toast.dismiss("rzp-checkout");
+
+      const rzpKeyId = import.meta.env.VITE_RAZORPAY_KEY_ID || "";
+      if (!rzpKeyId) {
+        toast.error("Razorpay Key ID is missing in environment variables.");
+        return;
+      }
+
+      const options = {
+        key: rzpKeyId,
+        amount: orderData.amount, // in paise
+        currency: orderData.currency,
+        name: "CodeBreakdowns",
+        description: product.title,
+        order_id: orderData.orderId,
+        handler: async function (response: any) {
+          toast.loading("Verifying payment security signature...", { id: "rzp-verify" });
+          try {
+            await verifyPayment({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+            });
+            toast.success("Payment successful! You now own this course 🎉", { id: "rzp-verify" });
+            queryClient.invalidateQueries({ queryKey: ["my-courses"] });
+            queryClient.invalidateQueries({ queryKey: ["products"] });
+            navigate({ to: "/dashboard" });
+          } catch (err: any) {
+            toast.error(err.message || "Payment verification failed", { id: "rzp-verify" });
+          }
+        },
+        prefill: {
+          name: user.displayName || user.username || "Student",
+          email: "",
+        },
+        theme: {
+          color: "#3b82f6", // Brand primary color
+        },
+      };
+
+      const rzp = new (window as any).Razorpay(options);
+      rzp.on("payment.failed", function (resp: any) {
+        toast.error(resp.error?.description || "Payment failed or cancelled.");
+      });
+      rzp.open();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to initiate checkout", { id: "rzp-checkout" });
+    }
   };
 
   if (isLoading) {
@@ -110,9 +208,21 @@ function ProductsPage() {
           </div>
         ) : (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {products.map((p) => (
-              <ProductCard key={p.id} product={p} onPurchase={() => handlePurchase(p.id)} />
-            ))}
+            {products.map((p) => {
+              const productCourseIds = p.courses?.map((c) => c.course.id) || [];
+              const isPurchased =
+                productCourseIds.length > 0 &&
+                productCourseIds.every((id) => myCourseIds.has(id));
+
+              return (
+                <ProductCard
+                  key={p.id}
+                  product={p}
+                  isPurchased={isPurchased}
+                  onPurchase={() => handlePurchase(p)}
+                />
+              );
+            })}
           </div>
         )}
       </section>
@@ -120,11 +230,16 @@ function ProductsPage() {
   );
 }
 
-function ProductCard({ product, onPurchase }: { product: ApiProduct, onPurchase: () => void }) {
+function ProductCard({
+  product,
+  isPurchased,
+  onPurchase,
+}: {
+  product: ApiProduct;
+  isPurchased: boolean;
+  onPurchase: () => void;
+}) {
   const { icon: Icon, tint } = getVisualsForProduct(product.title);
-  // We assume purchased logic comes from user state, 
-  // but for now, we just display the buy button.
-  const isPurchased = false; 
 
   return (
     <Card className="group flex flex-col overflow-hidden p-0 transition-all hover:-translate-y-0.5 hover:shadow-md border border-white/10 bg-[#0a0a0a]">
@@ -174,3 +289,4 @@ function ProductCard({ product, onPurchase }: { product: ApiProduct, onPurchase:
     </Card>
   );
 }
+

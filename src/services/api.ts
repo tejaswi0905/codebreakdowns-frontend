@@ -21,6 +21,13 @@ export interface ApiProduct {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  courses?: {
+    course: {
+      id: string;
+      title: string;
+      imageUrl?: string | null;
+    };
+  }[];
 }
 
 export interface User {
@@ -220,3 +227,39 @@ export const logoutUser = async (): Promise<boolean> => {
     return false;
   }
 };
+
+// --- Razorpay Payment APIs ---
+export interface CheckoutOrderResponse {
+  orderId: string;
+  amount: number; // in paise
+  currency: string;
+}
+
+export interface VerifyPaymentPayload {
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  razorpay_signature: string;
+}
+
+export const createCheckoutOrder = async (productId: string): Promise<CheckoutOrderResponse> => {
+  const response = await authFetch(`/payments/checkout/${productId}`, { method: "POST" });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || "Failed to initiate checkout");
+  }
+  const data = await response.json();
+  return data.data;
+};
+
+export const verifyPayment = async (payload: VerifyPaymentPayload): Promise<boolean> => {
+  const response = await authFetch(`/payments/verify`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || "Payment verification failed");
+  }
+  return true;
+};
+
