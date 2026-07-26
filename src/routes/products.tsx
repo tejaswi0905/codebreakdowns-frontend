@@ -114,7 +114,7 @@ function ProductsPage() {
       const orderData = await createCheckoutOrder(product.id);
       toast.dismiss("rzp-checkout");
 
-      const rzpKeyId = import.meta.env.VITE_RAZORPAY_KEY_ID || "";
+      const rzpKeyId = orderData.keyId || import.meta.env.VITE_RAZORPAY_KEY_ID || "";
       if (!rzpKeyId) {
         toast.error("Razorpay Key ID is missing in environment variables.");
         return;

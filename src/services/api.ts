@@ -233,6 +233,7 @@ export interface CheckoutOrderResponse {
   orderId: string;
   amount: number; // in paise
   currency: string;
+  keyId?: string;
 }
 
 export interface VerifyPaymentPayload {
