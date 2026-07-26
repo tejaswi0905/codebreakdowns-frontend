@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { markLessonComplete } from "@/services/api";
+import { markLessonCompletedApi } from "@/services/api";
+import { useHeartbeat } from "@/hooks/useHeartbeat";
 import { toast } from "sonner";
 
 interface BunnyPlayerProps {
@@ -7,19 +8,46 @@ interface BunnyPlayerProps {
   videoUrlOrId: string;
   isProblem: boolean;
   explanationEndSeconds: number | null;
+  initialTimestamp?: number;
+  isAlreadyCompleted?: boolean;
+  onLessonComplete?: () => void;
 }
 
-export function BunnyPlayer({ lessonId, videoUrlOrId, isProblem, explanationEndSeconds }: BunnyPlayerProps) {
+export function BunnyPlayer({ 
+  lessonId, 
+  videoUrlOrId, 
+  isProblem, 
+  explanationEndSeconds,
+  initialTimestamp,
+  isAlreadyCompleted,
+  onLessonComplete,
+}: BunnyPlayerProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const [maxWatched, setMaxWatched] = useState(0);
-  const [isCompleted, setIsCompleted] = useState(false);
+  const [maxWatched, setMaxWatched] = useState(initialTimestamp || 0);
+  const [isCompleted, setIsCompleted] = useState(!!isAlreadyCompleted);
   const [lastSeekWarning, setLastSeekWarning] = useState(0);
+
+  // Integrate 10s & unmount debounced heartbeat syncing
+  useHeartbeat(lessonId, maxWatched);
 
   useEffect(() => {
     // Reset tracking state when the lesson changes
-    setMaxWatched(0);
-    setIsCompleted(false);
-  }, [lessonId]);
+    const initial = initialTimestamp || 0;
+    setMaxWatched(initial);
+    setIsCompleted(!!isAlreadyCompleted);
+  }, [lessonId, initialTimestamp, isAlreadyCompleted]);
+
+  // Resume playback from initialTimestamp if previously watched (> 5 seconds)
+  useEffect(() => {
+    if (!lessonId || !initialTimestamp || initialTimestamp <= 5) return;
+    const timer = setTimeout(() => {
+      iframeRef.current?.contentWindow?.postMessage(
+        JSON.stringify({ method: "setCurrentTime", value: initialTimestamp }),
+        "*"
+      );
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [lessonId, initialTimestamp]);
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
@@ -40,8 +68,11 @@ export function BunnyPlayer({ lessonId, videoUrlOrId, isProblem, explanationEndS
           // Rule: Auto-complete problem explanations
           if (isProblem && !isCompleted && explanationEndSeconds && currentTime >= explanationEndSeconds) {
             setIsCompleted(true);
-            markLessonComplete(lessonId).then(() => {
-              toast.success("Explanation complete! Time to tackle the problem.");
+            markLessonCompletedApi(lessonId).then((res) => {
+              if (res.success) {
+                toast.success("Explanation complete! Time to tackle the problem.");
+                onLessonComplete?.();
+              }
             });
             // Auto-pause the video so they jump into the coding environment
             iframeRef.current?.contentWindow?.postMessage(JSON.stringify({ method: "pause" }), "*");

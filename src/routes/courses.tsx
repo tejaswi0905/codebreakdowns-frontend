@@ -1,7 +1,7 @@
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useMemo, useState, useEffect } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 import {
   Bookmark,
@@ -13,7 +13,8 @@ import {
   Play,
   PlayCircle,
   AlertCircle,
-  ArrowLeft
+  ArrowLeft,
+  Lock
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -34,12 +35,13 @@ import {
 } from "@/components/ui/accordion";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { fetchCoursePlayData, fetchMyCourses, markLessonComplete } from "@/services/api";
+import { fetchCoursePlayData, fetchMyCourses, markLessonComplete, markLessonCompletedApi, toggleBookmarkApi } from "@/services/api";
 import { BunnyPlayer } from "@/components/BunnyPlayer";
 import { toast } from "sonner";
 
 const courseSearchSchema = z.object({
   courseId: z.string().optional(),
+  lessonId: z.string().optional(),
 });
 
 export const Route = createFileRoute("/courses")({
@@ -53,15 +55,15 @@ export const Route = createFileRoute("/courses")({
 });
 
 function CoursePlayerPage() {
-  const { courseId } = Route.useSearch();
+  const { courseId, lessonId } = Route.useSearch();
   return (
     <ProtectedRoute>
-      <CoursePlayerContent courseId={courseId} />
+      <CoursePlayerContent courseId={courseId} initialLessonId={lessonId} />
     </ProtectedRoute>
   );
 }
 
-function CoursePlayerContent({ courseId }: { courseId?: string }) {
+function CoursePlayerContent({ courseId, initialLessonId }: { courseId?: string; initialLessonId?: string }) {
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -86,10 +88,10 @@ function CoursePlayerContent({ courseId }: { courseId?: string }) {
     );
   }
 
-  return <CoursePlayer courseId={courseId} />;
+  return <CoursePlayer courseId={courseId} initialLessonId={initialLessonId} />;
 }
 
-function CoursePlayer({ courseId }: { courseId: string }) {
+function CoursePlayer({ courseId, initialLessonId }: { courseId: string; initialLessonId?: string }) {
   const { data: course, isLoading, error } = useQuery({
     queryKey: ["course-play", courseId],
     queryFn: () => fetchCoursePlayData(courseId),
@@ -102,11 +104,17 @@ function CoursePlayer({ courseId }: { courseId: string }) {
   });
 
   const navigate = useNavigate();
-  const [lessonId, setLessonId] = useState<string | null>(null);
+  const [lessonId, setLessonId] = useState<string | null>(initialLessonId || null);
+
+  useEffect(() => {
+    if (initialLessonId) {
+      setLessonId(initialLessonId);
+    }
+  }, [initialLessonId]);
 
   useEffect(() => {
     if (course && !lessonId) {
-      const savedLessonId = localStorage.getItem(`codebreakdowns_last_lesson_${course.id}`);
+      const savedLessonId = initialLessonId || localStorage.getItem(`codebreakdowns_last_lesson_${course.id}`);
       let lessonExists = false;
       if (savedLessonId) {
         for (const chapter of course.chapters) {
@@ -123,7 +131,7 @@ function CoursePlayer({ courseId }: { courseId: string }) {
         setLessonId(course.chapters[0].lessons[0].id);
       }
     }
-  }, [course, lessonId]);
+  }, [course, lessonId, initialLessonId]);
 
   useEffect(() => {
     if (course && lessonId) {
@@ -253,84 +261,103 @@ function CoursePlayer({ courseId }: { courseId: string }) {
                 defaultValue={defaultOpenChapter ? [defaultOpenChapter] : []}
                 className="w-full"
               >
-                {course.chapters.map((chapter: any) => (
-                  <AccordionItem 
-                    value={chapter.id} 
-                    key={chapter.id} 
-                    className="border-b border-border last:border-0"
-                  >
-                    <AccordionTrigger className="px-5 py-4 hover:no-underline hover:bg-foreground/5 transition-colors group">
-                      <div className="flex items-center justify-between w-full pr-4">
-                        <div className="font-semibold text-sm group-hover:text-foreground text-foreground/90 transition-colors text-left">
-                          {chapter.title}
+                {course.chapters.map((chapter: any) => {
+                  const isChapterLocked = course.enforceLinearProgress && chapter.states && chapter.states.length > 0 && chapter.states[0].isUnlocked === false;
+                  return (
+                    <AccordionItem 
+                      value={chapter.id} 
+                      key={chapter.id} 
+                      className="border-b border-border last:border-0"
+                    >
+                      <AccordionTrigger className="px-5 py-4 hover:no-underline hover:bg-foreground/5 transition-colors group">
+                        <div className="flex items-center justify-between w-full pr-4">
+                          <div className="font-semibold text-sm group-hover:text-foreground text-foreground/90 transition-colors text-left flex items-center gap-1.5">
+                            {chapter.title}
+                            {isChapterLocked && <Lock className="w-3.5 h-3.5 text-muted-foreground" />}
+                          </div>
+                          <div className="text-xs text-muted-foreground font-medium">
+                            {chapter.lessons.length}
+                          </div>
                         </div>
-                        <div className="text-xs text-muted-foreground font-medium">
-                          {chapter.lessons.length}
-                        </div>
-                      </div>
-                    </AccordionTrigger>
-                    
-                    <AccordionContent className="pb-3 px-3 pt-1">
-                      {chapter.lessons.length === 0 ? (
-                        <div className="text-sm text-muted-foreground italic px-2 py-2">
-                          No lessons in this module yet.
-                        </div>
-                      ) : (
-                        <div className="space-y-1">
-                          {chapter.lessons.map((l: any) => {
-                            const isCompleted = l.progress && l.progress.length > 0 && l.progress[0].isCompleted;
-                            const isSelected = lessonId === l.id;
-                            let status: "completed" | "current" | "todo" = "todo";
-                            if (isCompleted) status = "completed";
-                            else if (isSelected) status = "current";
+                      </AccordionTrigger>
+                      
+                      <AccordionContent className="pb-3 px-3 pt-1">
+                        {chapter.lessons.length === 0 ? (
+                          <div className="text-sm text-muted-foreground italic px-2 py-2">
+                            No lessons in this module yet.
+                          </div>
+                        ) : (
+                          <div className="space-y-1">
+                            {chapter.lessons.map((l: any) => {
+                              const isCompleted = l.progress && l.progress.length > 0 && l.progress[0].isCompleted;
+                              const isBookmarked = l.progress && l.progress.length > 0 && l.progress[0].isBookmarked;
+                              const isSelected = lessonId === l.id;
+                              let status: "completed" | "current" | "todo" = "todo";
+                              if (isCompleted) status = "completed";
+                              else if (isSelected) status = "current";
 
-                            return (
-                              <button
-                                key={l.id}
-                                onClick={() => setLessonId(l.id)}
-                                className={cn(
-                                  "w-full flex items-start gap-3 p-3 rounded-xl text-left transition-all duration-200 group relative",
-                                  isSelected 
-                                    ? "bg-primary/10 border border-primary/20" 
-                                    : "hover:bg-foreground/5 border border-transparent"
-                                )}
-                              >
-                                <div className="mt-0.5 shrink-0">
-                                  {status === "completed" ? (
-                                    <CheckCircle2 className="h-4 w-4 text-success" />
-                                  ) : status === "current" ? (
-                                    <div className="h-4 w-4 rounded-full border-2 border-primary flex items-center justify-center">
-                                      <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                                    </div>
-                                  ) : (
-                                    <Circle className="h-4 w-4 text-muted-foreground/40 group-hover:text-muted-foreground/70 transition-colors" />
+                              return (
+                                <button
+                                  key={l.id}
+                                  onClick={() => {
+                                    if (isChapterLocked) {
+                                      toast.info("Please complete previous modules to unlock this chapter.");
+                                      return;
+                                    }
+                                    setLessonId(l.id);
+                                  }}
+                                  className={cn(
+                                    "w-full flex items-start gap-3 p-3 rounded-xl text-left transition-all duration-200 group relative",
+                                    isSelected 
+                                      ? "bg-primary/10 border border-primary/20" 
+                                      : "hover:bg-foreground/5 border border-transparent",
+                                    isChapterLocked && "opacity-60 cursor-not-allowed"
                                   )}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <div className={cn(
-                                    "text-sm font-medium truncate transition-colors",
-                                    isSelected ? "text-primary font-bold" : "text-foreground/90 group-hover:text-foreground"
-                                  )}>
-                                    {l.title}
-                                  </div>
-                                  <div className="flex items-center gap-2 mt-1 text-[11px] font-medium text-muted-foreground">
-                                    <span>{Math.floor(l.durationSeconds / 60)}m {l.durationSeconds % 60}s</span>
-                                    {l.isProblem && (
-                                      <>
-                                        <span className="opacity-50">•</span>
-                                        <span className="text-success">Easy</span>
-                                      </>
+                                >
+                                  <div className="mt-0.5 shrink-0">
+                                    {status === "completed" ? (
+                                      <CheckCircle2 className="h-4 w-4 text-success" />
+                                    ) : isChapterLocked ? (
+                                      <Lock className="h-4 w-4 text-muted-foreground/50" />
+                                    ) : status === "current" ? (
+                                      <div className="h-4 w-4 rounded-full border-2 border-primary flex items-center justify-center">
+                                        <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+                                      </div>
+                                    ) : (
+                                      <Circle className="h-4 w-4 text-muted-foreground/40 group-hover:text-muted-foreground/70 transition-colors" />
                                     )}
                                   </div>
-                                </div>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </AccordionContent>
-                  </AccordionItem>
-                ))}
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center justify-between gap-2">
+                                      <div className={cn(
+                                        "text-sm font-medium truncate transition-colors",
+                                        isSelected ? "text-primary font-bold" : "text-foreground/90 group-hover:text-foreground"
+                                      )}>
+                                        {l.title}
+                                      </div>
+                                      {isBookmarked && (
+                                        <Bookmark className="h-3.5 w-3.5 text-amber-500 fill-amber-500 shrink-0" />
+                                      )}
+                                    </div>
+                                    <div className="flex items-center gap-2 mt-1 text-[11px] font-medium text-muted-foreground">
+                                      <span>{Math.floor(l.durationSeconds / 60)}m {l.durationSeconds % 60}s</span>
+                                      {l.isProblem && (
+                                        <>
+                                          <span className="opacity-50">•</span>
+                                          <span className="text-success">Easy</span>
+                                        </>
+                                      )}
+                                    </div>
+                                  </div>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </AccordionContent>
+                    </AccordionItem>
+                  );
+                })}
               </Accordion>
             </ScrollArea>
           </Card>
@@ -338,7 +365,7 @@ function CoursePlayer({ courseId }: { courseId: string }) {
 
         {/* MAIN CONTENT AREA */}
         {currentLesson ? (
-          <Workspace lesson={currentLesson} courseId={courseId} />
+          <Workspace lesson={currentLesson} courseId={courseId} enforceLinearProgress={course.enforceLinearProgress} />
         ) : (
           <div className="lg:col-span-2 h-full flex flex-col justify-center items-center pb-20">
             <Card className="flex flex-col items-center justify-center p-12 text-center bg-card border-border rounded-2xl max-w-lg">
@@ -358,9 +385,50 @@ function CoursePlayer({ courseId }: { courseId: string }) {
   );
 }
 
-function Workspace({ lesson, courseId }: { lesson: any, courseId: string }) {
+function Workspace({ lesson, courseId, enforceLinearProgress }: { lesson: any, courseId: string, enforceLinearProgress?: boolean }) {
   const queryClient = useQueryClient();
-  
+  const [completeLoading, setCompleteLoading] = useState(false);
+
+  const isBookmarked = lesson.progress?.[0]?.isBookmarked || false;
+  const isCompleted = lesson.progress?.[0]?.isCompleted || false;
+  const initialTimestamp = lesson.progress?.[0]?.highestTimestampSecs || 0;
+
+  const bookmarkMutation = useMutation({
+    mutationFn: (newVal: boolean) => toggleBookmarkApi(lesson.id, newVal),
+    onMutate: async (newVal) => {
+      await queryClient.cancelQueries({ queryKey: ["course-play", courseId] });
+      const previousCourse = queryClient.getQueryData(["course-play", courseId]);
+
+      queryClient.setQueryData(["course-play", courseId], (old: any) => {
+        if (!old) return old;
+        const newChapters = old.chapters.map((ch: any) => ({
+          ...ch,
+          lessons: ch.lessons.map((l: any) => {
+            if (l.id === lesson.id) {
+              const prog = l.progress ? [...l.progress] : [{}];
+              prog[0] = { ...prog[0], isBookmarked: newVal };
+              return { ...l, progress: prog };
+            }
+            return l;
+          }),
+        }));
+        return { ...old, chapters: newChapters };
+      });
+
+      return { previousCourse };
+    },
+    onError: (err, newVal, context: any) => {
+      if (context?.previousCourse) {
+        queryClient.setQueryData(["course-play", courseId], context.previousCourse);
+      }
+      toast.error("Failed to update bookmark");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["course-play", courseId] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
+    },
+  });
+
   if (!lesson) return null;
 
   // Parse JSON description if it exists
@@ -457,18 +525,34 @@ function Workspace({ lesson, courseId }: { lesson: any, courseId: string }) {
               videoUrlOrId={lesson.videoUrlOrId}
               isProblem={lesson.isProblem}
               explanationEndSeconds={lesson.explanationEndSeconds}
+              initialTimestamp={initialTimestamp}
+              isAlreadyCompleted={isCompleted}
+              onLessonComplete={() => {
+                queryClient.invalidateQueries({ queryKey: ["course-play", courseId] });
+                queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
+              }}
             />
           )}
         </Card>
 
         <div className="flex flex-wrap items-center gap-3 w-full bg-card border border-border p-3 rounded-xl shadow-sm shrink-0">
           <Button
-            variant="outline"
+            variant={isBookmarked ? "default" : "outline"}
             size="sm"
-            className="gap-2 h-9 rounded-lg font-medium shadow-sm hover:bg-foreground/5 text-muted-foreground hover:text-foreground"
-            onClick={() => toast.success("Lesson bookmarked")}
+            className={cn(
+              "gap-2 h-9 rounded-lg font-medium shadow-sm transition-all duration-200",
+              isBookmarked 
+                ? "bg-amber-500 hover:bg-amber-600 text-white border-amber-500" 
+                : "hover:bg-foreground/5 text-muted-foreground hover:text-foreground"
+            )}
+            onClick={() => {
+              const nextVal = !isBookmarked;
+              bookmarkMutation.mutate(nextVal);
+              toast.success(nextVal ? "Lesson bookmarked!" : "Bookmark removed");
+            }}
           >
-            <Bookmark className="h-4 w-4" /> Bookmark
+            <Bookmark className={cn("h-4 w-4", isBookmarked && "fill-current")} /> 
+            {isBookmarked ? "Bookmarked" : "Bookmark"}
           </Button>
           {lesson.isProblem && (
             <Button
@@ -484,19 +568,46 @@ function Workspace({ lesson, courseId }: { lesson: any, courseId: string }) {
             </Button>
           )}
           <div className="flex-1"></div>
-          <Button
-            size="sm"
-            className="gap-2 h-9 rounded-lg font-bold shadow-sm"
-            onClick={() => {
-              markLessonComplete(lesson.id).then(() => {
-                toast.success("Marked as complete");
-                queryClient.invalidateQueries({ queryKey: ["course-play", courseId] });
-              });
-            }}
-            disabled={lesson.isLocked}
-          >
-            <Check className="h-4 w-4" /> Mark as Complete
-          </Button>
+          {isCompleted ? (
+            <Button
+              size="sm"
+              variant="secondary"
+              className="gap-2 h-9 rounded-lg font-bold shadow-sm bg-success/15 text-success hover:bg-success/20 cursor-default"
+              disabled
+            >
+              <CheckCircle2 className="h-4 w-4 text-success" /> Completed
+            </Button>
+          ) : enforceLinearProgress && lesson.isProblem && lesson.explanationEndSeconds !== null ? (
+            <Button
+              size="sm"
+              variant="outline"
+              className="gap-2 h-9 rounded-lg font-bold shadow-sm border-dashed border-primary/40 text-muted-foreground"
+              disabled
+            >
+              <Lock className="h-3.5 w-3.5 text-primary" /> Watch explanation to complete
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              className="gap-2 h-9 rounded-lg font-bold shadow-sm"
+              onClick={() => {
+                setCompleteLoading(true);
+                markLessonCompletedApi(lesson.id).then((res) => {
+                  setCompleteLoading(false);
+                  if (res.success) {
+                    toast.success("Marked as complete!");
+                    queryClient.invalidateQueries({ queryKey: ["course-play", courseId] });
+                    queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
+                  } else {
+                    toast.error(res.error || "Could not complete lesson");
+                  }
+                });
+              }}
+              disabled={lesson.isLocked || completeLoading}
+            >
+              <Check className="h-4 w-4" /> {completeLoading ? "Saving..." : "Mark as Complete"}
+            </Button>
+          )}
         </div>
 
         {lesson.isProblem && (

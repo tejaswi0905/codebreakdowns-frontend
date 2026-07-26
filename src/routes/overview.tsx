@@ -1,9 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { fetchCoursePlayData } from "@/services/api";
+import { fetchCoursePlayData, fetchDashboardStats } from "@/services/api";
 import { z } from "zod";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { Play, CheckCircle2, Circle } from "lucide-react";
+import { Play, CheckCircle2, Circle, Lock } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
@@ -32,6 +32,11 @@ function CourseOverviewContent({ courseId }: { courseId: string }) {
     queryKey: ["course-play", courseId],
     queryFn: () => fetchCoursePlayData(courseId),
     retry: 1,
+  });
+
+  const { data: statsData } = useQuery({
+    queryKey: ["dashboard-stats"],
+    queryFn: fetchDashboardStats,
   });
 
   if (isLoading) {
@@ -221,7 +226,7 @@ function CourseOverviewContent({ courseId }: { courseId: string }) {
             <Card className="bg-card border-border p-5 flex flex-col rounded-2xl">
               <div className="flex items-center gap-2 text-orange-400 mb-2">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                <span className="text-4xl font-bold text-foreground">{isUsingMock ? "48h" : "0h"}</span>
+                <span className="text-4xl font-bold text-foreground">{statsData?.metrics ? `${statsData.metrics.hoursLearned}h` : isUsingMock ? "48h" : "0h"}</span>
               </div>
               <span className="text-sm text-muted-foreground">Hours Learned</span>
             </Card>
@@ -255,29 +260,28 @@ function CourseOverviewContent({ courseId }: { courseId: string }) {
                 } else {
                   // Real calculation
                   let allComplete = true;
-                  let anyIncomplete = false;
                   
                   chapter.lessons?.forEach((l: any) => {
-                    if (l.progress?.[0]?.isCompleted) {
-                      // has some progress
-                    } else {
+                    if (!l.progress?.[0]?.isCompleted) {
                       allComplete = false;
-                      anyIncomplete = true;
                     }
                   });
 
-                  if (allComplete && chapter.lessons?.length > 0) status = "done";
+                  if (chapter.states?.[0]?.isCompleted || (allComplete && chapter.lessons?.length > 0)) status = "done";
+                  else if (chapter.states?.[0]?.isUnlocked === false) status = "locked";
                   else if (chapter.title === currentModuleTitle) status = "current";
                 }
 
                 return (
                   <div 
                     key={chapter.id} 
-                    className={`flex items-center justify-between p-4 rounded-xl mb-1 transition-colors hover:bg-foreground/5 ${status === 'current' ? 'bg-primary/5' : ''}`}
+                    className={`flex items-center justify-between p-4 rounded-xl mb-1 transition-colors hover:bg-foreground/5 ${status === 'current' ? 'bg-primary/5' : ''} ${status === 'locked' ? 'opacity-60' : ''}`}
                   >
                     <div className="flex items-center gap-4">
                       {status === "done" ? (
                         <CheckCircle2 className="w-6 h-6 text-success" />
+                      ) : status === "locked" ? (
+                        <Lock className="w-5 h-5 text-muted-foreground" />
                       ) : status === "current" ? (
                         <div className="relative flex items-center justify-center w-6 h-6">
                           <Circle className="w-6 h-6 text-primary absolute" />
@@ -287,8 +291,9 @@ function CourseOverviewContent({ courseId }: { courseId: string }) {
                         <Circle className="w-6 h-6 text-muted-foreground opacity-50" />
                       )}
                       
-                      <span className={`font-semibold ${status === 'incomplete' ? 'text-muted-foreground' : 'text-foreground'}`}>
+                      <span className={`font-semibold flex items-center gap-1.5 ${status === 'incomplete' || status === 'locked' ? 'text-muted-foreground' : 'text-foreground'}`}>
                         {chapter.title}
+                        {status === 'locked' && <Lock className="w-3.5 h-3.5 text-muted-foreground" />}
                       </span>
                     </div>
                     <span className="text-xs text-muted-foreground font-mono tracking-wider opacity-50">

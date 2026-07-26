@@ -6,6 +6,9 @@ export interface ApiCourse {
   imageUrl?: string;
   description?: string;
   isFree?: boolean;
+  completedLessons?: number;
+  totalLessons?: number;
+  progressPercentage?: number;
 }
 
 export interface ApiProduct {
@@ -37,10 +40,16 @@ export interface CoursePlayData {
   title: string;
   description: string | null;
   imageUrl: string | null;
+  isPurchased?: boolean;
+  enforceLinearProgress?: boolean;
   chapters: {
     id: string;
     title: string;
     sortOrder: number;
+    states?: {
+      isCompleted: boolean;
+      isUnlocked: boolean;
+    }[];
     lessons: {
       id: string;
       title: string;
@@ -53,9 +62,28 @@ export interface CoursePlayData {
       explanationEndSeconds: number | null;
       isPreview: boolean;
       isLocked?: boolean;
-      progress?: { isCompleted: boolean }[];
+      progress?: {
+        isCompleted: boolean;
+        isBookmarked: boolean;
+        highestTimestampSecs: number;
+      }[];
     }[];
   }[];
+}
+
+export interface DashboardStatsResponse {
+  metrics: {
+    lessonsAccessed: number;
+    lessonsCompleted: number;
+    hoursLearned: number;
+    bookmarksCount: number;
+  };
+  resumePoint: {
+    lessonId: string;
+    courseId?: string;
+    title: string;
+    timestamp: number;
+  } | null;
 }
 
 // Helper wrapper for authenticated fetches
@@ -127,16 +155,60 @@ export const fetchCurrentUser = async (): Promise<User | null> => {
 };
 
 export const markLessonComplete = async (lessonId: string): Promise<boolean> => {
+  const result = await markLessonCompletedApi(lessonId);
+  return result.success;
+};
+
+export const markLessonCompletedApi = async (lessonId: string): Promise<{ success: boolean; error?: string }> => {
   try {
     const response = await authFetch(`/progress/complete`, {
       method: "POST",
       body: JSON.stringify({ lessonId, isCompleted: true }),
     });
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      return { success: false, error: data.message || "Failed to mark lesson complete" };
+    }
+    return { success: true };
+  } catch (error: any) {
+    console.error("Error marking lesson complete:", error);
+    return { success: false, error: error?.message || "Network error" };
+  }
+};
+
+export const recordHeartbeat = async (lessonId: string, currentTime: number): Promise<boolean> => {
+  try {
+    const response = await authFetch(`/progress/heartbeat`, {
+      method: "POST",
+      body: JSON.stringify({ lessonId, currentTime }),
+    });
     return response.ok;
   } catch (error) {
-    console.error("Error marking lesson complete:", error);
+    console.error("Error recording heartbeat:", error);
     return false;
   }
+};
+
+export const toggleBookmarkApi = async (lessonId: string, isBookmarked: boolean): Promise<boolean> => {
+  try {
+    const response = await authFetch(`/progress/bookmark`, {
+      method: "POST",
+      body: JSON.stringify({ lessonId, isBookmarked }),
+    });
+    return response.ok;
+  } catch (error) {
+    console.error("Error toggling bookmark:", error);
+    return false;
+  }
+};
+
+export const fetchDashboardStats = async (): Promise<DashboardStatsResponse> => {
+  const response = await authFetch(`/progress/stats`);
+  if (!response.ok) {
+    throw new Error("Failed to fetch dashboard stats");
+  }
+  const data = await response.json();
+  return data.data;
 };
 
 export const logoutUser = async (): Promise<boolean> => {

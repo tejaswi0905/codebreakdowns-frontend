@@ -1,9 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Play, BookOpen, AlertCircle, CheckCircle2, Sparkles, LockOpen } from "lucide-react";
+import { Play, BookOpen, AlertCircle, CheckCircle2, Sparkles, LockOpen, Bookmark, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { fetchMyCourses, fetchCourses, type ApiCourse } from "@/services/api";
+import { fetchMyCourses, fetchCourses, fetchDashboardStats, type ApiCourse } from "@/services/api";
 import { useAuthStore } from "@/store/authStore";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 
@@ -28,6 +28,11 @@ function DashboardPage() {
   const { data: allCourses, isLoading: loadingAll } = useQuery({
     queryKey: ["all-courses"],
     queryFn: fetchCourses,
+  });
+
+  const { data: statsData } = useQuery({
+    queryKey: ["dashboard-stats"],
+    queryFn: fetchDashboardStats,
   });
 
   if (loadingMy || loadingAll) {
@@ -77,6 +82,56 @@ function DashboardPage() {
           <Link to="/products">Browse Catalog</Link>
         </Button>
       </div>
+
+      {/* Hero Metrics Ribbon */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <Card className="bg-card border-border p-4 rounded-xl shadow-sm flex flex-col justify-between">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground font-semibold uppercase tracking-wider">
+            <BookOpen className="w-4 h-4 text-primary" /> Enrolled Courses
+          </div>
+          <div className="text-3xl font-extrabold mt-2 text-foreground">{purchasedCourses.length}</div>
+        </Card>
+        <Card className="bg-card border-border p-4 rounded-xl shadow-sm flex flex-col justify-between">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground font-semibold uppercase tracking-wider">
+            <CheckCircle2 className="w-4 h-4 text-success" /> Lessons Completed
+          </div>
+          <div className="text-3xl font-extrabold mt-2 text-success">{statsData?.metrics?.lessonsCompleted || 0}</div>
+        </Card>
+        <Card className="bg-card border-border p-4 rounded-xl shadow-sm flex flex-col justify-between">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground font-semibold uppercase tracking-wider">
+            <Clock className="w-4 h-4 text-orange-400" /> Hours Learned
+          </div>
+          <div className="text-3xl font-extrabold mt-2 text-orange-400">{statsData?.metrics?.hoursLearned || 0}h</div>
+        </Card>
+        <Card className="bg-card border-border p-4 rounded-xl shadow-sm flex flex-col justify-between">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground font-semibold uppercase tracking-wider">
+            <Bookmark className="w-4 h-4 text-amber-500 fill-amber-500" /> Bookmarked
+          </div>
+          <div className="text-3xl font-extrabold mt-2 text-amber-500">{statsData?.metrics?.bookmarksCount || 0}</div>
+        </Card>
+      </div>
+
+      {/* Resume Learning Hero Banner CTA */}
+      {statsData?.resumePoint && (
+        <Card className="bg-gradient-to-r from-primary/15 via-primary/5 to-background border-primary/30 p-6 rounded-2xl mb-10 shadow-lg relative overflow-hidden">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
+            <div>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/20 text-primary text-xs font-bold uppercase tracking-wider mb-2.5 shadow-sm">
+                <Sparkles className="w-3.5 h-3.5" /> Continue Where You Left Off
+              </div>
+              <h2 className="text-xl md:text-2xl font-extrabold text-foreground">{statsData.resumePoint.title}</h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                Jump right back into your video at <span className="font-mono text-foreground font-bold bg-foreground/10 px-1.5 py-0.5 rounded">{Math.floor(statsData.resumePoint.timestamp / 60)}m {statsData.resumePoint.timestamp % 60}s</span>.
+              </p>
+            </div>
+            <Button asChild size="lg" className="rounded-xl font-bold shadow-md shrink-0 h-12 px-6">
+              <Link to="/courses" search={{ courseId: statsData.resumePoint.courseId || undefined, lessonId: statsData.resumePoint.lessonId }}>
+                <Play className="w-5 h-5 mr-2" fill="currentColor" /> Resume Learning
+              </Link>
+            </Button>
+          </div>
+        </Card>
+      )}
 
       <div className="space-y-12">
         
@@ -187,6 +242,20 @@ function CourseCard({ course, type }: { course: ApiCourse; type: "purchased" | "
           <CardDescription className="line-clamp-2 mt-2 text-muted-foreground text-xs leading-relaxed">
             {course.description}
           </CardDescription>
+        )}
+        {!isFree && course.totalLessons !== undefined && (
+          <div className="mt-4 w-full">
+            <div className="flex justify-between items-center text-xs font-semibold mb-1.5">
+              <span className="text-muted-foreground">{course.completedLessons || 0}/{course.totalLessons} Lessons</span>
+              <span className="text-primary font-bold">{course.progressPercentage || 0}%</span>
+            </div>
+            <div className="w-full bg-secondary h-2 rounded-full overflow-hidden">
+              <div 
+                className="bg-primary h-full rounded-full transition-all duration-500" 
+                style={{ width: `${course.progressPercentage || 0}%` }}
+              />
+            </div>
+          </div>
         )}
       </CardHeader>
 
