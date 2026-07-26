@@ -131,6 +131,7 @@ function ProductsPage() {
           toast.loading("Verifying payment security signature...", { id: "rzp-verify" });
           try {
             await verifyPayment({
+              productId: product.id,
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature,
