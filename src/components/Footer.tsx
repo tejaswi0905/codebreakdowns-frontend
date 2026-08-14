@@ -5,7 +5,7 @@ export function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-white/10 bg-[#070709] text-muted-foreground">
+    <footer className="border-t border-border dark:border-white/10 bg-background dark:bg-[#070709] text-muted-foreground">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-4 lg:grid-cols-5">
           {/* Brand Column */}
@@ -70,7 +70,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 border-t border-white/10 pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-muted-foreground/60 gap-4">
+        <div className="mt-12 border-t border-border dark:border-white/10 pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-muted-foreground/60 gap-4">
           <p>© {currentYear} CodeBreakdowns. All rights reserved.</p>
           <p className="flex items-center gap-1">
             Built with <Heart className="h-3.5 w-3.5 text-red-500 fill-red-500" /> for engineers, by engineers.

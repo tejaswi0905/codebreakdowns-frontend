@@ -207,21 +207,7 @@ function LandingPage() {
         </div>
       </section>
       
-      {/* Footer */}
-      <footer className="bg-background border-t border-border py-12 px-6">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center text-muted-foreground text-sm">
-          <div className="flex items-center mb-4 md:mb-0">
-            <span className="font-bold text-foreground text-lg mr-2">Codebreakdowns.</span>
-            <span>© {new Date().getFullYear()} All rights reserved.</span>
-          </div>
-          <div className="flex space-x-6">
-            <Link to="/" className="hover:text-foreground transition-colors">Twitter</Link>
-            <Link to="/" className="hover:text-foreground transition-colors">YouTube</Link>
-            <Link to="/" className="hover:text-foreground transition-colors">Terms</Link>
-            <Link to="/" className="hover:text-foreground transition-colors">Privacy</Link>
-          </div>
-        </div>
-      </footer>
+
 
     </div>
   );
