@@ -33,7 +33,6 @@ export function Navbar() {
   const activeLinks = [
     { to: "/", label: "Home" },
     ...(isAuthenticated ? [{ to: "/dashboard", label: "Dashboard" }] : []),
-    { to: "/courses", label: "Curriculum" },
     { to: "/products", label: "Products" },
     { to: "/#opportunities", label: "Opportunities", badge: "Soon" },
     { to: "/about", label: "About" },

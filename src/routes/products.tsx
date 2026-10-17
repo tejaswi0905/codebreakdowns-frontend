@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Check,
@@ -8,6 +8,8 @@ import {
   Database,
   Server,
   Code2,
+  Play,
+  ChevronRight,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -235,50 +237,124 @@ function ProductCard({
   onPurchase: () => void;
 }) {
   const { icon: Icon, tint } = getVisualsForProduct(product.title);
+  const courses = product.courses || [];
+  const primaryCourseId = courses[0]?.course?.id;
+  const isBundle = courses.length > 1;
 
   return (
-    <Card className="group flex flex-col overflow-hidden p-0 transition-all hover:-translate-y-0.5 hover:shadow-md border border-border bg-card text-card-foreground">
-      <div className={cn("relative h-28 bg-gradient-to-br", tint)}>
+    <Card className="group flex flex-col overflow-hidden p-0 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg border border-border bg-card text-card-foreground rounded-2xl">
+      {/* Header Banner */}
+      <div className={cn("relative h-32 bg-gradient-to-br", tint)}>
         {product.imageUrl ? (
           <img src={product.imageUrl} alt={product.title} className="w-full h-full object-cover opacity-80" />
         ) : (
-          <div className="absolute left-4 top-4 grid h-10 w-10 place-items-center rounded-lg bg-background/80 text-primary shadow-sm backdrop-blur">
+          <div className="absolute left-4 top-4 grid h-11 w-11 place-items-center rounded-xl bg-background/80 text-primary shadow-sm backdrop-blur">
             <Icon className="h-5 w-5" />
           </div>
         )}
-        
-        {isPurchased && (
-          <div className="absolute right-4 top-4">
-            <Badge variant="secondary" className="bg-background/80 backdrop-blur">
-              <Check className="mr-1 h-3 w-3 text-success" /> Owned
+
+        <div className="absolute right-3 top-3 flex items-center gap-1.5">
+          {isBundle && (
+            <Badge variant="secondary" className="bg-background/90 backdrop-blur text-[11px] font-semibold border border-border">
+              Bundle ({courses.length})
             </Badge>
-          </div>
-        )}
+          )}
+          {isPurchased && (
+            <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 backdrop-blur text-[11px] font-semibold">
+              <Check className="mr-1 h-3 w-3" /> Owned
+            </Badge>
+          )}
+        </div>
       </div>
 
+      {/* Body */}
       <div className="flex flex-1 flex-col p-5">
-        <h3 className="font-semibold leading-tight">{product.title}</h3>
-        <p className="mt-2 line-clamp-2 text-xs text-muted-foreground">
-          {product.description || "Learn and master these concepts."}
+        <h3 className="font-bold text-base leading-snug text-foreground group-hover:text-primary transition-colors">
+          {product.title}
+        </h3>
+        
+        <p className="mt-1.5 text-xs text-muted-foreground line-clamp-2 leading-relaxed">
+          {product.description || "Master these concepts with visual breakdowns and code solutions."}
         </p>
 
-        <div className="mt-auto pt-6">
-          <div className="flex items-center gap-2">
-            <span className="text-lg font-bold">{fmt(product.priceInr)}</span>
+        {/* Included Courses Preview */}
+        {courses.length > 0 && (
+          <div className="mt-4 pt-3 border-t border-border/60 flex-1">
+            <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center justify-between">
+              <span>{isBundle ? `Included Courses (${courses.length})` : "Course Content"}</span>
+            </div>
+            <div className="space-y-1.5">
+              {courses.map(({ course }) => (
+                <Link
+                  key={course.id}
+                  to="/courses"
+                  search={{ courseId: course.id }}
+                  className="flex items-center justify-between rounded-lg bg-secondary/40 hover:bg-secondary px-3 py-2 text-xs font-medium text-foreground transition-all group/item border border-transparent hover:border-border"
+                >
+                  <span className="truncate group-hover/item:text-primary transition-colors">
+                    {course.title}
+                  </span>
+                  <span className="text-[10px] text-muted-foreground group-hover/item:text-primary flex items-center gap-0.5 ml-2 shrink-0 font-medium">
+                    Preview <ChevronRight className="w-3 h-3" />
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Footer Actions */}
+        <div className="mt-5 pt-4 border-t border-border/60">
+          <div className="flex items-baseline justify-between mb-3">
+            <div className="flex items-baseline gap-2">
+              <span className="text-xl font-extrabold text-foreground">{fmt(product.priceInr)}</span>
+              {product.compareAtPriceInr && product.compareAtPriceInr > product.priceInr && (
+                <span className="text-xs text-muted-foreground line-through">
+                  {fmt(product.compareAtPriceInr)}
+                </span>
+              )}
+            </div>
             {product.compareAtPriceInr && product.compareAtPriceInr > product.priceInr && (
-              <span className="text-xs text-muted-foreground line-through">
-                {fmt(product.compareAtPriceInr)}
+              <span className="text-[10px] font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                Save {Math.round(((product.compareAtPriceInr - product.priceInr) / product.compareAtPriceInr) * 100)}%
               </span>
             )}
           </div>
-          <Button
-            className="mt-4 w-full font-medium"
-            variant={isPurchased ? "outline" : "default"}
-            onClick={onPurchase}
-            disabled={isPurchased}
-          >
-            {isPurchased ? "Purchased" : "Buy Now"}
-          </Button>
+
+          <div className="flex flex-col gap-2">
+            {isPurchased ? (
+              primaryCourseId ? (
+                <Button asChild className="w-full font-semibold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-sm">
+                  <Link to="/courses" search={{ courseId: primaryCourseId }}>
+                    <Play className="mr-1.5 h-4 w-4 fill-current" /> Start Learning
+                  </Link>
+                </Button>
+              ) : (
+                <Button disabled className="w-full font-medium rounded-xl">Owned</Button>
+              )
+            ) : (
+              <>
+                <Button
+                  className="w-full font-semibold rounded-xl shadow-sm bg-primary text-primary-foreground hover:shadow-md transition-all"
+                  onClick={onPurchase}
+                >
+                  Buy Now • {fmt(product.priceInr)}
+                </Button>
+                {primaryCourseId && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    asChild
+                    className="w-full rounded-xl text-xs font-medium hover:bg-foreground/5 text-muted-foreground hover:text-foreground"
+                  >
+                    <Link to="/courses" search={{ courseId: primaryCourseId }}>
+                      <BookOpen className="mr-1.5 h-3.5 w-3.5" /> Explore Chapters & Lessons
+                    </Link>
+                  </Button>
+                )}
+              </>
+            )}
+          </div>
         </div>
       </div>
     </Card>
