@@ -13,9 +13,9 @@ This document tracks all 14 prioritized items identified during the architectura
   - Replace the misleading `"Video coming soon"` screen with a high-converting **Video Lock Overlay** with direct enrollment CTAs. (Done)
   - Handle bundle vs. individual course ownership properly. (Done)
 
-- [ ] **Item 2: Fix `#opportunities` Navigation Anchor**
-  - Implement the missing `#opportunities` section on the landing page or resolve navigation routing.
-  - Provide real student value (internship tracker, referral network, Discord community).
+- [x] **Item 2: Fix `#opportunities` Navigation Anchor**
+  - Implement the missing `#opportunities` section on the landing page or resolve navigation routing. (Done)
+  - Provide real student value (corporate partner pilot waitlist, 1-click notification, referral network). (Done)
 
 - [ ] **Item 3: Interactive Video Breakdown Preview / Modal in Hero**
   - Replace the dead static mockup card with an interactive preview player or modal.

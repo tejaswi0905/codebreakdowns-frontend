@@ -1,9 +1,24 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, ChevronRight, Lock, Play } from "lucide-react";
+import { useState, useEffect } from "react";
+import { 
+  ArrowRight, 
+  ChevronRight, 
+  Lock, 
+  Play, 
+  Briefcase, 
+  Users, 
+  Building2, 
+  Sparkles, 
+  CheckCircle2, 
+  Bell, 
+  Github 
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { motion, Variants } from "framer-motion";
 import { landingFeatures, landingStats, landingCourses } from "../data/landing-mock";
+import { useAuthStore } from "@/store/authStore";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/")({
   component: LandingPage,
@@ -206,9 +221,162 @@ function LandingPage() {
           </div>
         </div>
       </section>
-      
 
-
+      {/* Opportunities Section */}
+      <OpportunitiesSection />
     </div>
+  );
+}
+
+function OpportunitiesSection() {
+  const { user, isAuthenticated } = useAuthStore();
+  const [notified, setNotified] = useState(false);
+
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      const key = `codebreakdowns_opps_notified_${user.username || user._id}`;
+      const stored = localStorage.getItem(key);
+      if (stored === "true") {
+        setNotified(true);
+      }
+    }
+  }, [isAuthenticated, user]);
+
+  const handleNotifyMe = () => {
+    if (!isAuthenticated || !user) return;
+    const key = `codebreakdowns_opps_notified_${user.username || user._id}`;
+    localStorage.setItem(key, "true");
+    setNotified(true);
+    toast.success("You're on the priority hiring waitlist! 🎉", {
+      description: "We will notify your registered account as soon as the first corporate partner roles open up.",
+    });
+  };
+
+  const opportunitiesPillars = [
+    {
+      icon: Users,
+      title: "Warm Referral Fast-Track",
+      description: "Skip the automated ATS resume black hole. Our partner engineers and vetted alumni refer top students directly to engineering hiring managers.",
+    },
+    {
+      icon: Building2,
+      title: "Curated Candidate Showcases",
+      description: "Partner companies review student project implementations, code breakdowns, and problem streaks directly on platform.",
+    },
+    {
+      icon: Sparkles,
+      title: "Senior Code & Resume Audits",
+      description: "Get your GitHub repositories, system architectures, and resumes critiqued by engineers who have interviewed candidates at top tech companies.",
+    },
+  ];
+
+  return (
+    <section 
+      id="opportunities" 
+      className="py-24 px-6 border-t border-border bg-gradient-to-b from-background via-card/25 to-background relative overflow-hidden"
+    >
+      {/* Background radial accent */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-primary/5 rounded-full blur-3xl pointer-events-none -z-10" />
+
+      <div className="max-w-7xl mx-auto">
+        {/* Section Header */}
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-4 py-1.5 text-xs font-semibold text-primary mb-4 shadow-sm">
+            <Briefcase className="w-3.5 h-3.5 mr-2" />
+            Partner Network • Active Corporate Pilots
+          </div>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-foreground mb-4 leading-tight">
+            Direct Introductions to <span className="text-primary">Engineering Teams</span>
+          </h2>
+          <p className="text-base text-muted-foreground leading-relaxed">
+            We are actively finalizing direct hiring partnerships with high-growth startups and tech companies. CodeBreakdowns students who complete our core playbooks get fast-tracked into real interview loops.
+          </p>
+        </div>
+
+        {/* 3 Pillars Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+          {opportunitiesPillars.map((pillar, idx) => {
+            const Icon = pillar.icon;
+            return (
+              <Card 
+                key={idx} 
+                className="p-8 border-border bg-card/80 backdrop-blur-sm hover:border-primary/40 transition-all duration-300 shadow-sm hover:shadow-md rounded-2xl flex flex-col justify-between"
+              >
+                <div>
+                  <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary border border-primary/20 flex items-center justify-center mb-6 shadow-sm">
+                    <Icon className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-lg font-bold mb-3 text-foreground">{pillar.title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {pillar.description}
+                  </p>
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+
+        {/* Dynamic Waitlist & Notification Box */}
+        <Card className="max-w-2xl mx-auto p-8 sm:p-10 border-border bg-card/60 backdrop-blur-md shadow-xl rounded-2xl text-center relative overflow-hidden">
+          <div className="absolute -top-16 -right-16 w-36 h-36 bg-primary/10 rounded-full blur-2xl pointer-events-none" />
+
+          {isAuthenticated ? (
+            notified ? (
+              <div className="flex flex-col items-center">
+                <div className="w-12 h-12 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 flex items-center justify-center mb-4">
+                  <CheckCircle2 className="w-6 h-6" />
+                </div>
+                <h3 className="text-xl font-bold text-foreground mb-1">You&apos;re On The Priority Waitlist</h3>
+                <p className="text-sm text-muted-foreground max-w-md mb-5 leading-relaxed">
+                  We have registered your account (<span className="font-semibold text-foreground">@{user?.username}</span>). As soon as partner company openings drop, you&apos;ll be among the first to receive invitation links and referral passes.
+                </p>
+                <div className="inline-flex items-center gap-2 text-xs font-semibold text-emerald-500 bg-emerald-500/10 px-4 py-2 rounded-full border border-emerald-500/20">
+                  <CheckCircle2 className="w-3.5 h-3.5" /> Notification Active
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center">
+                <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center mb-4">
+                  <Bell className="w-6 h-6" />
+                </div>
+                <h3 className="text-xl font-bold text-foreground mb-2">Be Notified When Openings Drop</h3>
+                <p className="text-sm text-muted-foreground max-w-md mb-6 leading-relaxed">
+                  You&apos;re signed in as <span className="font-semibold text-foreground">@{user?.username}</span>. Click below to add yourself to the priority notification queue with one click.
+                </p>
+                <Button 
+                  onClick={handleNotifyMe} 
+                  size="lg" 
+                  className="rounded-xl px-8 font-semibold shadow-md bg-primary text-primary-foreground hover:shadow-lg transition-all"
+                >
+                  <Bell className="mr-2 h-4 w-4" /> Notify Me When Partner Roles Open
+                </Button>
+              </div>
+            )
+          ) : (
+            <div className="flex flex-col items-center">
+              <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center mb-4">
+                <Briefcase className="w-6 h-6" />
+              </div>
+              <h3 className="text-xl font-bold text-foreground mb-2">Priority Access for Registered Students</h3>
+              <p className="text-sm text-muted-foreground max-w-md mb-6 leading-relaxed">
+                Partner companies will hire directly from our registered student cohort. Sign in with GitHub to claim your spot on the priority early-access notification list.
+              </p>
+              <Button 
+                asChild 
+                size="lg" 
+                className="rounded-xl px-8 font-semibold shadow-md bg-primary text-primary-foreground hover:shadow-lg transition-all"
+              >
+                <Link to="/login">
+                  <Github className="mr-2 h-5 w-5" /> Sign In to Get Priority Access <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+              <p className="text-xs text-muted-foreground mt-4">
+                Instant 1-click GitHub authentication • No spam, ever.
+              </p>
+            </div>
+          )}
+        </Card>
+      </div>
+    </section>
   );
 }

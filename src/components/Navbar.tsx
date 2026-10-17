@@ -23,14 +23,6 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/authStore";
 
-const links = [
-  { to: "/", label: "Home" },
-  { to: "/dashboard", label: "Dashboard" },
-  { to: "/products", label: "Products" },
-  { to: "#opportunities", label: "Opportunities" },
-  { to: "/about", label: "About" },
-] as const;
-
 export function Navbar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
@@ -40,9 +32,10 @@ export function Navbar() {
 
   const activeLinks = [
     { to: "/", label: "Home" },
-    { to: "/dashboard", label: "Dashboard" },
+    ...(isAuthenticated ? [{ to: "/dashboard", label: "Dashboard" }] : []),
+    { to: "/courses", label: "Curriculum" },
     { to: "/products", label: "Products" },
-    { to: "#opportunities", label: "Opportunities" },
+    { to: "/#opportunities", label: "Opportunities", badge: "Soon" },
     { to: "/about", label: "About" },
   ];
 
@@ -61,7 +54,7 @@ export function Navbar() {
 
         <nav className="hidden items-center gap-1 md:flex">
           {activeLinks.map((l) => {
-            const isHash = l.to.startsWith("#");
+            const isHash = l.to.includes("#");
             const active = isHash ? false : (l.to === "/" ? pathname === "/" : pathname.startsWith(l.to));
             const className = cn(
               "relative rounded-md px-3 py-2 text-sm font-medium transition-colors",
@@ -72,8 +65,25 @@ export function Navbar() {
 
             if (isHash) {
               return (
-                <a key={l.to} href={l.to} className={className}>
-                  {l.label}
+                <a 
+                  key={l.to} 
+                  href={l.to} 
+                  onClick={(e) => {
+                    if (pathname === "/") {
+                      e.preventDefault();
+                      const targetId = l.to.split("#")[1];
+                      const el = document.getElementById(targetId);
+                      if (el) el.scrollIntoView({ behavior: "smooth" });
+                    }
+                  }}
+                  className={cn(className, "inline-flex items-center gap-1.5")}
+                >
+                  <span>{l.label}</span>
+                  {l.badge && (
+                    <span className="rounded-full bg-primary/10 px-1.5 py-0.2 text-[10px] font-semibold text-primary border border-primary/20">
+                      {l.badge}
+                    </span>
+                  )}
                 </a>
               );
             }
@@ -172,11 +182,11 @@ export function Navbar() {
 
       {open && (
         <nav className="border-t border-border/70 bg-background px-4 py-2 md:hidden">
-          {links.map((l) => {
-            const isHash = l.to.startsWith("#");
+          {activeLinks.map((l) => {
+            const isHash = l.to.includes("#");
             const active = isHash ? false : (l.to === "/" ? pathname === "/" : pathname.startsWith(l.to));
             const className = cn(
-              "block rounded-md px-3 py-2 text-sm font-medium",
+              "flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium",
               active
                 ? "bg-accent text-accent-foreground"
                 : "text-muted-foreground hover:bg-muted hover:text-foreground",
@@ -187,10 +197,23 @@ export function Navbar() {
                 <a
                   key={l.to}
                   href={l.to}
-                  onClick={() => setOpen(false)}
+                  onClick={(e) => {
+                    setOpen(false);
+                    if (pathname === "/") {
+                      e.preventDefault();
+                      const targetId = l.to.split("#")[1];
+                      const el = document.getElementById(targetId);
+                      if (el) el.scrollIntoView({ behavior: "smooth" });
+                    }
+                  }}
                   className={className}
                 >
-                  {l.label}
+                  <span>{l.label}</span>
+                  {l.badge && (
+                    <span className="rounded-full bg-primary/10 px-1.5 py-0.2 text-[10px] font-semibold text-primary border border-primary/20">
+                      {l.badge}
+                    </span>
+                  )}
                 </a>
               );
             }
