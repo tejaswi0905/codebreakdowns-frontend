@@ -252,11 +252,11 @@ function CoursePlayer({ courseId, initialLessonId }: { courseId: string; initial
   const courseList = allCourses && allCourses.length > 0 ? allCourses : myCourses || [];
 
   return (
-    <div className="mx-auto max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8 h-[calc(100vh-80px)] overflow-hidden text-foreground">
-      <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr_1fr] xl:grid-cols-[320px_minmax(350px,1.2fr)_minmax(500px,1.5fr)] gap-6 h-full">
+    <div className="mx-auto max-w-[1600px] px-3 sm:px-6 lg:px-8 py-4 sm:py-6 min-h-[calc(100vh-80px)] lg:h-[calc(100vh-80px)] overflow-y-auto lg:overflow-hidden text-foreground">
+      <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr_1fr] xl:grid-cols-[320px_minmax(350px,1.2fr)_minmax(500px,1.5fr)] gap-6 lg:h-full">
         
         {/* LEFT SIDEBAR */}
-        <div className="flex flex-col gap-4 h-full overflow-hidden">
+        <div className="flex flex-col gap-4 order-2 lg:order-1 lg:h-full lg:overflow-hidden">
           
           {/* Current Course Selector */}
           <Card className="p-4 bg-card border-border shrink-0 rounded-2xl shadow-sm">
@@ -320,7 +320,7 @@ function CoursePlayer({ courseId, initialLessonId }: { courseId: string; initial
           </Card>
 
           {/* Chapters Accordion */}
-          <Card className="flex-1 bg-card border-border overflow-hidden rounded-2xl flex flex-col shadow-sm">
+          <Card className="bg-card border-border overflow-hidden rounded-2xl flex flex-col shadow-sm max-h-[380px] lg:max-h-none lg:flex-1">
             <ScrollArea className="flex-1">
               <Accordion 
                 type="multiple" 
@@ -450,7 +450,7 @@ function CoursePlayer({ courseId, initialLessonId }: { courseId: string; initial
             enforceLinearProgress={course.enforceLinearProgress} 
           />
         ) : (
-          <div className="lg:col-span-2 h-full flex flex-col justify-center items-center pb-20">
+          <div className="order-1 lg:order-2 lg:col-span-2 h-full flex flex-col justify-center items-center py-6 lg:py-0 lg:pb-20">
             <Card className="flex flex-col items-center justify-center p-12 text-center bg-card border-border rounded-2xl max-w-lg">
               <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-4">
                 <ChevronDown className="h-8 w-8" />
@@ -626,7 +626,7 @@ function Workspace({
   return (
     <>
       {/* COLUMN 2: Metadata (Left of Video) */}
-      <div className="flex flex-col gap-4 h-full overflow-y-auto custom-scrollbar pr-2 pb-6">
+      <div className="flex flex-col gap-4 order-3 lg:order-2 lg:h-full lg:overflow-y-auto custom-scrollbar pr-0 lg:pr-2 pb-6">
         <Card className="p-6 bg-card border-border rounded-2xl shadow-sm shrink-0">
           <div className="flex items-center gap-3 mb-4">
             <span className="text-xs font-semibold px-2.5 py-1 rounded-md bg-secondary text-secondary-foreground border border-border">
@@ -693,7 +693,7 @@ function Workspace({
       </div>
 
       {/* COLUMN 3: Video Player & Action Bar (Right side) */}
-      <div className="flex flex-col gap-4 h-full overflow-y-auto custom-scrollbar pr-2 pb-6">
+      <div className="flex flex-col gap-4 order-1 lg:order-3 lg:h-full lg:overflow-y-auto custom-scrollbar pr-0 lg:pr-2 pb-6">
         <Card className="overflow-hidden p-0 bg-background border-border relative z-10 shadow-lg shrink-0 rounded-2xl">
           {isLocked ? (
             <LockedLessonCard 

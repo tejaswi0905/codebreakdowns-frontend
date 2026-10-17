@@ -19,11 +19,11 @@ export function Footer() {
             <p className="text-sm max-w-sm text-muted-foreground leading-relaxed">
               Master real-world software engineering, systems design, and full-stack architecture with production-grade course breakdowns.
             </p>
-            <div className="flex items-center gap-4 text-sm pt-2">
-              <span className="flex items-center gap-1.5 text-xs text-muted-foreground/80">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm pt-2">
+              <span className="flex items-center gap-1.5 text-xs text-muted-foreground/80 shrink-0">
                 <MapPin className="h-3.5 w-3.5 text-primary" /> Hyderabad, India
               </span>
-              <a href="mailto:codebreakdowns@gmail.com" className="flex items-center gap-1.5 text-xs hover:text-foreground transition-colors">
+              <a href="mailto:codebreakdowns@gmail.com" className="flex items-center gap-1.5 text-xs hover:text-foreground transition-colors shrink-0">
                 <Mail className="h-3.5 w-3.5 text-primary" /> codebreakdowns@gmail.com
               </a>
             </div>

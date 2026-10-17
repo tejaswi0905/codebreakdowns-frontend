@@ -17,12 +17,13 @@ This document tracks all 14 prioritized items identified during the architectura
   - Implement the missing `#opportunities` section on the landing page or resolve navigation routing. (Done)
   - Provide real student value (corporate partner pilot waitlist, 1-click notification, referral network). (Done)
 
-- [ ] **Item 3: Interactive Video Breakdown Preview / Modal in Hero**
-  - Replace the dead static mockup card with an interactive preview player or modal.
-  - Enable visitors to watch an actual 2-minute pattern breakdown (e.g., Two-Sum or Sliding Window).
+- [x] **Item 3: Interactive Video Breakdown Preview / Modal in Hero**
+  - Replace the dead static mockup card with an interactive preview player or modal. (Done)
+  - Enable visitors to watch an actual pattern breakdown (Contains Duplicate via Bunny Stream). (Done)
 
-- [ ] **Item 4: Fix Stats Section Spacing & Sticky Navbar Cutoff**
-  - Resolve vertical spacing, margins, and clipping issues on scroll.
+- [x] **Item 4: Fix Stats Section Spacing & Sticky Navbar Cutoff**
+  - Resolve vertical spacing, margins, and clipping issues on scroll. (Done)
+  - Comprehensive mobile responsiveness overhaul across Hero, Stats, Cards, Drawer, and Course Player. (Done)
 
 ---
 

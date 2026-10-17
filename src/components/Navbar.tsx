@@ -72,7 +72,15 @@ export function Navbar() {
                       e.preventDefault();
                       const targetId = l.to.split("#")[1];
                       const el = document.getElementById(targetId);
-                      if (el) el.scrollIntoView({ behavior: "smooth" });
+                      if (el) {
+                        const navOffset = 76;
+                        const elementPosition = el.getBoundingClientRect().top;
+                        const offsetPosition = elementPosition + window.pageYOffset - navOffset;
+                        window.scrollTo({
+                          top: offsetPosition,
+                          behavior: "smooth"
+                        });
+                      }
                     }
                   }}
                   className={cn(className, "inline-flex items-center gap-1.5")}
@@ -180,7 +188,7 @@ export function Navbar() {
       </div>
 
       {open && (
-        <nav className="border-t border-border/70 bg-background px-4 py-2 md:hidden">
+        <nav className="border-t border-border/70 bg-background px-4 py-3 md:hidden space-y-1">
           {activeLinks.map((l) => {
             const isHash = l.to.includes("#");
             const active = isHash ? false : (l.to === "/" ? pathname === "/" : pathname.startsWith(l.to));
@@ -201,8 +209,18 @@ export function Navbar() {
                     if (pathname === "/") {
                       e.preventDefault();
                       const targetId = l.to.split("#")[1];
-                      const el = document.getElementById(targetId);
-                      if (el) el.scrollIntoView({ behavior: "smooth" });
+                      setTimeout(() => {
+                        const el = document.getElementById(targetId);
+                        if (el) {
+                          const navOffset = 76;
+                          const elementPosition = el.getBoundingClientRect().top;
+                          const offsetPosition = elementPosition + window.pageYOffset - navOffset;
+                          window.scrollTo({
+                            top: offsetPosition,
+                            behavior: "smooth"
+                          });
+                        }
+                      }, 120);
                     }
                   }}
                   className={className}
@@ -228,6 +246,16 @@ export function Navbar() {
               </Link>
             );
           })}
+
+          {!isAuthenticated && (
+            <div className="pt-2 border-t border-border/50 mt-2">
+              <Button asChild variant="default" size="sm" className="w-full shadow-sm">
+                <Link to="/login" onClick={() => setOpen(false)}>
+                  Sign In
+                </Link>
+              </Button>
+            </div>
+          )}
         </nav>
       )}
     </header>
