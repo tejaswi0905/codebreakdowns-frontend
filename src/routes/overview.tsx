@@ -2,7 +2,6 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { fetchCoursePlayData, fetchDashboardStats } from "@/services/api";
 import { z } from "zod";
-import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { Play, CheckCircle2, Circle, Lock } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -18,11 +17,7 @@ export const Route = createFileRoute("/overview")({
 
 function CourseOverviewPage() {
   const { courseId } = Route.useSearch();
-  return (
-    <ProtectedRoute>
-      <CourseOverviewContent courseId={courseId} />
-    </ProtectedRoute>
-  );
+  return <CourseOverviewContent courseId={courseId} />;
 }
 
 function CourseOverviewContent({ courseId }: { courseId: string }) {

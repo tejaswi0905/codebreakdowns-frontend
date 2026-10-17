@@ -1,4 +1,3 @@
-import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useMemo, useState, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -14,7 +13,8 @@ import {
   PlayCircle,
   AlertCircle,
   ArrowLeft,
-  Lock
+  Lock,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -35,9 +35,17 @@ import {
 } from "@/components/ui/accordion";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { fetchCoursePlayData, fetchMyCourses, markLessonComplete, markLessonCompletedApi, toggleBookmarkApi } from "@/services/api";
+import {
+  fetchCoursePlayData,
+  fetchCourses,
+  fetchMyCourses,
+  markLessonComplete,
+  markLessonCompletedApi,
+  toggleBookmarkApi,
+} from "@/services/api";
 import { BunnyPlayer } from "@/components/BunnyPlayer";
 import { toast } from "sonner";
+import { useAuthStore } from "@/store/authStore";
 
 const courseSearchSchema = z.object({
   courseId: z.string().optional(),
@@ -48,7 +56,11 @@ export const Route = createFileRoute("/courses")({
   validateSearch: courseSearchSchema,
   head: () => ({
     meta: [
-      { title: "Course Player — CodeBreakdowns" },
+      { title: "Course Curriculum & Player — CodeBreakdowns" },
+      {
+        name: "description",
+        content: "Explore structured breakdowns of DSA patterns, systems concepts, and real-world engineering modules.",
+      },
     ],
   }),
   component: CoursePlayerPage,
@@ -56,34 +68,59 @@ export const Route = createFileRoute("/courses")({
 
 function CoursePlayerPage() {
   const { courseId, lessonId } = Route.useSearch();
-  return (
-    <ProtectedRoute>
-      <CoursePlayerContent courseId={courseId} initialLessonId={lessonId} />
-    </ProtectedRoute>
-  );
+  return <CoursePlayerContent courseId={courseId} initialLessonId={lessonId} />;
 }
 
 function CoursePlayerContent({ courseId, initialLessonId }: { courseId?: string; initialLessonId?: string }) {
   const navigate = useNavigate();
+
+  const { data: allCourses, isLoading: loadingCourses } = useQuery({
+    queryKey: ["all-courses"],
+    queryFn: fetchCourses,
+  });
 
   useEffect(() => {
     if (!courseId) {
       const lastCourseId = localStorage.getItem("codebreakdowns_last_course");
       if (lastCourseId) {
         navigate({ to: "/courses", search: { courseId: lastCourseId }, replace: true });
-      } else {
-        navigate({ to: "/dashboard", replace: true });
+      } else if (allCourses && allCourses.length > 0) {
+        navigate({ to: "/courses", search: { courseId: allCourses[0].id }, replace: true });
       }
     } else {
       localStorage.setItem("codebreakdowns_last_course", courseId);
     }
-  }, [courseId, navigate]);
+  }, [courseId, allCourses, navigate]);
 
   if (!courseId) {
+    if (loadingCourses) {
+      return (
+        <div className="flex flex-col items-center justify-center min-h-[70vh] text-center px-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-4"></div>
+          <p className="text-muted-foreground mt-2">Loading courses...</p>
+        </div>
+      );
+    }
+
+    if (!allCourses || allCourses.length === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center min-h-[70vh] text-center px-4">
+          <AlertCircle className="h-12 w-12 text-muted-foreground mb-4 opacity-70" />
+          <h2 className="text-xl font-bold">No Courses Available</h2>
+          <p className="text-muted-foreground mt-2 max-w-sm text-sm">
+            Our course catalog is currently being updated. Please check back soon or browse our products!
+          </p>
+          <Button asChild className="mt-6">
+            <Link to="/products">Browse Bundles</Link>
+          </Button>
+        </div>
+      );
+    }
+
     return (
       <div className="flex flex-col items-center justify-center min-h-[70vh] text-center px-4">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-4"></div>
-        <p className="text-muted-foreground mt-2">Loading course...</p>
+        <p className="text-muted-foreground mt-2">Opening curriculum...</p>
       </div>
     );
   }
@@ -101,6 +138,11 @@ function CoursePlayer({ courseId, initialLessonId }: { courseId: string; initial
   const { data: myCourses } = useQuery({
     queryKey: ["my-courses"],
     queryFn: fetchMyCourses,
+  });
+
+  const { data: allCourses } = useQuery({
+    queryKey: ["all-courses"],
+    queryFn: fetchCourses,
   });
 
   const navigate = useNavigate();
@@ -148,6 +190,15 @@ function CoursePlayer({ courseId, initialLessonId }: { courseId: string; initial
     return null;
   }, [course, lessonId]);
 
+  const previewLessonId = useMemo(() => {
+    if (!course) return undefined;
+    for (const ch of course.chapters) {
+      const prev = ch.lessons.find((l: any) => l.isPreview);
+      if (prev) return prev.id;
+    }
+    return undefined;
+  }, [course]);
+
   const defaultOpenChapter = useMemo(() => {
     if (!course) return undefined;
     if (!lessonId) return course.chapters[0]?.id;
@@ -187,16 +238,18 @@ function CoursePlayer({ courseId, initialLessonId }: { courseId: string; initial
     return (
       <div className="flex flex-col items-center justify-center min-h-[70vh] text-center px-4">
         <AlertCircle className="h-12 w-12 text-destructive mb-4 opacity-80" />
-        <h2 className="text-2xl font-bold">Access Denied</h2>
-        <p className="text-muted-foreground mt-2 max-w-sm">
-          We couldn't load this course. You either don't own it, or it doesn't exist.
+        <h2 className="text-2xl font-bold">Course Not Found</h2>
+        <p className="text-muted-foreground mt-2 max-w-sm text-sm">
+          We couldn't load this course. It may be unpublished or does not exist yet.
         </p>
         <Button asChild className="mt-6">
-          <Link to="/products">Browse Courses</Link>
+          <Link to="/products">Browse All Courses</Link>
         </Button>
       </div>
     );
   }
+
+  const courseList = allCourses && allCourses.length > 0 ? allCourses : myCourses || [];
 
   return (
     <div className="mx-auto max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8 h-[calc(100vh-80px)] overflow-hidden text-foreground">
@@ -225,11 +278,21 @@ function CoursePlayer({ courseId, initialLessonId }: { courseId: string; initial
                 <SelectValue>{course.title}</SelectValue>
               </SelectTrigger>
               <SelectContent className="rounded-xl">
-                {myCourses?.map((c: any) => (
-                  <SelectItem key={c.id} value={c.id} className="rounded-lg text-sm">
-                    {c.title}
-                  </SelectItem>
-                ))}
+                {courseList.map((c: any) => {
+                  const isEnrolled = myCourses?.some((m: any) => m.id === c.id);
+                  return (
+                    <SelectItem key={c.id} value={c.id} className="rounded-lg text-sm">
+                      <div className="flex items-center justify-between w-full gap-2">
+                        <span>{c.title}</span>
+                        {isEnrolled && (
+                          <span className="text-[10px] font-semibold text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
+                            Enrolled
+                          </span>
+                        )}
+                      </div>
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
           </Card>
@@ -248,8 +311,11 @@ function CoursePlayer({ courseId, initialLessonId }: { courseId: string; initial
                 style={{ width: `${pct}%` }} 
               />
             </div>
-            <div className="mt-3 text-xs text-muted-foreground font-medium">
-              {progress.completed} / {progress.total} Lessons Completed
+            <div className="mt-3 text-xs text-muted-foreground font-medium flex items-center justify-between">
+              <span>{progress.completed} / {progress.total} Lessons Completed</span>
+              {!course.isPurchased && !course.isFree && (
+                <span className="text-primary font-semibold">Preview Mode</span>
+              )}
             </div>
           </Card>
 
@@ -292,6 +358,8 @@ function CoursePlayer({ courseId, initialLessonId }: { courseId: string; initial
                               const isCompleted = l.progress && l.progress.length > 0 && l.progress[0].isCompleted;
                               const isBookmarked = l.progress && l.progress.length > 0 && l.progress[0].isBookmarked;
                               const isSelected = lessonId === l.id;
+                              const isLessonLocked = l.isLocked || (!course.isPurchased && !course.isFree && !l.isPreview);
+
                               let status: "completed" | "current" | "todo" = "todo";
                               if (isCompleted) status = "completed";
                               else if (isSelected) status = "current";
@@ -317,7 +385,7 @@ function CoursePlayer({ courseId, initialLessonId }: { courseId: string; initial
                                   <div className="mt-0.5 shrink-0">
                                     {status === "completed" ? (
                                       <CheckCircle2 className="h-4 w-4 text-success" />
-                                    ) : isChapterLocked ? (
+                                    ) : isChapterLocked || isLessonLocked ? (
                                       <Lock className="h-4 w-4 text-muted-foreground/50" />
                                     ) : status === "current" ? (
                                       <div className="h-4 w-4 rounded-full border-2 border-primary flex items-center justify-center">
@@ -335,16 +403,23 @@ function CoursePlayer({ courseId, initialLessonId }: { courseId: string; initial
                                       )}>
                                         {l.title}
                                       </div>
-                                      {isBookmarked && (
-                                        <Bookmark className="h-3.5 w-3.5 text-amber-500 fill-amber-500 shrink-0" />
-                                      )}
+                                      <div className="flex items-center gap-1.5 shrink-0">
+                                        {l.isPreview && (
+                                          <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                                            Preview
+                                          </span>
+                                        )}
+                                        {isBookmarked && (
+                                          <Bookmark className="h-3.5 w-3.5 text-amber-500 fill-amber-500" />
+                                        )}
+                                      </div>
                                     </div>
                                     <div className="flex items-center gap-2 mt-1 text-[11px] font-medium text-muted-foreground">
                                       <span>{Math.floor(l.durationSeconds / 60)}m {l.durationSeconds % 60}s</span>
                                       {l.isProblem && (
                                         <>
                                           <span className="opacity-50">•</span>
-                                          <span className="text-success">Easy</span>
+                                          <span className="text-success">Problem</span>
                                         </>
                                       )}
                                     </div>
@@ -365,7 +440,15 @@ function CoursePlayer({ courseId, initialLessonId }: { courseId: string; initial
 
         {/* MAIN CONTENT AREA */}
         {currentLesson ? (
-          <Workspace lesson={currentLesson} courseId={courseId} enforceLinearProgress={course.enforceLinearProgress} />
+          <Workspace 
+            lesson={currentLesson} 
+            courseId={courseId} 
+            courseTitle={course.title}
+            courseIsPurchased={course.isPurchased || course.isFree}
+            previewLessonId={previewLessonId}
+            onSelectLesson={setLessonId}
+            enforceLinearProgress={course.enforceLinearProgress} 
+          />
         ) : (
           <div className="lg:col-span-2 h-full flex flex-col justify-center items-center pb-20">
             <Card className="flex flex-col items-center justify-center p-12 text-center bg-card border-border rounded-2xl max-w-lg">
@@ -374,7 +457,7 @@ function CoursePlayer({ courseId, initialLessonId }: { courseId: string; initial
               </div>
               <h2 className="text-xl font-bold">Select a lesson to begin</h2>
               <p className="text-muted-foreground mt-2">
-                Choose a module from the left sidebar to continue your learning journey.
+                Choose a module from the left sidebar to start exploring.
               </p>
             </Card>
           </div>
@@ -385,13 +468,106 @@ function CoursePlayer({ courseId, initialLessonId }: { courseId: string; initial
   );
 }
 
-function Workspace({ lesson, courseId, enforceLinearProgress }: { lesson: any, courseId: string, enforceLinearProgress?: boolean }) {
+function LockedLessonCard({
+  lessonTitle,
+  courseTitle,
+  previewLessonId,
+  onSelectPreview,
+}: {
+  lessonTitle: string;
+  courseTitle: string;
+  previewLessonId?: string;
+  onSelectPreview?: (id: string) => void;
+}) {
+  const { isAuthenticated } = useAuthStore();
+
+  return (
+    <div className="relative aspect-video w-full rounded-2xl bg-gradient-to-br from-card via-card/95 to-primary/10 flex flex-col items-center justify-center text-center p-6 sm:p-8 border border-border/80 shadow-inner overflow-hidden">
+      {/* Decorative ambient auras */}
+      <div className="absolute -top-20 -right-20 w-56 h-56 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-20 -left-20 w-56 h-56 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+
+      <div className="relative z-10 flex flex-col items-center max-w-md w-full">
+        <div className="grid h-14 w-14 place-items-center rounded-2xl bg-primary/15 text-primary border border-primary/30 shadow-md mb-4 animate-in fade-in zoom-in duration-300">
+          <Lock className="h-7 w-7" />
+        </div>
+
+        <div className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background/80 px-3 py-1 text-xs font-semibold text-muted-foreground shadow-sm mb-2.5">
+          <span>{courseTitle}</span>
+          <span className="opacity-40">•</span>
+          <span className="text-primary font-bold">Premium Lesson</span>
+        </div>
+
+        <h3 className="text-lg sm:text-xl font-bold tracking-tight text-foreground line-clamp-1 mb-2">
+          {lessonTitle}
+        </h3>
+
+        <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed mb-6">
+          This lesson is locked. Enroll in the course or bundle to unlock full video breakdowns, multi-language solutions, and interview playbooks.
+        </p>
+
+        <div className="flex flex-wrap items-center justify-center gap-3 w-full">
+          <Button
+            asChild
+            size="default"
+            className="rounded-xl px-5 font-semibold shadow-md bg-primary text-primary-foreground hover:shadow-lg transition-all"
+          >
+            <Link to="/products">
+              <Sparkles className="mr-2 h-4 w-4" /> Unlock Course
+            </Link>
+          </Button>
+
+          {!isAuthenticated ? (
+            <Button asChild variant="outline" size="default" className="rounded-xl px-4 text-xs font-medium">
+              <Link to="/login">
+                Already own it? Sign In
+              </Link>
+            </Button>
+          ) : (
+            previewLessonId && onSelectPreview && (
+              <Button
+                variant="ghost"
+                size="default"
+                onClick={() => onSelectPreview(previewLessonId)}
+                className="rounded-xl px-4 text-xs text-muted-foreground hover:text-foreground"
+              >
+                Watch Free Sample Lesson →
+              </Button>
+            )
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Workspace({ 
+  lesson, 
+  courseId, 
+  courseTitle,
+  courseIsPurchased,
+  previewLessonId,
+  onSelectLesson,
+  enforceLinearProgress,
+}: { 
+  lesson: any;
+  courseId: string;
+  courseTitle: string;
+  courseIsPurchased?: boolean;
+  previewLessonId?: string;
+  onSelectLesson?: (id: string) => void;
+  enforceLinearProgress?: boolean;
+}) {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuthStore();
   const [completeLoading, setCompleteLoading] = useState(false);
 
   const isBookmarked = lesson.progress?.[0]?.isBookmarked || false;
   const isCompleted = lesson.progress?.[0]?.isCompleted || false;
   const initialTimestamp = lesson.progress?.[0]?.highestTimestampSecs || 0;
+
+  const isLocked = lesson.isLocked || (!courseIsPurchased && !lesson.isPreview);
 
   const bookmarkMutation = useMutation({
     mutationFn: (newVal: boolean) => toggleBookmarkApi(lesson.id, newVal),
@@ -432,7 +608,12 @@ function Workspace({ lesson, courseId, enforceLinearProgress }: { lesson: any, c
   if (!lesson) return null;
 
   // Parse JSON description if it exists
-  let meta = { text: lesson.description || "", prerequisites: ["Arrays", "Basic greedy intuition"], objectives: ["Track the minimum price seen so far", "Maintain a running maximum profit", "Solve in a single pass with O(1) space"], outcome: "You'll master the min-so-far pattern and understand how it generalises to more complex stock problems." };
+  let meta = { 
+    text: lesson.description || "", 
+    prerequisites: ["Arrays", "Basic greedy intuition"], 
+    objectives: ["Track the minimum price seen so far", "Maintain a running maximum profit", "Solve in a single pass with O(1) space"], 
+    outcome: "You'll master the min-so-far pattern and understand how it generalises to more complex stock problems." 
+  };
   if (lesson.description) {
     try {
       const parsed = JSON.parse(lesson.description);
@@ -448,21 +629,24 @@ function Workspace({ lesson, courseId, enforceLinearProgress }: { lesson: any, c
       <div className="flex flex-col gap-4 h-full overflow-y-auto custom-scrollbar pr-2 pb-6">
         <Card className="p-6 bg-card border-border rounded-2xl shadow-sm shrink-0">
           <div className="flex items-center gap-3 mb-4">
-            <Badge className="bg-success/10 text-success hover:bg-success/20 border-0 rounded-md font-bold px-2 py-0.5 shadow-none">
-              Easy
-            </Badge>
-            <span className="text-sm font-semibold text-muted-foreground">
-              {Math.floor(lesson.durationSeconds / 60)} min
+            <span className="text-xs font-semibold px-2.5 py-1 rounded-md bg-secondary text-secondary-foreground border border-border">
+              {lesson.isProblem ? "Problem Breakdown" : "Concept Lesson"}
             </span>
+            <span className="text-xs text-muted-foreground font-medium">
+              Duration: {Math.floor(lesson.durationSeconds / 60)} mins
+            </span>
+            {lesson.isPreview && (
+              <span className="text-xs font-semibold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                Free Preview
+              </span>
+            )}
           </div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-foreground leading-tight">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground mb-3">
             {lesson.title}
           </h1>
-          {meta.text && (
-            <p className="mt-4 text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
-              {meta.text}
-            </p>
-          )}
+          <p className="text-sm leading-relaxed text-muted-foreground whitespace-pre-line">
+            {meta.text || "Learn how to tackle this question using an optimal mental model, identifying the underlying pattern and writing clean code."}
+          </p>
         </Card>
 
         {meta.prerequisites && meta.prerequisites.length > 0 && (
@@ -511,13 +695,22 @@ function Workspace({ lesson, courseId, enforceLinearProgress }: { lesson: any, c
       {/* COLUMN 3: Video Player & Action Bar (Right side) */}
       <div className="flex flex-col gap-4 h-full overflow-y-auto custom-scrollbar pr-2 pb-6">
         <Card className="overflow-hidden p-0 bg-background border-border relative z-10 shadow-lg shrink-0 rounded-2xl">
-          {lesson.isLocked || !lesson.videoUrlOrId ? (
-            <div className="relative aspect-video w-full bg-gradient-to-br from-background to-background/50 flex flex-col items-center justify-center text-center p-6">
-              <div className="grid h-16 w-16 place-items-center rounded-full bg-card shadow-sm mb-4">
-                <Play className="h-6 w-6 text-primary ml-1" />
+          {isLocked ? (
+            <LockedLessonCard 
+              lessonTitle={lesson.title}
+              courseTitle={courseTitle}
+              previewLessonId={previewLessonId}
+              onSelectPreview={onSelectLesson}
+            />
+          ) : !lesson.videoUrlOrId ? (
+            <div className="relative aspect-video w-full rounded-2xl bg-card border border-border flex flex-col items-center justify-center text-center p-6">
+              <div className="grid h-12 w-12 place-items-center rounded-xl bg-primary/10 text-primary mb-3">
+                <Play className="h-6 w-6 ml-0.5" />
               </div>
-              <h3 className="text-lg font-bold text-foreground">Video coming soon</h3>
-              <p className="text-sm text-muted-foreground mt-1 max-w-xs">{lesson.title}</p>
+              <h3 className="text-base font-bold text-foreground">Video Processing</h3>
+              <p className="text-xs text-muted-foreground mt-1 max-w-xs">
+                The video stream for &ldquo;{lesson.title}&rdquo; is being processed. Please check back shortly.
+              </p>
             </div>
           ) : (
             <BunnyPlayer 
@@ -546,6 +739,15 @@ function Workspace({ lesson, courseId, enforceLinearProgress }: { lesson: any, c
                 : "hover:bg-foreground/5 text-muted-foreground hover:text-foreground"
             )}
             onClick={() => {
+              if (!isAuthenticated) {
+                toast.info("Please sign in to bookmark lessons and save your progress.", {
+                  action: {
+                    label: "Sign In",
+                    onClick: () => navigate({ to: "/login" }),
+                  },
+                });
+                return;
+              }
               const nextVal = !isBookmarked;
               bookmarkMutation.mutate(nextVal);
               toast.success(nextVal ? "Lesson bookmarked!" : "Bookmark removed");
@@ -577,6 +779,15 @@ function Workspace({ lesson, courseId, enforceLinearProgress }: { lesson: any, c
             >
               <CheckCircle2 className="h-4 w-4 text-success" /> Completed
             </Button>
+          ) : isLocked ? (
+            <Button
+              size="sm"
+              variant="outline"
+              className="gap-2 h-9 rounded-lg font-semibold shadow-sm opacity-60 cursor-not-allowed"
+              disabled
+            >
+              <Lock className="h-3.5 w-3.5" /> Locked
+            </Button>
           ) : enforceLinearProgress && lesson.isProblem && lesson.explanationEndSeconds !== null ? (
             <Button
               size="sm"
@@ -591,6 +802,12 @@ function Workspace({ lesson, courseId, enforceLinearProgress }: { lesson: any, c
               size="sm"
               className="gap-2 h-9 rounded-lg font-bold shadow-sm"
               onClick={() => {
+                if (!isAuthenticated) {
+                  toast.info("Please sign in to track completed lessons.", {
+                    action: { label: "Sign In", onClick: () => navigate({ to: "/login" }) },
+                  });
+                  return;
+                }
                 setCompleteLoading(true);
                 markLessonCompletedApi(lesson.id).then((res) => {
                   setCompleteLoading(false);
@@ -603,7 +820,7 @@ function Workspace({ lesson, courseId, enforceLinearProgress }: { lesson: any, c
                   }
                 });
               }}
-              disabled={lesson.isLocked || completeLoading}
+              disabled={isLocked || completeLoading}
             >
               <Check className="h-4 w-4" /> {completeLoading ? "Saving..." : "Mark as Complete"}
             </Button>

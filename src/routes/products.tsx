@@ -27,21 +27,15 @@ import {
 export const Route = createFileRoute("/products")({
   head: () => ({
     meta: [
-      { title: "Products — CodeBreakdowns" },
+      { title: "Products & Bundles — CodeBreakdowns" },
       {
         name: "description",
         content: "Browse and purchase interview prep courses and bundles.",
       },
     ],
   }),
-  component: () => (
-    <ProtectedRoute>
-      <ProductsPage />
-    </ProtectedRoute>
-  ),
+  component: ProductsPage,
 });
-
-import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 const fmt = (n: number) => `₹${n.toLocaleString("en-IN")}`;
 

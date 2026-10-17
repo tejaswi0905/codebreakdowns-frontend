@@ -47,6 +47,7 @@ export interface CoursePlayData {
   title: string;
   description: string | null;
   imageUrl: string | null;
+  isFree?: boolean;
   isPurchased?: boolean;
   enforceLinearProgress?: boolean;
   chapters: {
@@ -60,7 +61,7 @@ export interface CoursePlayData {
     lessons: {
       id: string;
       title: string;
-      videoUrlOrId: string;
+      videoUrlOrId: string | null;
       durationSeconds: number;
       sortOrder: number;
       isProblem: boolean;
@@ -127,12 +128,19 @@ export const fetchProducts = async (): Promise<ApiProduct[]> => {
 };
 
 export const fetchMyCourses = async (): Promise<ApiCourse[]> => {
-  const response = await authFetch(`/courses/my-courses`);
-  if (!response.ok) {
-    throw new Error("Failed to fetch purchased courses");
+  try {
+    const response = await authFetch(`/courses/my-courses`);
+    if (!response.ok) {
+      if (response.status === 401) {
+        return [];
+      }
+      throw new Error("Failed to fetch purchased courses");
+    }
+    const data = await response.json();
+    return data.data || [];
+  } catch {
+    return [];
   }
-  const data = await response.json();
-  return data.data; 
 };
 
 export const fetchCoursePlayData = async (courseId: string): Promise<CoursePlayData> => {
