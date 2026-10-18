@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { 
   ArrowRight, 
   ChevronRight, 
@@ -11,7 +12,10 @@ import {
   Sparkles, 
   CheckCircle2, 
   Bell, 
-  Github 
+  Github,
+  Clock,
+  BookOpen,
+  Layers
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -24,12 +28,75 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { motion, Variants } from "framer-motion";
-import { landingFeatures, landingStats, landingCourses } from "../data/landing-mock";
+import { landingStats, landingCourses, type LandingCourseItem } from "../data/landing-mock";
 import { useAuthStore } from "@/store/authStore";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { fetchCourses, type ApiCourse } from "@/services/api";
+import { TargetEmployersSection } from "@/components/TargetEmployersSection";
+import { HowItWorksSection } from "@/components/HowItWorksSection";
+import { FaqSection } from "@/components/FaqSection";
+import { ConversionBanner } from "@/components/ConversionBanner";
 
+// Item 14: Route-Specific SEO Head Tags
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      {
+        title: "CodeBreakdowns — Crack Tech Interviews & Land Internships",
+      },
+      {
+        name: "description",
+        content:
+          "Master the Blind 75, System Design, SQL, and modern AI engineering patterns with interactive visual breakdowns, step-by-step intuition, and real-world playbooks.",
+      },
+      {
+        name: "keywords",
+        content:
+          "tech internships, interview preparation, Blind 75, data structures, algorithms, system design, software engineering, leetcode visualizer, software engineer interview prep",
+      },
+      // OpenGraph
+      {
+        property: "og:title",
+        content: "CodeBreakdowns — Crack Tech Interviews & Land Internships",
+      },
+      {
+        property: "og:description",
+        content:
+          "Stop grinding random LeetCode questions. Learn the underlying problem-solving frameworks and mental models required for top tech companies.",
+      },
+      {
+        property: "og:type",
+        content: "website",
+      },
+      {
+        property: "og:url",
+        content: "https://codebreakdowns.in",
+      },
+      {
+        property: "og:image",
+        content: "/og-image.png",
+      },
+      // Twitter Card
+      {
+        name: "twitter:card",
+        content: "summary_large_image",
+      },
+      {
+        name: "twitter:title",
+        content: "CodeBreakdowns — Crack Tech Interviews & Land Internships",
+      },
+      {
+        name: "twitter:description",
+        content:
+          "Stop grinding random LeetCode questions. Learn the underlying problem-solving frameworks and mental models required for top tech companies.",
+      },
+      {
+        name: "twitter:image",
+        content: "/og-image.png",
+      },
+    ],
+  }),
   component: LandingPage,
 });
 
@@ -50,6 +117,37 @@ const staggerContainer: Variants = {
 
 function LandingPage() {
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+
+  // Item 13: Backend Data Synchronization with Graceful Fallback
+  const { data: dbCourses, isLoading: isCoursesLoading } = useQuery<ApiCourse[]>({
+    queryKey: ["public-courses"],
+    queryFn: fetchCourses,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // Merge backend data with rich mock metadata
+  const coursesList: LandingCourseItem[] = useMemo(() => {
+    if (!dbCourses || dbCourses.length === 0) {
+      return landingCourses;
+    }
+    return landingCourses.map((mockCourse) => {
+      const matched = dbCourses.find(
+        (c) =>
+          c.id === mockCourse.id ||
+          (mockCourse.id === "blind-75" && c.title.toLowerCase().includes("test course")) ||
+          c.title.toLowerCase().includes(mockCourse.title.toLowerCase().slice(0, 8))
+      );
+      if (matched) {
+        return {
+          ...mockCourse,
+          dbId: matched.id,
+          title: matched.title || mockCourse.title,
+          description: matched.description || mockCourse.description,
+        };
+      }
+      return mockCourse;
+    });
+  }, [dbCourses]);
 
   useEffect(() => {
     // Handle sticky navbar offset when landing with a hash anchor (e.g. #opportunities)
@@ -73,89 +171,168 @@ function LandingPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background selection:bg-primary/20 selection:text-primary relative overflow-hidden">
       
-      {/* Premium Structural Background (No 'AI' Glows) */}
+      {/* Structural Subtle Grid Background */}
       <div className="absolute top-0 left-0 w-full h-[800px] overflow-hidden -z-10 pointer-events-none">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(var(--color-border),0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(var(--color-border),0.05)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
       </div>
 
       {/* Hero Section */}
-      <section className="relative px-4 sm:px-6 pt-6 pb-12 sm:pt-12 sm:pb-20 md:pt-16 md:pb-24 max-w-7xl mx-auto w-full">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+      <section className="relative px-4 sm:px-6 pt-8 pb-14 sm:pt-14 sm:pb-20 md:pt-20 md:pb-28 max-w-7xl mx-auto w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-center">
           
-          {/* Left Column: Copy & CTA */}
+          {/* Item 10: Left Column — Command SaaS Typography Hierarchy */}
           <motion.div
             variants={staggerContainer}
             initial="hidden"
             animate="visible"
-            className="flex flex-col items-start text-left lg:pr-8"
+            className="flex flex-col items-start text-left lg:pr-4"
           >
-            <motion.div variants={fadeUpVariant} className="mb-4 sm:mb-6 inline-flex max-w-full items-center rounded-full border border-border bg-card/50 px-3.5 sm:px-4 py-1.5 text-xs sm:text-sm font-medium text-foreground shadow-sm backdrop-blur-md">
-              <span className="flex h-2 w-2 rounded-full bg-primary mr-2 animate-pulse shrink-0"></span>
-              <span className="truncate">Your Blueprint for Tech Internships & Dev Roles</span>
+            {/* Top Pill / Trust Tag */}
+            <motion.div variants={fadeUpVariant} className="mb-5 sm:mb-6 inline-flex max-w-full items-center rounded-full border border-border bg-card/70 px-3.5 sm:px-4 py-1.5 text-xs sm:text-sm font-medium text-foreground shadow-sm backdrop-blur-md">
+              <span className="relative flex h-2 w-2 mr-2.5 shrink-0">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+              </span>
+              <span className="truncate font-semibold tracking-wide">Your Blueprint for Tech Internships & Dev Roles</span>
             </motion.div>
 
-            <motion.h1 variants={fadeUpVariant} className="text-2xl sm:text-4xl md:text-5xl font-extrabold tracking-tight mb-4 sm:mb-6 text-foreground leading-[1.15] break-words">
-              Crack Your Tech Interviews and <span className="text-primary">Land the Internship.</span>
+            {/* Item 10: High-Impact H1 Typography */}
+            <motion.h1 
+              variants={fadeUpVariant} 
+              className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight mb-5 sm:mb-6 text-foreground leading-[1.08] break-words"
+            >
+              Crack Your Tech Interviews and{" "}
+              <span className="bg-gradient-to-r from-primary via-indigo-500 to-sky-400 bg-clip-text text-transparent">
+                Land the Internship.
+              </span>
             </motion.h1>
 
-            <motion.p variants={fadeUpVariant} className="text-sm sm:text-base text-muted-foreground max-w-xl mb-6 sm:mb-10 leading-relaxed">
-              Landing a top-tier tech internship isn't about blindly grinding 1,000 random LeetCode problems. We break down the Blind 75 & 150, essential backend concepts, and real-world resume projects into structured playbooks so you build the mental models required to succeed.
+            {/* Subtitle with proper line-height & weight */}
+            <motion.p 
+              variants={fadeUpVariant} 
+              className="text-base sm:text-lg text-muted-foreground max-w-xl mb-7 sm:mb-10 leading-relaxed font-normal"
+            >
+              Landing a top-tier tech internship isn't about blindly grinding 1,000 random LeetCode problems. We break down the Blind 75, backend systems, and production projects into structured visual playbooks so you build the mental models that interviewers actually test for.
             </motion.p>
 
-            <motion.div variants={fadeUpVariant} className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto">
-              <Button size="lg" asChild className="w-full sm:w-auto rounded-xl px-7 h-12 sm:h-14 text-sm sm:text-base font-semibold shadow-md hover:shadow-lg transition-all bg-primary text-primary-foreground">
+            {/* CTA Button Group */}
+            <motion.div variants={fadeUpVariant} className="flex flex-col sm:flex-row gap-3.5 sm:gap-4 w-full sm:w-auto">
+              <Button size="lg" asChild className="w-full sm:w-auto rounded-xl px-8 h-12 sm:h-14 text-sm sm:text-base font-semibold shadow-md hover:shadow-xl transition-all bg-primary text-primary-foreground hover:scale-[1.02]">
                 <Link to="/courses" className="flex items-center justify-center">
                   Start the Playbook
                   <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
                 </Link>
               </Button>
+              <Button 
+                variant="outline" 
+                size="lg" 
+                onClick={() => setIsVideoModalOpen(true)}
+                className="w-full sm:w-auto rounded-xl px-6 h-12 sm:h-14 text-sm sm:text-base font-semibold border-border hover:bg-card/80 transition-all text-foreground"
+              >
+                <Play className="mr-2 h-4 w-4 fill-primary text-primary" />
+                Watch Breakdown Preview
+              </Button>
             </motion.div>
           </motion.div>
 
-          {/* Right Column: Interactive Video Breakdown Preview */}
+          {/* Item 11: Right Column — Multi-Layered Glowing macOS IDE & Video Canvas */}
           <motion.div 
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
-            onClick={() => setIsVideoModalOpen(true)}
-            className="relative w-full min-h-[260px] sm:min-h-0 sm:aspect-video rounded-2xl overflow-hidden shadow-2xl border border-border bg-card flex items-center justify-center group cursor-pointer hover:border-primary/50 transition-all duration-300 hover:shadow-primary/10"
+            className="relative group w-full"
           >
-            {/* Subtle Gradient Background for the placeholder */}
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-card to-background z-0"></div>
-            
-            {/* Top pill badge */}
-            <div className="absolute top-3 sm:top-4 left-3 sm:left-4 z-20 flex items-center gap-2">
-              <Badge variant="secondary" className="bg-background/90 text-primary border-primary/20 backdrop-blur text-[10px] sm:text-[11px] font-semibold shadow-sm">
-                <Sparkles className="mr-1 h-3 w-3" /> Free Sample Breakdown
-              </Badge>
-              <Badge variant="outline" className="bg-background/60 text-[10px] backdrop-blur border-border hidden sm:inline-flex">
-                Problem #1
-              </Badge>
-            </div>
+            {/* Ambient Multi-Dimensional Glow */}
+            <div className="absolute -inset-1 sm:-inset-1.5 bg-gradient-to-r from-primary/30 via-indigo-500/25 to-sky-500/20 rounded-3xl blur-xl opacity-75 group-hover:opacity-100 transition-all duration-700 pointer-events-none" />
 
-            {/* Mock Player UI */}
-            <div className="relative z-10 flex flex-col items-center justify-center text-center px-4 py-8 sm:py-0">
-              <div className="relative mb-2.5 sm:mb-3">
-                <div className="absolute -inset-2 rounded-full bg-primary/20 blur-md group-hover:bg-primary/40 transition-all duration-300 animate-pulse"></div>
-                <div className="relative w-14 h-14 sm:w-20 sm:h-20 rounded-full bg-primary flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform duration-300">
-                  <Play className="w-5 h-5 sm:w-7 sm:h-7 text-primary-foreground ml-0.5 sm:ml-1" fill="currentColor" />
+            {/* Main IDE Window Container */}
+            <div 
+              onClick={() => setIsVideoModalOpen(true)}
+              className="relative rounded-2xl overflow-hidden border border-border/80 bg-card/95 shadow-2xl backdrop-blur-xl cursor-pointer hover:border-primary/60 transition-all duration-300"
+            >
+              {/* macOS Window Titlebar */}
+              <div className="h-9 sm:h-10 bg-muted/70 border-b border-border/70 px-3.5 sm:px-4 flex items-center justify-between text-xs select-none">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#ff5f56] inline-block shadow-sm" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e] inline-block shadow-sm" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#27c93f] inline-block shadow-sm" />
+                </div>
+                <div className="flex items-center gap-1.5 text-muted-foreground font-mono text-[11px] sm:text-xs">
+                  <span className="text-foreground/80 font-medium">blind-75</span>
+                  <span>/</span>
+                  <span className="text-primary font-semibold">contains-duplicate.ts</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-medium text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    Ready to Play
+                  </span>
                 </div>
               </div>
-              <p className="font-bold text-sm sm:text-base md:text-lg text-foreground">Contains Duplicate</p>
-              <p className="text-[11px] sm:text-sm text-muted-foreground mt-0.5">Blind 75: Hash Set Pattern • 19 mins</p>
-            </div>
-            
-            {/* Decorative Mock UI Elements */}
-            <div className="absolute bottom-3 sm:bottom-4 left-3 sm:left-4 right-3 sm:right-4 h-10 sm:h-12 bg-background/90 backdrop-blur-md rounded-xl border border-border flex items-center px-3 sm:px-4 space-x-2.5 sm:space-x-3 shadow-sm">
-              <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
-                 <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-primary"></div>
-              </div>
-              <div className="flex-1 space-y-1.5">
-                <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
-                  <div className="h-full w-2/5 bg-primary rounded-full"></div>
+
+              {/* High-Contrast Dark Video Canvas with Watermark */}
+              <div className="relative min-h-[270px] sm:aspect-video w-full bg-[#0b0f17] flex items-center justify-center overflow-hidden">
+                {/* Code Background Watermark */}
+                <div className="absolute inset-0 p-5 font-mono text-[11px] sm:text-xs text-zinc-600/30 select-none pointer-events-none overflow-hidden leading-relaxed">
+                  <p className="text-primary/40">// Pattern: Optimal Hash Set Tradeoff</p>
+                  <p>function containsDuplicate(nums: number[]): boolean &#123;</p>
+                  <p className="pl-4">const seen = new Set&lt;number&gt;();</p>
+                  <p className="pl-4">for (const num of nums) &#123;</p>
+                  <p className="pl-8">if (seen.has(num)) return true; // Early exit O(1)</p>
+                  <p className="pl-8">seen.add(num);</p>
+                  <p className="pl-4">&#125;</p>
+                  <p className="pl-4">return false; // Time O(N), Space O(N)</p>
+                  <p>&#125;</p>
+                </div>
+
+                {/* Dark Vignette Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/30 z-0" />
+
+                {/* Top Overlay Badges */}
+                <div className="absolute top-3 left-3 sm:top-4 sm:left-4 z-20 flex items-center gap-2">
+                  <Badge className="bg-primary text-primary-foreground text-[10px] sm:text-xs font-semibold px-2.5 py-0.5 shadow-md">
+                    <Sparkles className="mr-1 h-3 w-3" /> Free Video Breakdown
+                  </Badge>
+                  <Badge variant="outline" className="bg-black/60 text-white/90 border-white/20 text-[10px] sm:text-xs backdrop-blur-sm hidden sm:inline-flex">
+                    19:24 Full Duration
+                  </Badge>
+                </div>
+
+                {/* Center Animated Play Button with Radiating Pulse */}
+                <div className="relative z-10 flex flex-col items-center justify-center text-center px-4 py-6">
+                  <div className="relative mb-3 group-hover:scale-110 transition-transform duration-300">
+                    <div className="absolute -inset-3 rounded-full bg-primary/30 blur-md animate-pulse" />
+                    <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-primary flex items-center justify-center shadow-2xl text-primary-foreground group-hover:bg-primary/95 transition-colors">
+                      <Play className="w-6 h-6 sm:w-8 sm:h-8 ml-1" fill="currentColor" />
+                    </div>
+                  </div>
+                  <h3 className="font-bold text-base sm:text-xl text-white tracking-tight drop-shadow-sm">
+                    Contains Duplicate
+                  </h3>
+                  <p className="text-xs sm:text-sm text-zinc-300 mt-1 max-w-xs drop-shadow-sm">
+                    Watch the complete pattern intuition, $O(N^2) \rightarrow O(N)$ refactor, and dry run
+                  </p>
+                </div>
+
+                {/* Bottom Interactive Control Bar Scrubber */}
+                <div className="absolute bottom-3 left-3 right-3 sm:bottom-4 sm:left-4 sm:right-4 h-11 sm:h-12 bg-black/80 backdrop-blur-md rounded-xl border border-white/10 flex items-center px-3.5 sm:px-4 space-x-3 shadow-lg z-10">
+                  <div className="w-7 h-7 rounded-lg bg-primary/20 text-primary flex items-center justify-center shrink-0 border border-primary/30">
+                    <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
+                  </div>
+                  <div className="flex-1 space-y-1">
+                    <div className="h-1.5 w-full bg-white/20 rounded-full overflow-hidden">
+                      <div className="h-full w-2/5 bg-primary rounded-full" />
+                    </div>
+                    <div className="flex justify-between text-[10px] font-mono text-zinc-400">
+                      <span>07:42</span>
+                      <span>19:24</span>
+                    </div>
+                  </div>
+                  <span className="text-[11px] sm:text-xs font-mono font-medium text-white/90 bg-white/10 px-2.5 py-1 rounded-md border border-white/10 shrink-0 group-hover:border-primary/40 group-hover:text-primary transition-colors">
+                    Watch Now →
+                  </span>
                 </div>
               </div>
-              <div className="text-[11px] sm:text-xs font-mono font-medium text-foreground shrink-0">Click to Watch →</div>
             </div>
           </motion.div>
 
@@ -238,85 +415,121 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* Features Section */}
-      <section id="features" className="scroll-mt-20 py-16 sm:py-24 px-4 sm:px-6 max-w-7xl mx-auto">
-        <div className="text-center mb-10 sm:mb-16 max-w-2xl mx-auto px-2">
-          <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4 text-foreground">Why This Approach Works</h2>
-          <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-            We focus on structured learning and pattern recognition, bridging the gap between theoretical algorithms and passing the actual interview.
-          </p>
-        </div>
+      {/* Item 5: Crack MAANG Target Employers Marquee & The DSA + System Design + AI Triad */}
+      <TargetEmployersSection />
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-          {landingFeatures.map((feature, idx) => {
-            const Icon = feature.icon;
-            return (
-              <Card key={idx} className="p-6 sm:p-8 border-border bg-card hover:border-primary/30 transition-colors duration-300 shadow-sm hover:shadow-md rounded-2xl">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-5 sm:mb-6 border border-primary/20">
-                  <Icon className="w-6 h-6 text-primary" />
-                </div>
-                <h3 className="text-base sm:text-lg font-bold mb-2.5 text-foreground">{feature.title}</h3>
-                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                  {feature.description}
-                </p>
-              </Card>
-            );
-          })}
-        </div>
-      </section>
+      {/* Item 6: Interactive "How It Works" 3-Stage Deep Dive */}
+      <HowItWorksSection />
 
-      {/* Course Preview Section */}
+      {/* Item 12: Upgraded Course Roadmap Cards with Item 13 Backend Data Sync */}
       <section className="scroll-mt-20 py-16 sm:py-24 px-4 sm:px-6 bg-card/30 border-t border-border">
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 sm:mb-12 gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-10 sm:mb-14 gap-4">
             <div>
-              <h2 className="text-2xl sm:text-3xl font-bold mb-2 sm:mb-4 text-foreground">The Complete Roadmap</h2>
-              <p className="text-sm sm:text-base text-muted-foreground max-w-xl">
-                Everything you need to secure the internship and excel in your first role.
+              <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary uppercase tracking-wider mb-2">
+                <Layers className="w-3.5 h-3.5" />
+                Curriculum Breakdown
+              </div>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-foreground tracking-tight">
+                The Complete Roadmap
+              </h2>
+              <p className="text-sm sm:text-base text-muted-foreground max-w-xl mt-2 leading-relaxed">
+                Structured playbooks covering algorithms, high-concurrency systems, and portfolio projects that top tech teams look for.
               </p>
             </div>
             <Button variant="ghost" asChild className="hover:bg-transparent hover:text-primary p-0 self-start sm:self-auto">
-              <Link to="/courses" className="flex items-center text-foreground font-medium text-sm">
-                View all content <ChevronRight className="ml-1 w-4 h-4" />
+              <Link to="/courses" className="flex items-center text-foreground font-semibold text-sm">
+                View full curriculum syllabus <ChevronRight className="ml-1 w-4 h-4" />
               </Link>
             </Button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-            {landingCourses.map((course) => {
+            {coursesList.map((course) => {
               const Icon = course.icon;
+              
+              // Difficulty Badges Styling (Emerald / Amber / Purple)
+              const difficultyBadgeClass = 
+                course.difficulty === "Beginner" 
+                  ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                  : course.difficulty === "Intermediate"
+                  ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20"
+                  : "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20";
+
               return (
-                <Link key={course.id} to="/courses" className="group h-full">
-                  <Card className="h-full flex flex-col overflow-hidden border-border bg-card hover:border-primary/40 transition-all duration-300 shadow-sm hover:shadow-lg rounded-2xl">
-                    {/* Minimal Header */}
-                    <div className="p-5 sm:p-6 pb-0 flex justify-between items-start">
-                      <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center border border-border">
-                        <Icon className="w-5 h-5 text-muted-foreground" />
+                <Link 
+                  key={course.id} 
+                  to="/courses" 
+                  search={course.dbId ? { courseId: course.dbId } : undefined}
+                  className="group h-full flex"
+                >
+                  <Card className="h-full w-full flex flex-col justify-between overflow-hidden border-border bg-card/90 backdrop-blur-sm hover:border-primary/50 transition-all duration-300 shadow-sm hover:shadow-xl hover:-translate-y-1.5 rounded-2xl relative">
+                    
+                    {/* Top ambient hover gradient */}
+                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+                    <div>
+                      {/* Card Header */}
+                      <div className="p-6 pb-4 flex justify-between items-start gap-3">
+                        <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center border border-primary/20 shrink-0 group-hover:scale-105 group-hover:bg-primary/20 transition-all duration-300">
+                          <Icon className="w-6 h-6" />
+                        </div>
+                        
+                        <div className="flex flex-col items-end gap-1.5">
+                          <span className={cn("text-[10px] sm:text-[11px] font-semibold px-2 py-0.5 rounded-full border", difficultyBadgeClass)}>
+                            {course.difficulty}
+                          </span>
+                          {course.isPremium ? (
+                            <span className="flex items-center text-muted-foreground text-[11px] font-medium">
+                              <Lock className="w-3 h-3 mr-1" /> Premium
+                            </span>
+                          ) : (
+                            <span className="text-emerald-500 text-[11px] font-semibold flex items-center">
+                              <Sparkles className="w-3 h-3 mr-1" /> Free Access
+                            </span>
+                          )}
+                        </div>
                       </div>
-                      <div className="flex flex-col items-end gap-1.5">
-                        <span className="bg-background/90 text-foreground text-[11px] font-semibold px-2 py-0.5 rounded-md border border-border">
-                          {course.category}
-                        </span>
-                        {course.isPremium ? (
-                          <span className="flex items-center text-muted-foreground text-[11px] font-semibold">
-                            <Lock className="w-3 h-3 mr-1" /> Premium
-                          </span>
-                        ) : (
-                          <span className="text-emerald-500 text-[11px] font-semibold">
-                            Free Trial
-                          </span>
-                        )}
+                      
+                      {/* Card Body */}
+                      <div className="px-6 py-2 flex flex-col">
+                        <div className="flex items-center gap-2 mb-2 text-xs text-muted-foreground font-mono">
+                          <span className="text-foreground/75 font-medium">{course.category}</span>
+                        </div>
+                        <h3 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors mb-2 leading-snug">
+                          {course.title}
+                        </h3>
+                        <p className="text-muted-foreground text-xs leading-relaxed line-clamp-3 mb-4">
+                          {course.description}
+                        </p>
+
+                        {/* Topic Tags */}
+                        <div className="flex flex-wrap gap-1.5 mb-4">
+                          {course.tags.map((tag, tIdx) => (
+                            <span 
+                              key={tIdx} 
+                              className="text-[10px] font-mono bg-muted/70 text-muted-foreground border border-border/70 px-2 py-0.5 rounded-md"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
                       </div>
                     </div>
-                    
-                    {/* Card Content */}
-                    <div className="p-5 sm:p-6 flex flex-col flex-1">
-                      <h3 className="text-base sm:text-lg font-bold mb-2 text-foreground group-hover:text-primary transition-colors">{course.title}</h3>
-                      <p className="text-muted-foreground text-xs flex-1 leading-relaxed">
-                        {course.description}
-                      </p>
-                      <div className="mt-5 pt-3.5 border-t border-border flex items-center text-xs sm:text-sm font-medium text-foreground group-hover:text-primary transition-colors">
-                        Explore module <ArrowRight className="ml-1.5 w-3.5 h-3.5" />
+
+                    {/* Card Footer: Metadata (Lessons, Duration) & CTA */}
+                    <div className="px-6 pb-6 pt-3 border-t border-border/70 flex flex-col gap-3">
+                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1 font-medium">
+                          <BookOpen className="w-3.5 h-3.5 text-primary" /> {course.lessonsCount}
+                        </span>
+                        <span className="flex items-center gap-1 font-medium">
+                          <Clock className="w-3.5 h-3.5 text-muted-foreground" /> {course.durationHours}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-xs font-semibold text-primary pt-1">
+                        <span>Explore module</span>
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                       </div>
                     </div>
                   </Card>
@@ -329,6 +542,12 @@ function LandingPage() {
 
       {/* Opportunities Section */}
       <OpportunitiesSection />
+
+      {/* Item 8: Frequently Asked Questions */}
+      <FaqSection />
+
+      {/* Item 9: Bottom High-Impact Conversion Banner */}
+      <ConversionBanner />
     </div>
   );
 }
