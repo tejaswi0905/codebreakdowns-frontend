@@ -133,6 +133,7 @@ function CoursePlayer({ courseId, initialLessonId }: { courseId: string; initial
     queryKey: ["course-play", courseId],
     queryFn: () => fetchCoursePlayData(courseId),
     retry: 1,
+    refetchOnWindowFocus: false, // Prevents video player reloads when switching browser tabs
   });
 
   const { data: myCourses } = useQuery({
@@ -787,15 +788,6 @@ function Workspace({
               disabled
             >
               <Lock className="h-3.5 w-3.5" /> Locked
-            </Button>
-          ) : enforceLinearProgress && lesson.isProblem && lesson.explanationEndSeconds !== null ? (
-            <Button
-              size="sm"
-              variant="outline"
-              className="gap-2 h-9 rounded-lg font-bold shadow-sm border-dashed border-primary/40 text-muted-foreground"
-              disabled
-            >
-              <Lock className="h-3.5 w-3.5 text-primary" /> Watch explanation to complete
             </Button>
           ) : (
             <Button
