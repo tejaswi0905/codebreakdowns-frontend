@@ -9,13 +9,13 @@ import { D as Lock, G as Circle, J as CircleAlert, Q as Check, Y as ChevronUp, Z
 import { n as toast } from "../_libs/sonner.mjs";
 import { d as recordHeartbeat, f as toggleBookmarkApi, i as fetchCourses, r as fetchCoursePlayData, s as fetchMyCourses, u as markLessonCompletedApi } from "./api-BUiRiYXp.mjs";
 import { t as useAuthStore } from "./authStore-CaRoAg4M.mjs";
-import { t as Route } from "./courses-B3Ci4uAQ.mjs";
+import { t as Route } from "./courses-rGA_26I7.mjs";
 import { t as Badge } from "./badge-D1Dupn2y.mjs";
 import { i as AccordionTrigger, n as AccordionContent, r as AccordionItem, t as Accordion } from "./accordion-uwqhymWC.mjs";
 import { i as useQueryClient, n as useQuery, t as useMutation } from "../_libs/tanstack__react-query.mjs";
 import { a as SelectItemIndicator, c as SelectPortal, d as SelectSeparator$1, f as SelectTrigger$1, i as SelectItem$1, l as SelectScrollDownButton$1, m as SelectViewport, n as SelectContent$1, o as SelectItemText, p as SelectValue$1, r as SelectIcon, s as SelectLabel$1, t as Select$1, u as SelectScrollUpButton$1 } from "../_libs/@radix-ui/react-select+[...].mjs";
 import { a as Viewport, i as ScrollAreaThumb, n as Root, r as ScrollAreaScrollbar, t as Corner } from "../_libs/radix-ui__react-scroll-area.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/courses-v8tWcZA7.js
+//#region node_modules/.nitro/vite/services/ssr/assets/courses-Dkr5JN7M.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var Select = Select$1;
@@ -145,6 +145,25 @@ function useHeartbeat(lessonId, currentTime) {
 		};
 	}, [lessonId, syncHeartbeat]);
 }
+function loadPlayerJs() {
+	if (typeof window === "undefined") return Promise.reject();
+	if (window.playerjs) return Promise.resolve(window.playerjs);
+	return new Promise((resolve, reject) => {
+		const existing = document.querySelector("script[src*=\"player-0.1.0.min.js\"]");
+		if (existing) {
+			if (window.playerjs) return resolve(window.playerjs);
+			existing.addEventListener("load", () => resolve(window.playerjs));
+			existing.addEventListener("error", reject);
+			return;
+		}
+		const script = document.createElement("script");
+		script.src = "https://assets.mediadelivery.net/playerjs/player-0.1.0.min.js";
+		script.async = true;
+		script.onload = () => resolve(window.playerjs);
+		script.onerror = reject;
+		document.head.appendChild(script);
+	});
+}
 var getNormalizedBunnyUrl = (raw, startSeconds) => {
 	if (!raw) return "";
 	let url = raw.trim();
@@ -156,17 +175,18 @@ var getNormalizedBunnyUrl = (raw, startSeconds) => {
 		parsed.searchParams.set("loop", "false");
 		parsed.searchParams.set("muted", "false");
 		parsed.searchParams.set("preload", "true");
-		if (startSeconds && startSeconds > 2) parsed.searchParams.set("t", `${Math.floor(startSeconds)}s`);
+		if (startSeconds && startSeconds > 2) parsed.searchParams.set("t", `${Math.floor(startSeconds)}`);
 		return parsed.toString();
 	} catch {
 		url = url.replace("autoplay=true", "autoplay=false");
 		if (!url.includes("autoplay=false")) url += (url.includes("?") ? "&" : "?") + "autoplay=false";
-		if (startSeconds && startSeconds > 2 && !url.includes("t=")) url += `&t=${Math.floor(startSeconds)}s`;
+		if (startSeconds && startSeconds > 2 && !url.includes("t=")) url += `&t=${Math.floor(startSeconds)}`;
 		return url;
 	}
 };
 function BunnyPlayer({ lessonId, videoUrlOrId, isProblem, explanationEndSeconds, initialTimestamp, isAlreadyCompleted, onProgress }) {
 	const iframeRef = (0, import_react.useRef)(null);
+	const playerInstanceRef = (0, import_react.useRef)(null);
 	const explanationNotifiedRef = (0, import_react.useRef)(false);
 	const initialPosition = (0, import_react.useMemo)(() => {
 		try {
@@ -181,9 +201,27 @@ function BunnyPlayer({ lessonId, videoUrlOrId, isProblem, explanationEndSeconds,
 	const [currentTime, setCurrentTime] = (0, import_react.useState)(initialPosition);
 	const [maxWatched, setMaxWatched] = (0, import_react.useState)(initialPosition);
 	useHeartbeat(lessonId, maxWatched);
+	const handleTimeUpdate = (seconds) => {
+		if (typeof seconds !== "number" || isNaN(seconds) || seconds < 0) return;
+		setCurrentTime(seconds);
+		if (seconds > 0) try {
+			localStorage.setItem(`cb_video_pos_${lessonId}`, seconds.toString());
+		} catch {}
+		setMaxWatched((prevMax) => {
+			const newMax = Math.max(prevMax, seconds);
+			onProgress?.(seconds, newMax);
+			return newMax;
+		});
+		if (isProblem && explanationEndSeconds && seconds >= explanationEndSeconds && !explanationNotifiedRef.current && !isAlreadyCompleted) {
+			explanationNotifiedRef.current = true;
+			toast.success("Explanation complete! 'Mark as Complete' is now unlocked.", { id: `explanation-unlocked-${lessonId}` });
+		}
+	};
 	const postToIframe = (method, value) => {
 		try {
 			if (iframeRef.current?.contentWindow) iframeRef.current.contentWindow.postMessage(JSON.stringify({
+				context: "player.js",
+				version: "0.0.11",
 				method,
 				value
 			}), "*");
@@ -196,6 +234,46 @@ function BunnyPlayer({ lessonId, videoUrlOrId, isProblem, explanationEndSeconds,
 		onProgress?.(initialPosition, initialPosition);
 	}, [lessonId, initialPosition]);
 	(0, import_react.useEffect)(() => {
+		let isCancelled = false;
+		loadPlayerJs().then((playerjs) => {
+			if (isCancelled || !iframeRef.current) return;
+			try {
+				if (playerInstanceRef.current) try {
+					playerInstanceRef.current.off("ready");
+					playerInstanceRef.current.off("timeupdate");
+					playerInstanceRef.current.off("seeked");
+					playerInstanceRef.current.off("pause");
+				} catch {}
+				const player = new playerjs.Player(iframeRef.current);
+				playerInstanceRef.current = player;
+				player.on("ready", () => {
+					if (initialPosition > 2) player.setCurrentTime(initialPosition);
+				});
+				player.on("timeupdate", (data) => {
+					const secs = typeof data === "object" && typeof data?.seconds === "number" ? data.seconds : typeof data === "number" ? data : 0;
+					handleTimeUpdate(secs);
+				});
+				player.on("seeked", (data) => {
+					const secs = typeof data === "object" && typeof data?.seconds === "number" ? data.seconds : typeof data === "number" ? data : 0;
+					if (secs > 0) handleTimeUpdate(secs);
+					else player.getCurrentTime((t) => {
+						if (typeof t === "number") handleTimeUpdate(t);
+					});
+				});
+				player.on("pause", () => {
+					player.getCurrentTime((t) => {
+						if (typeof t === "number") handleTimeUpdate(t);
+					});
+				});
+			} catch (err) {
+				console.warn("[BunnyPlayer] Player.js initialization fallback:", err);
+			}
+		}).catch(() => {});
+		return () => {
+			isCancelled = true;
+		};
+	}, [lessonId, initialPosition]);
+	(0, import_react.useEffect)(() => {
 		const handleMessage = (event) => {
 			if (typeof event.origin === "string" && !event.origin.includes("mediadelivery.net")) return;
 			try {
@@ -203,50 +281,22 @@ function BunnyPlayer({ lessonId, videoUrlOrId, isProblem, explanationEndSeconds,
 				if (!data || typeof data !== "object") return;
 				if (data.event === "ready") {
 					postToIframe("addEventListener", "timeupdate");
-					postToIframe("addEventListener", "seek");
-					postToIframe("addEventListener", "play");
+					postToIframe("addEventListener", "seeked");
 					postToIframe("addEventListener", "pause");
-					postToIframe("addEventListener", "ended");
-					if (initialPosition > 2) {
-						postToIframe("setCurrentTime", initialPosition);
-						postToIframe("pause");
-					}
+					if (initialPosition > 2) postToIframe("setCurrentTime", initialPosition);
 				}
-				if (data.event === "timeupdate" || data.event === "seek") {
+				if (data.event === "timeupdate" || data.event === "seeked") {
 					let timeVal = null;
 					if (typeof data.value === "object" && data.value !== null && typeof data.value.seconds === "number") timeVal = data.value.seconds;
 					else if (typeof data.value === "number") timeVal = data.value;
 					else if (typeof data.seconds === "number") timeVal = data.seconds;
-					else if (typeof data.currentTime === "number") timeVal = data.currentTime;
-					else if (typeof data.time === "number") timeVal = data.time;
-					if (timeVal !== null && !isNaN(timeVal) && timeVal >= 0) {
-						setCurrentTime(timeVal);
-						if (timeVal > 0) try {
-							localStorage.setItem(`cb_video_pos_${lessonId}`, timeVal.toString());
-						} catch {}
-						setMaxWatched((prevMax) => {
-							const newMax = Math.max(prevMax, timeVal);
-							onProgress?.(timeVal, newMax);
-							return newMax;
-						});
-						if (isProblem && explanationEndSeconds && timeVal >= explanationEndSeconds && !explanationNotifiedRef.current && !isAlreadyCompleted) {
-							explanationNotifiedRef.current = true;
-							toast.success("Explanation complete! 'Mark as Complete' is now unlocked.", { id: `explanation-unlocked-${lessonId}` });
-						}
-					}
+					if (timeVal !== null && !isNaN(timeVal) && timeVal >= 0) handleTimeUpdate(timeVal);
 				}
 			} catch {}
 		};
 		window.addEventListener("message", handleMessage);
 		return () => window.removeEventListener("message", handleMessage);
-	}, [
-		lessonId,
-		initialPosition,
-		isProblem,
-		explanationEndSeconds,
-		isAlreadyCompleted,
-		onProgress
-	]);
+	}, [lessonId, initialPosition]);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 		className: "w-full aspect-video bg-black rounded-xl border border-white/10 overflow-hidden relative shadow-2xl",
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("iframe", {
@@ -254,6 +304,13 @@ function BunnyPlayer({ lessonId, videoUrlOrId, isProblem, explanationEndSeconds,
 			src: (0, import_react.useMemo)(() => {
 				return getNormalizedBunnyUrl(videoUrlOrId, initialPosition);
 			}, [videoUrlOrId, initialPosition]),
+			onLoad: () => {
+				postToIframe("addEventListener", "ready");
+				postToIframe("addEventListener", "timeupdate");
+				postToIframe("addEventListener", "seeked");
+				postToIframe("addEventListener", "pause");
+				if (initialPosition > 2) postToIframe("setCurrentTime", initialPosition);
+			},
 			className: "w-full h-full border-0 absolute inset-0",
 			allow: "accelerometer; gyroscope; encrypted-media; picture-in-picture;",
 			allowFullScreen: true

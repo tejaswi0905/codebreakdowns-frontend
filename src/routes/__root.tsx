@@ -155,6 +155,7 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="en" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+        <script src="https://assets.mediadelivery.net/playerjs/player-0.1.0.min.js" async />
         <HeadContent />
       </head>
       <body>

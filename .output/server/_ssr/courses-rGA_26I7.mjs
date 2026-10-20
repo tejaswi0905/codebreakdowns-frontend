@@ -1,7 +1,7 @@
 import { _ as createFileRoute, g as lazyRouteComponent } from "../_libs/@tanstack/react-router+[...].mjs";
 import { n as stringType, t as objectType } from "../_libs/zod.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/courses-B3Ci4uAQ.js
-var $$splitComponentImporter = () => import("./courses-v8tWcZA7.mjs");
+//#region node_modules/.nitro/vite/services/ssr/assets/courses-rGA_26I7.js
+var $$splitComponentImporter = () => import("./courses-Dkr5JN7M.mjs");
 var courseSearchSchema = objectType({
 	courseId: stringType().optional(),
 	lessonId: stringType().optional()

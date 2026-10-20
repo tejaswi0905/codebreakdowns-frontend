@@ -7,13 +7,13 @@ import { S as useRouter, _ as createFileRoute, d as HeadContent, f as useRouterS
 import { C as Menu, E as LogOut, F as Github, G as Circle, N as Heart, P as GraduationCap, Q as Check, T as Mail, U as CodeXml, X as ChevronRight, a as User, b as Moon, c as Sun, j as LifeBuoy, o as Twitter, w as MapPin } from "../_libs/lucide-react.mjs";
 import { t as Toaster } from "../_libs/sonner.mjs";
 import { t as useAuthStore } from "./authStore-CaRoAg4M.mjs";
-import { t as Route$12 } from "./courses-B3Ci4uAQ.mjs";
+import { t as Route$12 } from "./courses-rGA_26I7.mjs";
 import { t as QueryClient } from "../_libs/tanstack__query-core.mjs";
 import { r as QueryClientProvider } from "../_libs/tanstack__react-query.mjs";
 import { t as Route$13 } from "./overview-DbF4Z_LC.mjs";
 import { n as AvatarFallback, t as Avatar } from "./avatar-CiQwCJNR.mjs";
 import { a as Label2, c as Root2, d as SubTrigger2, f as Trigger, i as ItemIndicator2, l as Separator2, n as Content2, o as Portal2, r as Item2, s as RadioItem2, t as CheckboxItem2, u as SubContent2 } from "../_libs/@radix-ui/react-dropdown-menu+[...].mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-MFhRArSo.js
+//#region node_modules/.nitro/vite/services/ssr/assets/router-CHjPcNYO.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var styles_default = "/assets/styles-C7MRBium.css";
@@ -650,7 +650,14 @@ function RootShell({ children }) {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("html", {
 		lang: "en",
 		suppressHydrationWarning: true,
-		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("head", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("script", { dangerouslySetInnerHTML: { __html: themeInitScript } }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(HeadContent, {})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("body", { children: [children, /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Scripts, {})] })]
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("head", { children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("script", { dangerouslySetInnerHTML: { __html: themeInitScript } }),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("script", {
+				src: "https://assets.mediadelivery.net/playerjs/player-0.1.0.min.js",
+				async: true
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(HeadContent, {})
+		] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("body", { children: [children, /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Scripts, {})] })]
 	});
 }
 function RootComponent() {
