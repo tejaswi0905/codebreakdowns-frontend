@@ -1,6 +1,6 @@
 import { a as __toESM, t as __commonJSMin } from "../../_runtime.mjs";
 import { l as require_react_dom, u as require_react } from "../@floating-ui/react-dom+[...].mjs";
-import { t as composeEventHandlers } from "../radix-ui__primitive.mjs";
+import { n as composeEventHandlers } from "../radix-ui__primitive.mjs";
 //#region node_modules/react/cjs/react-jsx-runtime.production.js
 /**
 * @license React

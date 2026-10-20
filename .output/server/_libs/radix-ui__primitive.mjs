@@ -1,24 +1,32 @@
+typeof window !== "undefined" && window.document && window.document.createElement;
+function composeEventHandlers$1(originalEventHandler, ourEventHandler, { checkForDefaultPrevented = true } = {}) {
+	return function handleEvent(event) {
+		originalEventHandler?.(event);
+		if (checkForDefaultPrevented === false || !event || !event.defaultPrevented) return ourEventHandler?.(event);
+	};
+}
+//#endregion
 //#region node_modules/@radix-ui/react-select/node_modules/@radix-ui/primitive/dist/index.mjs
 var __defProp = Object.defineProperty;
 var __name = (target, value) => __defProp(target, "name", {
 	value,
 	configurable: true
 });
-var canUseDOM$1 = !!(typeof window !== "undefined" && window.document && window.document.createElement);
-function composeEventHandlers$1(originalEventHandler, ourEventHandler, { checkForDefaultPrevented = true } = {}) {
+var canUseDOM = !!(typeof window !== "undefined" && window.document && window.document.createElement);
+function composeEventHandlers(originalEventHandler, ourEventHandler, { checkForDefaultPrevented = true } = {}) {
 	return /* @__PURE__ */ __name(function handleEvent(event) {
 		originalEventHandler?.(event);
 		if (checkForDefaultPrevented === false || !event || !event.defaultPrevented) return ourEventHandler?.(event);
 	}, "handleEvent");
 }
-__name(composeEventHandlers$1, "composeEventHandlers");
+__name(composeEventHandlers, "composeEventHandlers");
 function getOwnerWindow(element) {
-	if (!canUseDOM$1) throw new Error("Cannot access window outside of the DOM");
+	if (!canUseDOM) throw new Error("Cannot access window outside of the DOM");
 	return element?.ownerDocument?.defaultView ?? window;
 }
 __name(getOwnerWindow, "getOwnerWindow");
 function getOwnerDocument(element) {
-	if (!canUseDOM$1) throw new Error("Cannot access document outside of the DOM");
+	if (!canUseDOM) throw new Error("Cannot access document outside of the DOM");
 	return element?.ownerDocument ?? document;
 }
 __name(getOwnerDocument, "getOwnerDocument");
@@ -40,12 +48,5 @@ function isFrame(element) {
 	return element.tagName === "IFRAME";
 }
 __name(isFrame, "isFrame");
-typeof window !== "undefined" && window.document && window.document.createElement;
-function composeEventHandlers(originalEventHandler, ourEventHandler, { checkForDefaultPrevented = true } = {}) {
-	return function handleEvent(event) {
-		originalEventHandler?.(event);
-		if (checkForDefaultPrevented === false || !event || !event.defaultPrevented) return ourEventHandler?.(event);
-	};
-}
 //#endregion
 export { composeEventHandlers$1 as n, composeEventHandlers as t };

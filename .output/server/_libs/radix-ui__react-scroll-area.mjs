@@ -1,8 +1,8 @@
 import { a as __toESM } from "../_runtime.mjs";
 import { u as require_react } from "./@floating-ui/react-dom+[...].mjs";
 import { c as Presence, f as useLayoutEffect2, g as require_jsx_runtime, h as createContextScope, l as Primitive, m as useComposedRefs, o as useDirection } from "./@radix-ui/react-accordion+[...].mjs";
+import { n as composeEventHandlers } from "./radix-ui__primitive.mjs";
 import { t as clamp } from "./radix-ui__number.mjs";
-import { t as composeEventHandlers } from "./radix-ui__primitive.mjs";
 import { i as useCallbackRef } from "./@radix-ui/react-avatar+[...].mjs";
 //#region node_modules/@radix-ui/react-scroll-area/dist/index.mjs
 var import_react = /* @__PURE__ */ __toESM(require_react(), 1);

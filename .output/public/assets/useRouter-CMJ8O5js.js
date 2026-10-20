@@ -1,0 +1,1 @@
+import{a as e,u as t}from"./utils-Dg9KQAHE.js";var n=t(e(),1),r=n.createContext(null);function i(e){return n.useContext(r)}export{r as n,i as t};

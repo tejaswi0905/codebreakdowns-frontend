@@ -42,6 +42,7 @@ import {
   markLessonComplete,
   markLessonCompletedApi,
   toggleBookmarkApi,
+  recordHeartbeat,
 } from "@/services/api";
 import { BunnyPlayer } from "@/components/BunnyPlayer";
 import { toast } from "sonner";
@@ -541,6 +542,11 @@ function LockedLessonCard({
     </div>
   );
 }
+const formatTime = (totalSeconds: number): string => {
+  const m = Math.floor(totalSeconds / 60);
+  const s = Math.floor(totalSeconds % 60);
+  return `${m}:${s < 10 ? "0" : ""}${s}`;
+};
 
 function Workspace({ 
   lesson, 
@@ -568,7 +574,35 @@ function Workspace({
   const isCompleted = lesson.progress?.[0]?.isCompleted || false;
   const initialTimestamp = lesson.progress?.[0]?.highestTimestampSecs || 0;
 
+  const [playerMaxWatched, setPlayerMaxWatched] = useState<number>(() => {
+    try {
+      const cached = localStorage.getItem(`cb_video_pos_${lesson.id}`);
+      if (cached) {
+        const val = parseFloat(cached);
+        if (!isNaN(val)) return Math.max(val, initialTimestamp);
+      }
+    } catch {}
+    return initialTimestamp;
+  });
+
+  // Re-synchronize local watch state when active lesson changes
+  useEffect(() => {
+    let startVal = initialTimestamp;
+    try {
+      const cached = localStorage.getItem(`cb_video_pos_${lesson.id}`);
+      if (cached) {
+        const val = parseFloat(cached);
+        if (!isNaN(val)) startVal = Math.max(val, initialTimestamp);
+      }
+    } catch {}
+    setPlayerMaxWatched(startVal);
+  }, [lesson.id, initialTimestamp]);
+
   const isLocked = lesson.isLocked || (!courseIsPurchased && !lesson.isPreview);
+
+  const explanationEnd = lesson.explanationEndSeconds;
+  const isProblemWithExplanation = lesson.isProblem && typeof explanationEnd === "number" && explanationEnd > 0;
+  const hasWatchedExplanation = !isProblemWithExplanation || isCompleted || playerMaxWatched >= explanationEnd;
 
   const bookmarkMutation = useMutation({
     mutationFn: (newVal: boolean) => toggleBookmarkApi(lesson.id, newVal),
@@ -721,6 +755,9 @@ function Workspace({
               explanationEndSeconds={lesson.explanationEndSeconds}
               initialTimestamp={initialTimestamp}
               isAlreadyCompleted={isCompleted}
+              onProgress={(_curr, max) => {
+                setPlayerMaxWatched((prev) => Math.max(prev, max));
+              }}
               onLessonComplete={() => {
                 queryClient.invalidateQueries({ queryKey: ["course-play", courseId] });
                 queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
@@ -789,11 +826,22 @@ function Workspace({
             >
               <Lock className="h-3.5 w-3.5" /> Locked
             </Button>
+          ) : !hasWatchedExplanation ? (
+            <Button
+              size="sm"
+              variant="outline"
+              className="gap-2 h-9 rounded-lg font-medium shadow-sm opacity-70 cursor-not-allowed bg-muted/40 border-dashed text-muted-foreground select-none"
+              disabled
+              title={`Watch explanation up to ${formatTime(explanationEnd!)} to complete`}
+            >
+              <Lock className="h-3.5 w-3.5 text-muted-foreground" />
+              <span>Watch to Complete ({formatTime(Math.min(playerMaxWatched, explanationEnd!))} / {formatTime(explanationEnd!)})</span>
+            </Button>
           ) : (
             <Button
               size="sm"
-              className="gap-2 h-9 rounded-lg font-bold shadow-sm"
-              onClick={() => {
+              className="gap-2 h-9 rounded-lg font-bold shadow-sm transition-all duration-200 animate-in fade-in"
+              onClick={async () => {
                 if (!isAuthenticated) {
                   toast.info("Please sign in to track completed lessons.", {
                     action: { label: "Sign In", onClick: () => navigate({ to: "/login" }) },
@@ -801,18 +849,26 @@ function Workspace({
                   return;
                 }
                 setCompleteLoading(true);
-                markLessonCompletedApi(lesson.id).then((res) => {
-                  setCompleteLoading(false);
+                try {
+                  // Guarantee the backend database has highestTimestampSecs recorded before marking complete
+                  if (playerMaxWatched > 0) {
+                    await recordHeartbeat(lesson.id, Math.floor(playerMaxWatched));
+                  }
+                  const res = await markLessonCompletedApi(lesson.id);
                   if (res.success) {
-                    toast.success("Marked as complete!");
+                    toast.success("Lesson marked as complete! 🎉");
                     queryClient.invalidateQueries({ queryKey: ["course-play", courseId] });
                     queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
                   } else {
                     toast.error(res.error || "Could not complete lesson");
                   }
-                });
+                } catch (err: any) {
+                  toast.error(err?.message || "Failed to mark lesson complete");
+                } finally {
+                  setCompleteLoading(false);
+                }
               }}
-              disabled={isLocked || completeLoading}
+              disabled={completeLoading}
             >
               <Check className="h-4 w-4" /> {completeLoading ? "Saving..." : "Mark as Complete"}
             </Button>
