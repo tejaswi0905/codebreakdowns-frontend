@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion, Variants } from "framer-motion";
-import { Github, MapPin, Code2, Users, GraduationCap, Quote, ArrowRight, Play, BookOpen, MonitorPlay, MessageSquare, Twitter, Youtube, GithubIcon } from "lucide-react";
+import { Github, MapPin, Code2, Users, GraduationCap, Quote, ArrowRight, Play, BookOpen, MonitorPlay, MessageSquare, GithubIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useState, useEffect } from "react";
@@ -9,6 +9,15 @@ import { GlobeMap, calculateDistanceKm } from "../components/GlobeMap";
 const HQ_LOCATION = { lat: 17.4480, lng: 78.3812, city: "Hyderabad" };
 
 export const Route = createFileRoute("/about")({
+  head: () => ({
+    meta: [
+      { title: "About Us — CodeBreakdowns" },
+      {
+        name: "description",
+        content: "Learn about the mission, engineers, and vision behind CodeBreakdowns technical interview and architecture prep.",
+      },
+    ],
+  }),
   component: AboutPage,
 });
 
@@ -213,56 +222,6 @@ function AboutPage() {
           </Button>
         </div>
       </section>
-
-      {/* Structured Footer */}
-      <footer className="bg-background py-16 px-6">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8">
-          
-          <div className="md:col-span-2">
-            <span className="font-bold text-foreground text-2xl tracking-tight block mb-4">Codebreakdowns.</span>
-            <p className="text-muted-foreground max-w-xs mb-6">
-              The blueprint for tech internships and developer roles. Built by engineers, for engineers.
-            </p>
-            <p className="text-sm text-muted-foreground/70">
-              © {new Date().getFullYear()} All rights reserved.
-            </p>
-          </div>
-
-          <div>
-            <h4 className="font-semibold text-foreground mb-4">Courses</h4>
-            <ul className="space-y-3">
-              <li><Link to="/courses" className="text-muted-foreground hover:text-primary transition-colors">Blind 75 Breakdown</Link></li>
-              <li><Link to="/courses" className="text-muted-foreground hover:text-primary transition-colors">Blind 150 Extension</Link></li>
-              <li><Link to="/courses" className="text-muted-foreground hover:text-primary transition-colors">Blind SQL 25</Link></li>
-              <li><Link to="/courses" className="text-muted-foreground hover:text-primary transition-colors">Backend Essentials</Link></li>
-              <li><Link to="/courses" className="text-muted-foreground hover:text-primary transition-colors">Resume Projects</Link></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="font-semibold text-foreground mb-4">Social</h4>
-            <ul className="space-y-3">
-              <li>
-                <a href="https://twitter.com" target="_blank" rel="noreferrer" className="flex items-center text-muted-foreground hover:text-primary transition-colors">
-                  <Twitter className="w-4 h-4 mr-2" /> Twitter
-                </a>
-              </li>
-              <li>
-                <a href="https://youtube.com" target="_blank" rel="noreferrer" className="flex items-center text-muted-foreground hover:text-primary transition-colors">
-                  <Youtube className="w-4 h-4 mr-2" /> YouTube
-                </a>
-              </li>
-              <li>
-                <a href="https://github.com" target="_blank" rel="noreferrer" className="flex items-center text-muted-foreground hover:text-primary transition-colors">
-                  <Github className="w-4 h-4 mr-2" /> GitHub
-                </a>
-              </li>
-            </ul>
-          </div>
-
-        </div>
-      </footer>
-
     </div>
   );
 }

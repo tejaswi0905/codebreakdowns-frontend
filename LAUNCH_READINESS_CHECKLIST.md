@@ -27,7 +27,7 @@ This document tracks all prioritized items required to bring **CodeBreakdowns** 
   - Dynamically render the active course roadmap, title, and progress metrics based on real database curriculum data.
   - Add an intuitive empty state when a selected course has unpublished modules.
 
-- [ ] **Item 5: Eliminate Double Footer on `/about` & Dead Anchor Links in `/login`**
+- [x] **Item 5: Eliminate Double Footer on `/about` & Dead Anchor Links in `/login`**
   - Remove the redundant `<footer>` declared inside [`src/routes/about.tsx`](file:///c:/Users/surek/OneDrive/Desktop/Coding/codebreakdowns-frontend/src/routes/about.tsx) (prevents two stacked footers from rendering on `/about`).
   - Update dead `<a href="#">` links in [`src/routes/login.tsx`](file:///c:/Users/surek/OneDrive/Desktop/Coding/codebreakdowns-frontend/src/routes/login.tsx) to properly link to `/terms-and-conditions` and `/privacy-policy`.
 
