@@ -75,7 +75,19 @@ export const Route = createFileRoute("/")({
       },
       {
         property: "og:image",
-        content: "/og-image.png",
+        content: "https://codebreakdowns.in/og-image.png",
+      },
+      {
+        property: "og:image:width",
+        content: "1200",
+      },
+      {
+        property: "og:image:height",
+        content: "630",
+      },
+      {
+        property: "og:image:type",
+        content: "image/png",
       },
       // Twitter Card
       {
@@ -93,7 +105,7 @@ export const Route = createFileRoute("/")({
       },
       {
         name: "twitter:image",
-        content: "/og-image.png",
+        content: "https://codebreakdowns.in/og-image.png",
       },
     ],
   }),

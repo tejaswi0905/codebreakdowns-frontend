@@ -35,7 +35,7 @@ This document tracks all prioritized items required to bring **CodeBreakdowns** 
 
 ## 🟡 Category 2: Pre-Launch Polish & Missing Media Assets
 
-- [ ] **Item 6: Create & Deploy Social Share OpenGraph Asset (`og-image.png`)**
+- [x] **Item 6: Create & Deploy Social Share OpenGraph Asset (`og-image.png`)**
   - Add high-resolution (1200×630px) branded OpenGraph preview card to [`codebreakdowns-frontend/public/og-image.png`](file:///c:/Users/surek/OneDrive/Desktop/Coding/codebreakdowns-frontend/public).
   - Verify rich link previews across Twitter/X, WhatsApp, Discord, and LinkedIn.
 

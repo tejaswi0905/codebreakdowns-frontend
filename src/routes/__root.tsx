@@ -118,11 +118,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         },
         {
           property: "og:image",
-          content: "/og-image.png",
+          content: "https://codebreakdowns.in/og-image.png",
         },
+        { property: "og:image:width", content: "1200" },
+        { property: "og:image:height", content: "630" },
+        { property: "og:image:type", content: "image/png" },
         {
           name: "twitter:image",
-          content: "/og-image.png",
+          content: "https://codebreakdowns.in/og-image.png",
         },
       ],
       links: [
