@@ -39,7 +39,7 @@ This document tracks all prioritized items required to bring **CodeBreakdowns** 
   - Add high-resolution (1200×630px) branded OpenGraph preview card to [`codebreakdowns-frontend/public/og-image.png`](file:///c:/Users/surek/OneDrive/Desktop/Coding/codebreakdowns-frontend/public).
   - Verify rich link previews across Twitter/X, WhatsApp, Discord, and LinkedIn.
 
-- [ ] **Item 7: First-Time Student Dashboard Onboarding & Empty States**
+- [x] **Item 7: First-Time Student Dashboard Onboarding & Empty States**
   - Polish the zero-enrollment state in [`dashboard.tsx`](file:///c:/Users/surek/OneDrive/Desktop/Coding/codebreakdowns-frontend/src/routes/dashboard.tsx) with recommended starting paths (Blind 75 or Free modules) to guide first-time students.
   - Ensure fast 1-click continuation cards highlight the most recent unfinished lesson.
 
