@@ -16,12 +16,23 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/lib/theme";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/authStore";
+
+function getInitials(name?: string): string {
+  if (!name) return "U";
+  const trimmed = name.trim();
+  if (!trimmed) return "U";
+  const parts = trimmed.split(/\s+/);
+  if (parts.length >= 2) {
+    return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+  }
+  return trimmed.slice(0, 2).toUpperCase();
+}
 
 export function Navbar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -121,18 +132,21 @@ export function Navbar() {
                   className="rounded-full ring-offset-background transition-all hover:ring-2 hover:ring-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 >
                   <Avatar className="h-9 w-9 border border-border">
-                    <AvatarFallback className="bg-primary/10 text-sm font-medium text-primary">
-                      {user.displayName?.charAt(0) || user.username?.charAt(0) || "U"}
+                    {user.avatarUrl && (
+                      <AvatarImage src={user.avatarUrl} alt={user.name || "User"} />
+                    )}
+                    <AvatarFallback className="bg-primary/10 text-sm font-semibold text-primary">
+                      {getInitials(user.name)}
                     </AvatarFallback>
                   </Avatar>
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel>
-                  <div className="flex flex-col">
-                    <span className="text-sm font-medium">{user.displayName || user.username}</span>
-                    <span className="text-xs text-muted-foreground">
-                      @{user.username}
+                  <div className="flex flex-col space-y-0.5">
+                    <span className="text-sm font-semibold truncate text-foreground">{user.name || "Learner"}</span>
+                    <span className="text-xs text-muted-foreground truncate font-normal">
+                      {user.email}
                     </span>
                   </div>
                 </DropdownMenuLabel>
@@ -147,8 +161,10 @@ export function Navbar() {
                     <GraduationCap className="mr-2 h-4 w-4" /> My Purchases
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <LifeBuoy className="mr-2 h-4 w-4" /> Help & Support
+                <DropdownMenuItem asChild>
+                  <Link to="/contact" className="cursor-pointer">
+                    <LifeBuoy className="mr-2 h-4 w-4" /> Help & Support
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem 

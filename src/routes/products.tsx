@@ -346,8 +346,8 @@ function ProductsPage() {
           }
         },
         prefill: {
-          name: user.displayName || user.username || "Student",
-          email: "",
+          name: user.name || "Student",
+          email: user.email || "",
         },
         theme: {
           color: "#3b82f6",

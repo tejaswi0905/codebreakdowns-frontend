@@ -7,12 +7,15 @@ interface AuthState {
   isLoading: boolean;
   checkAuth: () => Promise<void>;
   logout: () => Promise<void>;
+  setUser: (user: User) => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   isAuthenticated: false,
   isLoading: true, // Start loading as true so we don't flash unauthenticated states
+
+  setUser: (user: User) => set({ user, isAuthenticated: true }),
 
   checkAuth: async () => {
     try {

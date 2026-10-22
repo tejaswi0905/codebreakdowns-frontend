@@ -31,15 +31,35 @@ export interface ApiProduct {
 }
 
 export interface User {
-  _id: string;
-  githubId: string;
-  username: string;
-  displayName: string;
-  avatarUrl: string;
-  profileUrl: string;
+  id: string;
+  name: string;
+  email: string;
+  avatarUrl: string | null;
   role: string;
-  createdAt: string;
-  updatedAt: string;
+  phone?: string | null;
+  college?: string | null;
+  degree?: string | null;
+  gradYear?: string | null;
+  city?: string | null;
+  state?: string | null;
+  country?: string | null;
+  linkedin?: string | null;
+  github?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface UpdateProfilePayload {
+  name?: string;
+  phone?: string | null;
+  college?: string | null;
+  degree?: string | null;
+  gradYear?: string | null;
+  city?: string | null;
+  state?: string | null;
+  country?: string | null;
+  linkedin?: string | null;
+  github?: string | null;
 }
 
 export interface CoursePlayData {
@@ -167,6 +187,19 @@ export const fetchCurrentUser = async (): Promise<User | null> => {
     console.error("fetchCurrentUser error:", error);
     return null;
   }
+};
+
+export const updateUserProfile = async (payload: UpdateProfilePayload): Promise<User> => {
+  const response = await authFetch(`/users/me`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || "Failed to update profile");
+  }
+  const data = await response.json();
+  return data.data;
 };
 
 export const markLessonComplete = async (lessonId: string): Promise<boolean> => {

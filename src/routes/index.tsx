@@ -558,7 +558,7 @@ function OpportunitiesSection() {
 
   useEffect(() => {
     if (isAuthenticated && user) {
-      const key = `codebreakdowns_opps_notified_${user.username || user._id}`;
+      const key = `codebreakdowns_opps_notified_${user.id || user.email}`;
       const stored = localStorage.getItem(key);
       if (stored === "true") {
         setNotified(true);
@@ -568,7 +568,7 @@ function OpportunitiesSection() {
 
   const handleNotifyMe = () => {
     if (!isAuthenticated || !user) return;
-    const key = `codebreakdowns_opps_notified_${user.username || user._id}`;
+    const key = `codebreakdowns_opps_notified_${user.id || user.email}`;
     localStorage.setItem(key, "true");
     setNotified(true);
     toast.success("You're on the priority hiring waitlist! 🎉", {
@@ -652,7 +652,7 @@ function OpportunitiesSection() {
                 </div>
                 <h3 className="text-lg sm:text-xl font-bold text-foreground mb-1">You&apos;re On The Priority Waitlist</h3>
                 <p className="text-xs sm:text-sm text-muted-foreground max-w-md mb-5 leading-relaxed">
-                  We have registered your account (<span className="font-semibold text-foreground">@{user?.username}</span>). As soon as partner company openings drop, you&apos;ll be among the first to receive invitation links and referral passes.
+                  We have registered your account (<span className="font-semibold text-foreground">{user?.email || user?.name}</span>). As soon as partner company openings drop, you&apos;ll be among the first to receive invitation links and referral passes.
                 </p>
                 <div className="inline-flex items-center gap-2 text-xs font-semibold text-emerald-500 bg-emerald-500/10 px-4 py-2 rounded-full border border-emerald-500/20">
                   <CheckCircle2 className="w-3.5 h-3.5" /> Notification Active
@@ -665,7 +665,7 @@ function OpportunitiesSection() {
                 </div>
                 <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2">Be Notified When Openings Drop</h3>
                 <p className="text-xs sm:text-sm text-muted-foreground max-w-md mb-6 leading-relaxed">
-                  You&apos;re signed in as <span className="font-semibold text-foreground">@{user?.username}</span>. Click below to add yourself to the priority notification queue with one click.
+                  You&apos;re signed in as <span className="font-semibold text-foreground">{user?.name || user?.email}</span>. Click below to add yourself to the priority notification queue with one click.
                 </p>
                 <Button 
                   onClick={handleNotifyMe} 

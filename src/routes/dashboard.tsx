@@ -72,7 +72,7 @@ function DashboardPage() {
       <div className="mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">
-            Welcome back, <span className="text-primary">{user?.displayName || user?.username || "Learner"}</span>
+            Welcome back, <span className="text-primary">{user?.name || "Learner"}</span>
           </h1>
           <p className="mt-1 text-base text-muted-foreground">
             Ready to crush your next interview? Pick up where you left off.
