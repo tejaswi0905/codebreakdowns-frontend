@@ -2,7 +2,18 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { fetchCoursePlayData, fetchDashboardStats } from "@/services/api";
 import { z } from "zod";
-import { Play, CheckCircle2, Circle, Lock } from "lucide-react";
+import { 
+  Play, 
+  CheckCircle2, 
+  Circle, 
+  Lock, 
+  AlertCircle, 
+  ArrowLeft, 
+  Layers, 
+  Sparkles, 
+  BookOpen, 
+  Clock 
+} from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
@@ -12,6 +23,15 @@ const overviewSearchSchema = z.object({
 
 export const Route = createFileRoute("/overview")({
   validateSearch: overviewSearchSchema,
+  head: () => ({
+    meta: [
+      { title: "Course Overview & Roadmap — CodeBreakdowns" },
+      {
+        name: "description",
+        content: "Track your modular milestone progression, solved problems, and course roadmap.",
+      },
+    ],
+  }),
   component: CourseOverviewPage,
 });
 
@@ -38,89 +58,115 @@ function CourseOverviewContent({ courseId }: { courseId: string }) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[70vh] text-center px-4">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-4"></div>
-        <p className="text-muted-foreground mt-2">Loading roadmap...</p>
+        <p className="text-muted-foreground mt-2 text-sm">Loading course roadmap...</p>
       </div>
     );
   }
 
-  // --- MOCK DATA INJECTION ---
-  // If the real course exists but has no chapters, or if the API failed, we inject fake data.
-  // This ensures the UI is visible and beautiful right now, but will automatically 
-  // switch to real data once the backend returns it without ANY bugs!
-  const mockChapters = [
-    { id: "c1", title: "Arrays", isCompleted: true },
-    { id: "c2", title: "Strings", isCompleted: true },
-    { id: "c3", title: "Hashing", isCompleted: true },
-    { id: "c4", title: "Linked Lists", isCompleted: true },
-    { id: "c5", title: "Stacks", isCompleted: true },
-    { id: "c6", title: "Queues", isCompleted: true },
-    { id: "c7", title: "Binary Search", isCompleted: true },
-    { id: "c8", title: "Trees", isCompleted: false },
-    { id: "c9", title: "BST", isCompleted: false },
-    { id: "c10", title: "Heap", isCompleted: false },
-    { id: "c11", title: "Graphs", isCompleted: false },
-    { id: "c12", title: "Dynamic Programming", isCompleted: false },
-  ];
-
-  // Derive the active data safely
-  const courseTitle = realCourse?.title || "Blind 150";
-  
-  // Use real chapters if they exist and are populated, otherwise use mock chapters
-  let chapters = realCourse?.chapters || [];
-  let isUsingMock = false;
-  if (!chapters || chapters.length === 0) {
-    chapters = mockChapters as any;
-    isUsingMock = true;
+  // Error / Course Not Found State
+  if (error || !realCourse) {
+    return (
+      <div className="mx-auto max-w-4xl px-4 py-20 text-center sm:px-6 lg:px-8 min-h-[70vh] flex flex-col items-center justify-center">
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10 text-destructive mb-4 border border-destructive/20">
+          <AlertCircle className="h-8 w-8" />
+        </div>
+        <h2 className="text-2xl font-bold tracking-tight text-foreground">Course Roadmap Unavailable</h2>
+        <p className="mt-2 text-sm text-muted-foreground max-w-md mx-auto">
+          We could not load the curriculum for this course. You may not be enrolled, or the course ID is invalid.
+        </p>
+        <div className="mt-6 flex flex-wrap justify-center gap-3">
+          <Button asChild variant="outline">
+            <Link to="/dashboard">
+              <ArrowLeft className="mr-2 h-4 w-4" /> Back to Dashboard
+            </Link>
+          </Button>
+          <Button asChild>
+            <Link to="/products">Browse Course Catalog</Link>
+          </Button>
+        </div>
+      </div>
+    );
   }
 
-  // Calculate Progress Stats
+  const chapters = realCourse.chapters || [];
+
+  // Empty State: Course exists but has no published chapters yet
+  if (chapters.length === 0) {
+    return (
+      <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8 min-h-[70vh]">
+        <div className="mb-6">
+          <Link 
+            to="/dashboard" 
+            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" /> Back to Dashboard
+          </Link>
+        </div>
+
+        <Card className="border border-border p-8 sm:p-14 text-center rounded-2xl shadow-sm bg-card">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-5 border border-primary/20">
+            <Layers className="h-8 w-8" />
+          </div>
+          <h1 className="text-2xl font-bold text-foreground sm:text-3xl">
+            {realCourse.title}
+          </h1>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-muted text-muted-foreground mt-3 mb-4 border border-border">
+            <Sparkles className="w-3.5 h-3.5 text-primary" /> Curriculum in Preparation
+          </div>
+          <p className="max-w-lg mx-auto text-sm text-muted-foreground leading-relaxed">
+            The curriculum modules and lesson roadmaps for this course are currently being finalized. Once published, your lesson progression and interactive challenges will automatically appear here.
+          </p>
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
+            <Button asChild variant="outline">
+              <Link to="/dashboard">Back to My Courses</Link>
+            </Button>
+            <Button asChild>
+              <Link to="/products">Explore Catalog</Link>
+            </Button>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  // --- REAL CURRICULUM PROGRESS CALCULATION ---
+  let totalLessons = 0;
+  let completedLessons = 0;
   let totalProblems = 0;
   let solvedProblems = 0;
 
-  if (isUsingMock) {
-    totalProblems = 150;
-    solvedProblems = 63;
-  } else {
-    // Real calculation based on lessons
-    chapters.forEach((chapter: any) => {
-      chapter.lessons?.forEach((lesson: any) => {
-        if (lesson.isProblem) {
-          totalProblems++;
-          const isCompleted = lesson.progress?.[0]?.isCompleted;
-          if (isCompleted) solvedProblems++;
-        }
-      });
-    });
-  }
+  chapters.forEach((chapter) => {
+    (chapter.lessons || []).forEach((lesson) => {
+      totalLessons++;
+      const isCompleted = Boolean(lesson.progress?.[0]?.isCompleted);
+      if (isCompleted) completedLessons++;
 
-  // Fallback to avoid divide by zero
-  if (totalProblems === 0) totalProblems = 1;
-  const remainingProblems = totalProblems - solvedProblems;
-  const progressPercentage = Math.round((solvedProblems / totalProblems) * 100);
-
-  // Determine current module
-  // Find the first chapter that has incomplete lessons (or just the first incomplete chapter in mock)
-  let currentModuleTitle = "Introduction";
-  let currentTopicTitle = "Getting Started";
-  
-  if (isUsingMock) {
-    const firstIncomplete = mockChapters.find(c => !c.isCompleted);
-    currentModuleTitle = firstIncomplete ? firstIncomplete.title : mockChapters[0].title;
-    currentTopicTitle = "Binary Search Tree"; // As per screenshot
-  } else {
-    // Real logic to find current module
-    for (const chapter of chapters) {
-      let isChapterComplete = true;
-      for (const lesson of chapter.lessons || []) {
-        if (!lesson.progress?.[0]?.isCompleted) {
-          isChapterComplete = false;
-          currentModuleTitle = chapter.title;
-          currentTopicTitle = lesson.title;
-          break;
-        }
+      if (lesson.isProblem) {
+        totalProblems++;
+        if (isCompleted) solvedProblems++;
       }
-      if (!isChapterComplete) break;
+    });
+  });
+
+  const hasProblems = totalProblems > 0;
+  const progressPercentage = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
+
+  // Determine current milestone module and topic
+  let currentModuleTitle = "All Modules Finished 🎉";
+  let currentTopicTitle = "Course Completed";
+  let foundActiveMilestone = false;
+
+  for (const chapter of chapters) {
+    for (const lesson of chapter.lessons || []) {
+      const isCompleted = Boolean(lesson.progress?.[0]?.isCompleted);
+      if (!isCompleted) {
+        currentModuleTitle = chapter.title;
+        currentTopicTitle = lesson.title;
+        foundActiveMilestone = true;
+        break;
+      }
     }
+    if (foundActiveMilestone) break;
   }
 
   // Circle SVG properties
@@ -132,18 +178,31 @@ function CourseOverviewContent({ courseId }: { courseId: string }) {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 min-h-[85vh] text-foreground">
+      {/* Top Breadcrumb Header */}
+      <div className="mb-6 flex items-center justify-between">
+        <Link 
+          to="/dashboard" 
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" /> Back to Dashboard
+        </Link>
+        <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">
+          {chapters.length} {chapters.length === 1 ? "Module" : "Modules"} • {totalLessons} Lessons
+        </span>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 h-full">
         
         {/* LEFT COLUMN: Progress & CTA */}
         <div className="lg:col-span-4 flex flex-col gap-6">
-          <Card className="bg-card border-border p-8 flex flex-col items-center shadow-2xl rounded-2xl">
+          <Card className="bg-card border-border p-8 flex flex-col items-center shadow-lg rounded-2xl">
             
             {/* Circular Progress SVG */}
             <div className="relative flex items-center justify-center w-[220px] h-[220px] mb-8">
-              <svg height={radius * 2} width={radius * 2} className="transform -rotate-90 drop-shadow-2xl">
+              <svg height={radius * 2} width={radius * 2} className="transform -rotate-90 drop-shadow-md">
                 {/* Background Track */}
                 <circle
-                  stroke="rgba(255,255,255,0.05)"
+                  stroke="rgba(255,255,255,0.06)"
                   fill="transparent"
                   strokeWidth={strokeWidth}
                   r={normalizedRadius}
@@ -155,7 +214,7 @@ function CourseOverviewContent({ courseId }: { courseId: string }) {
                   stroke="hsl(var(--primary))"
                   fill="transparent"
                   strokeWidth={strokeWidth}
-                  strokeDasharray={circumference + ' ' + circumference}
+                  strokeDasharray={circumference + " " + circumference}
                   style={{ strokeDashoffset }}
                   strokeLinecap="round"
                   r={normalizedRadius}
@@ -171,24 +230,30 @@ function CourseOverviewContent({ courseId }: { courseId: string }) {
               </div>
             </div>
 
-            {/* Course Info */}
+            {/* Dynamic Course Info */}
             <div className="w-full space-y-4 mb-8">
               <div className="flex justify-between items-center border-b border-border pb-3">
-                <span className="text-sm text-muted-foreground">Current Course</span>
-                <span className="text-sm font-semibold">{courseTitle}</span>
+                <span className="text-sm text-muted-foreground">Course</span>
+                <span className="text-sm font-semibold truncate max-w-[180px] text-right" title={realCourse.title}>
+                  {realCourse.title}
+                </span>
               </div>
               <div className="flex justify-between items-center border-b border-border pb-3">
                 <span className="text-sm text-muted-foreground">Current Module</span>
-                <span className="text-sm font-semibold">{currentModuleTitle}</span>
+                <span className="text-sm font-semibold truncate max-w-[180px] text-right" title={currentModuleTitle}>
+                  {currentModuleTitle}
+                </span>
               </div>
               <div className="flex justify-between items-center pb-1">
-                <span className="text-sm text-muted-foreground">Current Topic</span>
-                <span className="text-sm font-semibold text-right">{currentTopicTitle}</span>
+                <span className="text-sm text-muted-foreground">Next Milestone</span>
+                <span className="text-sm font-semibold truncate max-w-[180px] text-right text-primary" title={currentTopicTitle}>
+                  {currentTopicTitle}
+                </span>
               </div>
             </div>
 
             <Button 
-              className="w-full py-6 text-lg font-bold rounded-xl shadow-lg hover:shadow-primary/25 transition-all"
+              className="w-full py-6 text-base font-bold rounded-xl shadow-md hover:shadow-primary/25 transition-all"
               onClick={() => navigate({ to: "/courses", search: { courseId } })}
             >
               <Play className="w-5 h-5 mr-2" fill="currentColor" />
@@ -202,97 +267,162 @@ function CourseOverviewContent({ courseId }: { courseId: string }) {
           
           {/* Top Stat Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card className="bg-card border-border p-5 flex flex-col rounded-2xl">
-              <div className="flex items-center gap-2 text-success mb-2">
-                <CheckCircle2 className="w-4 h-4" />
-                <span className="text-4xl font-bold text-foreground">{solvedProblems}</span>
-              </div>
-              <span className="text-sm text-muted-foreground">Problems Solved</span>
-            </Card>
+            {hasProblems ? (
+              <>
+                <Card className="bg-card border-border p-5 flex flex-col rounded-2xl shadow-sm">
+                  <div className="flex items-center gap-2 text-success mb-2">
+                    <CheckCircle2 className="w-5 h-5" />
+                    <span className="text-3xl font-extrabold text-foreground">{solvedProblems}</span>
+                  </div>
+                  <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">
+                    Problems Solved
+                  </span>
+                </Card>
 
-            <Card className="bg-card border-border p-5 flex flex-col rounded-2xl">
-              <div className="flex items-center gap-2 text-blue-400 mb-2">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
-                <span className="text-4xl font-bold text-foreground">{remainingProblems}</span>
-              </div>
-              <span className="text-sm text-muted-foreground">Problems Remaining</span>
-            </Card>
+                <Card className="bg-card border-border p-5 flex flex-col rounded-2xl shadow-sm">
+                  <div className="flex items-center gap-2 text-primary mb-2">
+                    <BookOpen className="w-5 h-5" />
+                    <span className="text-3xl font-extrabold text-foreground">{totalProblems - solvedProblems}</span>
+                  </div>
+                  <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">
+                    Problems Remaining
+                  </span>
+                </Card>
+              </>
+            ) : (
+              <>
+                <Card className="bg-card border-border p-5 flex flex-col rounded-2xl shadow-sm">
+                  <div className="flex items-center gap-2 text-success mb-2">
+                    <CheckCircle2 className="w-5 h-5" />
+                    <span className="text-3xl font-extrabold text-foreground">{completedLessons}</span>
+                  </div>
+                  <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">
+                    Lessons Completed
+                  </span>
+                </Card>
 
-            <Card className="bg-card border-border p-5 flex flex-col rounded-2xl">
-              <div className="flex items-center gap-2 text-orange-400 mb-2">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                <span className="text-4xl font-bold text-foreground">{statsData?.metrics ? `${statsData.metrics.hoursLearned}h` : isUsingMock ? "48h" : "0h"}</span>
+                <Card className="bg-card border-border p-5 flex flex-col rounded-2xl shadow-sm">
+                  <div className="flex items-center gap-2 text-primary mb-2">
+                    <BookOpen className="w-5 h-5" />
+                    <span className="text-3xl font-extrabold text-foreground">{totalLessons - completedLessons}</span>
+                  </div>
+                  <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">
+                    Lessons Remaining
+                  </span>
+                </Card>
+              </>
+            )}
+
+            <Card className="bg-card border-border p-5 flex flex-col rounded-2xl shadow-sm">
+              <div className="flex items-center gap-2 text-amber-500 mb-2">
+                <Clock className="w-5 h-5" />
+                <span className="text-3xl font-extrabold text-foreground">
+                  {statsData?.metrics ? `${statsData.metrics.hoursLearned}h` : "0h"}
+                </span>
               </div>
-              <span className="text-sm text-muted-foreground">Hours Learned</span>
+              <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">
+                Platform Hours Learned
+              </span>
             </Card>
           </div>
 
-          {/* DSA Roadmap List */}
-          <Card className="bg-card border-border rounded-2xl flex-1 flex flex-col">
+          {/* Dynamic Course Roadmap List */}
+          <Card className="bg-card border-border rounded-2xl flex-1 flex flex-col shadow-sm">
             <div className="p-6 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h2 className="text-xl font-bold">DSA Roadmap</h2>
-                <p className="text-sm text-muted-foreground mt-1">Your interview prep learning path</p>
+                <h2 className="text-xl font-bold tracking-tight text-foreground">
+                  {realCourse.title} Roadmap
+                </h2>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Structured learning path &amp; milestone checklist
+                </p>
               </div>
               
               {/* Legend */}
               <div className="flex items-center gap-4 text-xs font-medium text-muted-foreground">
-                <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-success"></div> Done</div>
-                <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-primary"></div> Current</div>
-                <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full border border-muted-foreground"></div> Incomplete</div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2 h-2 rounded-full bg-success"></div> Done
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2 h-2 rounded-full bg-primary"></div> Current
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2 h-2 rounded-full border border-muted-foreground/60"></div> Incomplete
+                </div>
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-2">
-              {chapters.map((chapter: any, index: number) => {
-                // Determine status based on mock or real data
-                let status = "incomplete";
+            <div className="flex-1 overflow-y-auto p-4 space-y-2">
+              {chapters.map((chapter, index) => {
+                // Determine real completion state
+                const chapterLessons = chapter.lessons || [];
+                const allLessonsComplete = 
+                  chapterLessons.length > 0 && 
+                  chapterLessons.every((l) => Boolean(l.progress?.[0]?.isCompleted));
                 
-                if (isUsingMock) {
-                  if (chapter.isCompleted) status = "done";
-                  else if (index > 0 && mockChapters[index - 1].isCompleted && !chapter.isCompleted) status = "current";
-                  else if (index === 0 && !chapter.isCompleted) status = "current";
-                } else {
-                  // Real calculation
-                  let allComplete = true;
-                  
-                  chapter.lessons?.forEach((l: any) => {
-                    if (!l.progress?.[0]?.isCompleted) {
-                      allComplete = false;
-                    }
-                  });
+                const isExplicitlyLocked = chapter.states?.[0]?.isUnlocked === false;
+                
+                let status: "done" | "locked" | "current" | "incomplete" = "incomplete";
 
-                  if (chapter.states?.[0]?.isCompleted || (allComplete && chapter.lessons?.length > 0)) status = "done";
-                  else if (chapter.states?.[0]?.isUnlocked === false) status = "locked";
-                  else if (chapter.title === currentModuleTitle) status = "current";
+                if (isExplicitlyLocked) {
+                  status = "locked";
+                } else if (chapter.states?.[0]?.isCompleted || allLessonsComplete) {
+                  status = "done";
+                } else if (chapter.title === currentModuleTitle) {
+                  status = "current";
                 }
+
+                const completedInChapter = chapterLessons.filter((l) => Boolean(l.progress?.[0]?.isCompleted)).length;
 
                 return (
                   <div 
                     key={chapter.id} 
-                    className={`flex items-center justify-between p-4 rounded-xl mb-1 transition-colors hover:bg-foreground/5 ${status === 'current' ? 'bg-primary/5' : ''} ${status === 'locked' ? 'opacity-60' : ''}`}
+                    onClick={() => navigate({ to: "/courses", search: { courseId } })}
+                    className={`flex items-center justify-between p-4 rounded-xl transition-all cursor-pointer border ${
+                      status === "current" 
+                        ? "bg-primary/5 border-primary/30 shadow-sm" 
+                        : status === "done"
+                        ? "bg-muted/20 border-border/60 hover:bg-muted/40"
+                        : status === "locked"
+                        ? "opacity-60 border-border/40 cursor-not-allowed"
+                        : "border-border/40 hover:bg-muted/30"
+                    }`}
                   >
                     <div className="flex items-center gap-4">
                       {status === "done" ? (
-                        <CheckCircle2 className="w-6 h-6 text-success" />
+                        <CheckCircle2 className="w-5 h-5 text-success shrink-0" />
                       ) : status === "locked" ? (
-                        <Lock className="w-5 h-5 text-muted-foreground" />
+                        <Lock className="w-5 h-5 text-muted-foreground shrink-0" />
                       ) : status === "current" ? (
-                        <div className="relative flex items-center justify-center w-6 h-6">
-                          <Circle className="w-6 h-6 text-primary absolute" />
-                          <div className="w-3 h-3 bg-primary rounded-full"></div>
+                        <div className="relative flex items-center justify-center w-5 h-5 shrink-0">
+                          <Circle className="w-5 h-5 text-primary absolute animate-pulse" />
+                          <div className="w-2 h-2 bg-primary rounded-full"></div>
                         </div>
                       ) : (
-                        <Circle className="w-6 h-6 text-muted-foreground opacity-50" />
+                        <Circle className="w-5 h-5 text-muted-foreground/40 shrink-0" />
                       )}
                       
-                      <span className={`font-semibold flex items-center gap-1.5 ${status === 'incomplete' || status === 'locked' ? 'text-muted-foreground' : 'text-foreground'}`}>
-                        {chapter.title}
-                        {status === 'locked' && <Lock className="w-3.5 h-3.5 text-muted-foreground" />}
-                      </span>
+                      <div>
+                        <div className={`text-sm font-semibold flex items-center gap-2 ${
+                          status === "incomplete" || status === "locked" 
+                            ? "text-muted-foreground" 
+                            : "text-foreground"
+                        }`}>
+                          {chapter.title}
+                          {status === "locked" && (
+                            <span className="text-[10px] font-semibold bg-muted px-2 py-0.5 rounded text-muted-foreground">
+                              Locked
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {completedInChapter} of {chapterLessons.length} lessons completed
+                        </p>
+                      </div>
                     </div>
-                    <span className="text-xs text-muted-foreground font-mono tracking-wider opacity-50">
-                      {(index + 1).toString().padStart(2, '0')}
+
+                    <span className="text-xs text-muted-foreground font-mono tracking-wider opacity-60">
+                      {(index + 1).toString().padStart(2, "0")}
                     </span>
                   </div>
                 );

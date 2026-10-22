@@ -22,7 +22,7 @@ This document tracks all prioritized items required to bring **CodeBreakdowns** 
   - Implement a real backend support ingestion endpoint (`POST /api/v1/users/contact` or transactional email integration via Resend/Nodemailer) forwarding inquiries to `codebreakdowns@gmail.com`.
   - Add client-side validation, error handling, and delivery confirmation.
 
-- [ ] **Item 4: Dynamic Course Overview & Roadmaps (Remove Hardcoded Fallbacks)**
+- [x] **Item 4: Dynamic Course Overview & Roadmaps (Remove Hardcoded Fallbacks)**
   - Remove hardcoded `"Blind 150"`, `"63/150 solved"`, and static `"DSA Roadmap"` title in [`src/routes/overview.tsx`](file:///c:/Users/surek/OneDrive/Desktop/Coding/codebreakdowns-frontend/src/routes/overview.tsx).
   - Dynamically render the active course roadmap, title, and progress metrics based on real database curriculum data.
   - Add an intuitive empty state when a selected course has unpublished modules.
