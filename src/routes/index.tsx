@@ -377,7 +377,7 @@ function LandingPage() {
               <div className="relative aspect-video w-full bg-black">
                 {isVideoModalOpen && (
                   <iframe
-                    src="https://iframe.mediadelivery.net/embed/728335/83faebaf-4ac3-4aa2-9233-ae6448e1461e?autoplay=true&loop=false&muted=false&preload=true"
+                    src="https://iframe.mediadelivery.net/embed/728335/3e04148d-c871-4b00-94a6-eec8400c966b?autoplay=true&loop=false&muted=false&preload=true"
                     loading="lazy"
                     className="w-full h-full border-0 absolute inset-0"
                     allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
