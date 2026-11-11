@@ -1,5 +1,7 @@
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useHeartbeat } from "@/hooks/useHeartbeat";
+import { Button } from "@/components/ui/button";
+import { WifiOff, RotateCw, AlertCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 interface BunnyPlayerProps {
@@ -12,6 +14,12 @@ interface BunnyPlayerProps {
   onLessonComplete?: () => void;
   onProgress?: (currentTime: number, maxWatched: number) => void;
 }
+
+const formatSeconds = (totalSeconds: number): string => {
+  const m = Math.floor(totalSeconds / 60);
+  const s = Math.floor(totalSeconds % 60);
+  return `${m}:${s < 10 ? "0" : ""}${s}`;
+};
 
 // Dynamically loads the official Player.js library hosted by Bunny.net
 function loadPlayerJs(): Promise<any> {
@@ -41,7 +49,7 @@ const getNormalizedBunnyUrl = (raw: string, startSeconds?: number): string => {
   if (!raw) return "";
   let url = raw.trim();
 
-  // If the user pasted a raw UUID
+  // If raw UUID
   if (/^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$/.test(url)) {
     url = `https://iframe.mediadelivery.net/embed/728335/${url}`;
   } else {
@@ -83,6 +91,16 @@ export function BunnyPlayer({
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const playerInstanceRef = useRef<any>(null);
   const explanationNotifiedRef = useRef<boolean>(false);
+  const loadTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Network and Stream State
+  const [isOnline, setIsOnline] = useState<boolean>(() => {
+    return typeof navigator !== "undefined" ? navigator.onLine : true;
+  });
+  const [streamError, setStreamError] = useState<string | null>(null);
+  const [isLoadingStream, setIsLoadingStream] = useState<boolean>(true);
+  const [reconnectKey, setReconnectKey] = useState<number>(0);
+  const [retryAttempts, setRetryAttempts] = useState<number>(0);
 
   // Retrieve any locally cached watch position or fallback to backend initialTimestamp
   const initialPosition = useMemo(() => {
@@ -99,16 +117,80 @@ export function BunnyPlayer({
   const [currentTime, setCurrentTime] = useState<number>(initialPosition);
   const [maxWatched, setMaxWatched] = useState<number>(initialPosition);
 
-  // Integrate 10s & unmount debounced heartbeat syncing to database
+  // Sync latest playback point to heartbeat hook
   useHeartbeat(lessonId, maxWatched);
 
+  // Safe Player.js command sender with required protocol headers
+  const postToIframe = useCallback((method: string, value?: any) => {
+    try {
+      if (iframeRef.current?.contentWindow) {
+        iframeRef.current.contentWindow.postMessage(
+          JSON.stringify({
+            context: "player.js",
+            version: "0.0.11",
+            method,
+            value,
+          }),
+          "*"
+        );
+      }
+    } catch {}
+  }, []);
+
+  // Manual & Automated Reconnection handler
+  const handleReconnect = useCallback((isAuto = false) => {
+    setStreamError(null);
+    setIsLoadingStream(true);
+    setRetryAttempts((prev) => prev + 1);
+    setReconnectKey((prev) => prev + 1);
+
+    if (isAuto) {
+      toast.info("Connection restored. Reconnecting video stream...", {
+        id: `auto-reconnect-${lessonId}`,
+      });
+    } else {
+      toast.loading("Reconnecting stream...", {
+        id: `manual-reconnect-${lessonId}`,
+        duration: 1500,
+      });
+    }
+  }, [lessonId]);
+
+  // Network connectivity event listeners
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true);
+      // Auto-reconnect if player was in an error state or stream was interrupted
+      handleReconnect(true);
+    };
+
+    const handleOffline = () => {
+      setIsOnline(false);
+      setStreamError("Network connection lost. Video stream may pause.");
+      toast.warning("Network connection lost. Waiting for connection...", {
+        id: "network-offline-warning",
+      });
+    };
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, [handleReconnect]);
+
   // Update position and trigger side effects
-  const handleTimeUpdate = (seconds: number) => {
+  const handleTimeUpdate = useCallback((seconds: number) => {
     if (typeof seconds !== "number" || isNaN(seconds) || seconds < 0) return;
 
+    // Stream is actively progressing -> clear any loading or error state
+    setIsLoadingStream(false);
+    setStreamError(null);
     setCurrentTime(seconds);
 
-    // Save to localStorage for seamless refresh recovery
+    // Save to localStorage for seamless refresh/reconnection recovery
     if (seconds > 0) {
       try {
         localStorage.setItem(`cb_video_pos_${lessonId}`, seconds.toString());
@@ -135,32 +217,36 @@ export function BunnyPlayer({
         id: `explanation-unlocked-${lessonId}`,
       });
     }
-  };
-
-  // Safe Player.js command sender with required protocol headers
-  const postToIframe = (method: string, value?: any) => {
-    try {
-      if (iframeRef.current?.contentWindow) {
-        iframeRef.current.contentWindow.postMessage(
-          JSON.stringify({
-            context: "player.js",
-            version: "0.0.11",
-            method,
-            value,
-          }),
-          "*"
-        );
-      }
-    } catch {}
-  };
+  }, [lessonId, isProblem, explanationEndSeconds, isAlreadyCompleted, onProgress]);
 
   // Reset state when active lesson changes
   useEffect(() => {
     explanationNotifiedRef.current = false;
     setCurrentTime(initialPosition);
     setMaxWatched(initialPosition);
+    setStreamError(null);
+    setIsLoadingStream(true);
+    setRetryAttempts(0);
     onProgress?.(initialPosition, initialPosition);
-  }, [lessonId, initialPosition]);
+  }, [lessonId, initialPosition, onProgress]);
+
+  // Timeout guard for slow/unresponsive initial connection on mobile
+  useEffect(() => {
+    if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
+
+    loadTimeoutRef.current = setTimeout(() => {
+      if (isLoadingStream && !currentTime) {
+        // Did not start playing within 12s
+        if (!navigator.onLine) {
+          setStreamError("You appear to be offline. Reconnect your network to resume.");
+        }
+      }
+    }, 12000);
+
+    return () => {
+      if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
+    };
+  }, [isLoadingStream, currentTime, reconnectKey]);
 
   // Primary Integration: Official Player.js Wrapper
   useEffect(() => {
@@ -178,6 +264,7 @@ export function BunnyPlayer({
               playerInstanceRef.current.off("timeupdate");
               playerInstanceRef.current.off("seeked");
               playerInstanceRef.current.off("pause");
+              playerInstanceRef.current.off("error");
             } catch {}
           }
 
@@ -185,9 +272,18 @@ export function BunnyPlayer({
           playerInstanceRef.current = player;
 
           player.on("ready", () => {
-            if (initialPosition > 2) {
-              player.setCurrentTime(initialPosition);
+            setIsLoadingStream(false);
+            setStreamError(null);
+            const resumePoint = Math.max(currentTime, initialPosition);
+            if (resumePoint > 2) {
+              player.setCurrentTime(resumePoint);
             }
+          });
+
+          player.on("error", (err: any) => {
+            console.warn("[BunnyPlayer] Player.js stream error:", err);
+            setIsLoadingStream(false);
+            setStreamError("Playback interrupted by network instability or video stream timeout.");
           });
 
           player.on("timeupdate", (data: any) => {
@@ -219,12 +315,14 @@ export function BunnyPlayer({
           console.warn("[BunnyPlayer] Player.js initialization fallback:", err);
         }
       })
-      .catch(() => {});
+      .catch((loadErr) => {
+        console.warn("[BunnyPlayer] Script load error, falling back to postMessage:", loadErr);
+      });
 
     return () => {
       isCancelled = true;
     };
-  }, [lessonId, initialPosition]);
+  }, [lessonId, initialPosition, reconnectKey, handleTimeUpdate]);
 
   // Secondary Integration (Fallback Layer): Raw window message listener
   useEffect(() => {
@@ -238,13 +336,21 @@ export function BunnyPlayer({
         if (!data || typeof data !== "object") return;
 
         if (data.event === "ready") {
-          // Send subscriptions with Player.js context
+          setIsLoadingStream(false);
+          setStreamError(null);
           postToIframe("addEventListener", "timeupdate");
           postToIframe("addEventListener", "seeked");
           postToIframe("addEventListener", "pause");
-          if (initialPosition > 2) {
-            postToIframe("setCurrentTime", initialPosition);
+          postToIframe("addEventListener", "error");
+          const resumePoint = Math.max(currentTime, initialPosition);
+          if (resumePoint > 2) {
+            postToIframe("setCurrentTime", resumePoint);
           }
+        }
+
+        if (data.event === "error") {
+          setIsLoadingStream(false);
+          setStreamError("Stream playback error detected. Check connection.");
         }
 
         if (data.event === "timeupdate" || data.event === "seeked") {
@@ -265,30 +371,92 @@ export function BunnyPlayer({
 
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
-  }, [lessonId, initialPosition]);
+  }, [lessonId, initialPosition, reconnectKey, postToIframe, handleTimeUpdate]);
+
+  // Resume timestamp used in iframe source
+  const resumeTimestamp = useMemo(() => {
+    return Math.max(currentTime, initialPosition);
+  }, [currentTime, initialPosition]);
 
   const embedUrl = useMemo(() => {
-    return getNormalizedBunnyUrl(videoUrlOrId, initialPosition);
-  }, [videoUrlOrId, initialPosition]);
+    return getNormalizedBunnyUrl(videoUrlOrId, resumeTimestamp);
+  }, [videoUrlOrId, resumeTimestamp, reconnectKey]);
 
   return (
-    <div className="w-full aspect-video bg-black rounded-xl border border-white/10 overflow-hidden relative shadow-2xl">
+    <div className="w-full aspect-video bg-black rounded-xl border border-white/10 overflow-hidden relative shadow-2xl group select-none">
+      {/* Offline Status Badge */}
+      {!isOnline && (
+        <div className="absolute top-3 right-3 z-30 flex items-center gap-2 px-3 py-1.5 rounded-lg bg-amber-500/90 text-white text-xs font-semibold backdrop-blur-md shadow-lg animate-in fade-in duration-200">
+          <WifiOff className="h-3.5 w-3.5 animate-pulse" />
+          <span>Offline — Reconnecting when available</span>
+        </div>
+      )}
+
+      {/* Stream Interruption / Connection Error Overlay */}
+      {streamError && (
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-6 bg-black/90 backdrop-blur-md text-center animate-in fade-in duration-300">
+          <div className="h-12 w-12 rounded-2xl bg-destructive/15 text-destructive border border-destructive/30 flex items-center justify-center mb-3">
+            <AlertCircle className="h-6 w-6" />
+          </div>
+          <h4 className="text-base font-bold text-white">Video Stream Interrupted</h4>
+          <p className="text-xs text-white/70 mt-1.5 max-w-sm leading-relaxed">
+            {streamError}
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-3 mt-4">
+            <Button 
+              size="sm" 
+              onClick={() => handleReconnect(false)} 
+              className="gap-2 font-semibold shadow-md rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground"
+            >
+              <RotateCw className="h-3.5 w-3.5" /> Reconnect Stream
+            </Button>
+          </div>
+          {resumeTimestamp > 2 && (
+            <p className="text-[11px] text-white/50 mt-2 font-mono">
+              Resumes automatically at {formatSeconds(resumeTimestamp)}
+            </p>
+          )}
+          {retryAttempts > 0 && (
+            <span className="text-[10px] text-white/40 mt-1">
+              Reconnect attempts: {retryAttempts}
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Initial Connecting Loader Overlay */}
+      {isLoadingStream && !streamError && (
+        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/75 backdrop-blur-xs transition-opacity duration-300 pointer-events-none">
+          <Loader2 className="h-8 w-8 text-primary animate-spin mb-2.5 opacity-90" />
+          <span className="text-xs font-medium text-white/80">Connecting to secure stream...</span>
+          {resumeTimestamp > 2 && (
+            <span className="text-[10px] text-white/50 mt-1">
+              Resuming from {formatSeconds(resumeTimestamp)}
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Bunny Embed Iframe */}
       <iframe
+        key={`bunny-frame-${lessonId}-${reconnectKey}`}
         ref={iframeRef}
         src={embedUrl}
         onLoad={() => {
-          // Send handshake registrations with Player.js context immediately when iframe loads
+          // Handshake registrations with Player.js context immediately when iframe loads
           postToIframe("addEventListener", "ready");
           postToIframe("addEventListener", "timeupdate");
           postToIframe("addEventListener", "seeked");
           postToIframe("addEventListener", "pause");
-          if (initialPosition > 2) {
-            postToIframe("setCurrentTime", initialPosition);
+          postToIframe("addEventListener", "error");
+          if (resumeTimestamp > 2) {
+            postToIframe("setCurrentTime", resumeTimestamp);
           }
         }}
         className="w-full h-full border-0 absolute inset-0"
         allow="accelerometer; gyroscope; encrypted-media; picture-in-picture;"
         allowFullScreen
+        title="Lesson Video Stream"
       />
     </div>
   );

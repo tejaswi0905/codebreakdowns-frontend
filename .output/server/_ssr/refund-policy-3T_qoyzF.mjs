@@ -1,6 +1,6 @@
 import { g as require_jsx_runtime } from "../_libs/@radix-ui/react-accordion+[...].mjs";
 import { t as Card } from "./card-CM_IL3Hu.mjs";
-import { _ as RefreshCcw } from "../_libs/lucide-react.mjs";
+import { v as RefreshCcw } from "../_libs/lucide-react.mjs";
 //#region node_modules/.nitro/vite/services/ssr/assets/refund-policy-3T_qoyzF.js
 var import_jsx_runtime = require_jsx_runtime();
 function RefundPolicyPage() {

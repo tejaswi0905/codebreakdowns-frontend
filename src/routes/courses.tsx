@@ -19,6 +19,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -421,7 +427,10 @@ function CoursePlayer({ courseId, initialLessonId }: { courseId: string; initial
                                       {l.isProblem && (
                                         <>
                                           <span className="opacity-50">•</span>
-                                          <span className="text-success">Problem</span>
+                                          <span className="text-emerald-500 font-medium inline-flex items-center gap-1">
+                                            Problem
+                                            {Boolean(l.problemUrl) && <ExternalLink className="h-2.5 w-2.5 opacity-70" />}
+                                          </span>
                                         </>
                                       )}
                                     </div>
@@ -548,6 +557,16 @@ const formatTime = (totalSeconds: number): string => {
   return `${m}:${s < 10 ? "0" : ""}${s}`;
 };
 
+const getProblemPlatform = (url?: string | null): { name: string; isLeetCode: boolean } => {
+  if (!url) return { name: "LeetCode", isLeetCode: true };
+  const lower = url.toLowerCase();
+  if (lower.includes("leetcode.com")) return { name: "LeetCode", isLeetCode: true };
+  if (lower.includes("hackerrank.com")) return { name: "HackerRank", isLeetCode: false };
+  if (lower.includes("codeforces.com")) return { name: "Codeforces", isLeetCode: false };
+  if (lower.includes("geeksforgeeks.org")) return { name: "GeeksforGeeks", isLeetCode: false };
+  return { name: "Problem Platform", isLeetCode: false };
+};
+
 function Workspace({ 
   lesson, 
   courseId, 
@@ -642,17 +661,27 @@ function Workspace({
 
   if (!lesson) return null;
 
+  const hasProblemUrl = Boolean(lesson.problemUrl && lesson.problemUrl.trim().length > 0);
+  const problemPlatform = getProblemPlatform(lesson.problemUrl);
+
   // Parse JSON description if it exists
-  let meta = { 
+  let meta: {
+    text: string;
+    prerequisites?: string[];
+    objectives?: string[];
+    outcome?: string;
+    hints?: string[];
+  } = { 
     text: lesson.description || "", 
     prerequisites: ["Arrays", "Basic greedy intuition"], 
     objectives: ["Track the minimum price seen so far", "Maintain a running maximum profit", "Solve in a single pass with O(1) space"], 
-    outcome: "You'll master the min-so-far pattern and understand how it generalises to more complex stock problems." 
+    outcome: "You'll master the min-so-far pattern and understand how it generalises to more complex stock problems.",
+    hints: [],
   };
   if (lesson.description) {
     try {
       const parsed = JSON.parse(lesson.description);
-      if (parsed.text !== undefined) meta = parsed;
+      if (parsed.text !== undefined) meta = { ...meta, ...parsed };
     } catch(e) {
       meta.text = lesson.description;
     }
@@ -766,123 +795,186 @@ function Workspace({
           )}
         </Card>
 
-        <div className="flex flex-wrap items-center gap-3 w-full bg-card border border-border p-3 rounded-xl shadow-sm shrink-0">
-          <Button
-            variant={isBookmarked ? "default" : "outline"}
-            size="sm"
-            className={cn(
-              "gap-2 h-9 rounded-lg font-medium shadow-sm transition-all duration-200",
-              isBookmarked 
-                ? "bg-amber-500 hover:bg-amber-600 text-white border-amber-500" 
-                : "hover:bg-foreground/5 text-muted-foreground hover:text-foreground"
-            )}
-            onClick={() => {
-              if (!isAuthenticated) {
-                toast.info("Please sign in to bookmark lessons and save your progress.", {
-                  action: {
-                    label: "Sign In",
-                    onClick: () => navigate({ to: "/login" }),
-                  },
-                });
-                return;
-              }
-              const nextVal = !isBookmarked;
-              bookmarkMutation.mutate(nextVal);
-              toast.success(nextVal ? "Lesson bookmarked!" : "Bookmark removed");
-            }}
-          >
-            <Bookmark className={cn("h-4 w-4", isBookmarked && "fill-current")} /> 
-            {isBookmarked ? "Bookmarked" : "Bookmark"}
-          </Button>
-          {lesson.isProblem && (
+        <TooltipProvider delayDuration={150}>
+          <div className="flex flex-wrap items-center gap-3 w-full bg-card border border-border p-3 rounded-xl shadow-sm shrink-0">
             <Button
-              variant="outline"
+              variant={isBookmarked ? "default" : "outline"}
               size="sm"
-              className="gap-2 h-9 rounded-lg font-medium shadow-sm hover:bg-foreground/5 text-muted-foreground hover:text-foreground"
+              className={cn(
+                "gap-2 h-9 rounded-lg font-medium shadow-sm transition-all duration-200",
+                isBookmarked 
+                  ? "bg-amber-500 hover:bg-amber-600 text-white border-amber-500" 
+                  : "hover:bg-foreground/5 text-muted-foreground hover:text-foreground"
+              )}
               onClick={() => {
-                if(lesson.problemUrl) window.open(lesson.problemUrl, "_blank");
-                else toast.info("LeetCode link coming soon");
-              }}
-            >
-              <ExternalLink className="h-4 w-4" /> Solve on LeetCode
-            </Button>
-          )}
-          <div className="flex-1"></div>
-          {isCompleted ? (
-            <Button
-              size="sm"
-              variant="secondary"
-              className="gap-2 h-9 rounded-lg font-bold shadow-sm bg-success/15 text-success hover:bg-success/20 cursor-default"
-              disabled
-            >
-              <CheckCircle2 className="h-4 w-4 text-success" /> Completed
-            </Button>
-          ) : isLocked ? (
-            <Button
-              size="sm"
-              variant="outline"
-              className="gap-2 h-9 rounded-lg font-semibold shadow-sm opacity-60 cursor-not-allowed"
-              disabled
-            >
-              <Lock className="h-3.5 w-3.5" /> Locked
-            </Button>
-          ) : !hasWatchedExplanation ? (
-            <Button
-              size="sm"
-              variant="outline"
-              className="gap-2 h-9 rounded-lg font-medium shadow-sm opacity-70 cursor-not-allowed bg-muted/40 border-dashed text-muted-foreground select-none"
-              disabled
-              title={`Watch explanation up to ${formatTime(explanationEnd!)} to complete`}
-            >
-              <Lock className="h-3.5 w-3.5 text-muted-foreground" />
-              <span>Watch to Complete ({formatTime(Math.min(playerMaxWatched, explanationEnd!))} / {formatTime(explanationEnd!)})</span>
-            </Button>
-          ) : (
-            <Button
-              size="sm"
-              className="gap-2 h-9 rounded-lg font-bold shadow-sm transition-all duration-200 animate-in fade-in"
-              onClick={async () => {
                 if (!isAuthenticated) {
-                  toast.info("Please sign in to track completed lessons.", {
-                    action: { label: "Sign In", onClick: () => navigate({ to: "/login" }) },
+                  toast.info("Please sign in to bookmark lessons and save your progress.", {
+                    action: {
+                      label: "Sign In",
+                      onClick: () => navigate({ to: "/login" }),
+                    },
                   });
                   return;
                 }
-                setCompleteLoading(true);
-                try {
-                  // Guarantee the backend database has highestTimestampSecs recorded before marking complete
-                  if (playerMaxWatched > 0) {
-                    await recordHeartbeat(lesson.id, Math.floor(playerMaxWatched));
-                  }
-                  const res = await markLessonCompletedApi(lesson.id);
-                  if (res.success) {
-                    toast.success("Lesson marked as complete! 🎉");
-                    queryClient.invalidateQueries({ queryKey: ["course-play", courseId] });
-                    queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
-                  } else {
-                    toast.error(res.error || "Could not complete lesson");
-                  }
-                } catch (err: any) {
-                  toast.error(err?.message || "Failed to mark lesson complete");
-                } finally {
-                  setCompleteLoading(false);
-                }
+                const nextVal = !isBookmarked;
+                bookmarkMutation.mutate(nextVal);
+                toast.success(nextVal ? "Lesson bookmarked!" : "Bookmark removed");
               }}
-              disabled={completeLoading}
             >
-              <Check className="h-4 w-4" /> {completeLoading ? "Saving..." : "Mark as Complete"}
+              <Bookmark className={cn("h-4 w-4", isBookmarked && "fill-current")} /> 
+              {isBookmarked ? "Bookmarked" : "Bookmark"}
             </Button>
-          )}
-        </div>
+
+            {lesson.isProblem && (
+              hasProblemUrl ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      asChild
+                      variant="outline"
+                      size="sm"
+                      className="gap-2 h-9 rounded-lg font-medium shadow-sm hover:bg-foreground/5 text-muted-foreground hover:text-foreground transition-all duration-200"
+                    >
+                      <a
+                        href={lesson.problemUrl!}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`Solve ${lesson.title} on ${problemPlatform.name} (opens in new tab)`}
+                      >
+                        <ExternalLink className="h-4 w-4 text-primary" /> Solve on {problemPlatform.name}
+                      </a>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="text-xs">
+                    <span>Opens problem statement on {problemPlatform.name} in a new tab</span>
+                  </TooltipContent>
+                </Tooltip>
+              ) : (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span tabIndex={0} className="inline-flex cursor-not-allowed">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled
+                        className="gap-2 h-9 rounded-lg font-medium shadow-sm opacity-55 bg-muted/40 border-dashed text-muted-foreground select-none cursor-not-allowed pointer-events-none"
+                        aria-disabled="true"
+                      >
+                        <ExternalLink className="h-4 w-4 opacity-50" /> Solve on LeetCode
+                      </Button>
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="max-w-xs text-xs text-center py-2 px-3">
+                    <span>LeetCode problem link coming soon for this breakdown. Stay tuned!</span>
+                  </TooltipContent>
+                </Tooltip>
+              )
+            )}
+
+            <div className="flex-1"></div>
+            {isCompleted ? (
+              <Button
+                size="sm"
+                variant="secondary"
+                className="gap-2 h-9 rounded-lg font-bold shadow-sm bg-success/15 text-success hover:bg-success/20 cursor-default"
+                disabled
+              >
+                <CheckCircle2 className="h-4 w-4 text-success" /> Completed
+              </Button>
+            ) : isLocked ? (
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-2 h-9 rounded-lg font-semibold shadow-sm opacity-60 cursor-not-allowed"
+                disabled
+              >
+                <Lock className="h-3.5 w-3.5" /> Locked
+              </Button>
+            ) : !hasWatchedExplanation ? (
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-2 h-9 rounded-lg font-medium shadow-sm opacity-70 cursor-not-allowed bg-muted/40 border-dashed text-muted-foreground select-none"
+                disabled
+                title={`Watch explanation up to ${formatTime(explanationEnd!)} to complete`}
+              >
+                <Lock className="h-3.5 w-3.5 text-muted-foreground" />
+                <span>Watch to Complete ({formatTime(Math.min(playerMaxWatched, explanationEnd!))} / {formatTime(explanationEnd!)})</span>
+              </Button>
+            ) : (
+              <Button
+                size="sm"
+                className="gap-2 h-9 rounded-lg font-bold shadow-sm transition-all duration-200 animate-in fade-in"
+                onClick={async () => {
+                  if (!isAuthenticated) {
+                    toast.info("Please sign in to track completed lessons.", {
+                      action: { label: "Sign In", onClick: () => navigate({ to: "/login" }) },
+                    });
+                    return;
+                  }
+                  setCompleteLoading(true);
+                  try {
+                    // Guarantee the backend database has highestTimestampSecs recorded before marking complete
+                    if (playerMaxWatched > 0) {
+                      await recordHeartbeat(lesson.id, Math.floor(playerMaxWatched));
+                    }
+                    const res = await markLessonCompletedApi(lesson.id);
+                    if (res.success) {
+                      toast.success("Lesson marked as complete! 🎉");
+                      queryClient.invalidateQueries({ queryKey: ["course-play", courseId] });
+                      queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
+                    } else {
+                      toast.error(res.error || "Could not complete lesson");
+                    }
+                  } catch (err: any) {
+                    toast.error(err?.message || "Failed to mark lesson complete");
+                  } finally {
+                    setCompleteLoading(false);
+                  }
+                }}
+                disabled={completeLoading}
+              >
+                <Check className="h-4 w-4" /> {completeLoading ? "Saving..." : "Mark as Complete"}
+              </Button>
+            )}
+          </div>
+        </TooltipProvider>
 
         {lesson.isProblem && (
           <Card className="p-5 bg-card border-border rounded-2xl shadow-sm mt-2 shrink-0">
-            <div className="mb-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-              Hints
+            <div className="flex items-center justify-between mb-3">
+              <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                Problem & Hints
+              </div>
+              {hasProblemUrl ? (
+                <a
+                  href={lesson.problemUrl!}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-primary hover:underline font-medium inline-flex items-center gap-1 transition-colors"
+                >
+                  Solve on {problemPlatform.name} <ExternalLink className="h-3 w-3" />
+                </a>
+              ) : (
+                <span className="text-[11px] text-muted-foreground/70 italic">
+                  Link pending
+                </span>
+              )}
             </div>
-            <p className="text-sm text-muted-foreground italic">
-              No hints available for this problem yet.
-            </p>
+            {meta.hints && meta.hints.length > 0 ? (
+              <ul className="space-y-2">
+                {meta.hints.map((hint: string, idx: number) => (
+                  <li key={idx} className="text-xs text-foreground/80 leading-relaxed flex items-start gap-2">
+                    <span className="text-primary font-bold">#{idx + 1}</span>
+                    <span>{hint}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-xs text-muted-foreground italic leading-relaxed">
+                Attempt solving the problem on {problemPlatform.name} before reviewing the complete solution walkthrough and optimal time/space complexity analysis.
+              </p>
+            )}
           </Card>
         )}
       </div>

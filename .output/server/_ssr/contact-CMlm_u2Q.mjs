@@ -3,7 +3,7 @@ import { u as require_react } from "../_libs/@floating-ui/react-dom+[...].mjs";
 import { g as require_jsx_runtime } from "../_libs/@radix-ui/react-accordion+[...].mjs";
 import { t as Button } from "./button-Bq5vK6RO.mjs";
 import { t as Card } from "./card-CM_IL3Hu.mjs";
-import { S as MessageSquare, T as Mail, W as Clock, m as Send, u as Sparkles, w as MapPin } from "../_libs/lucide-react.mjs";
+import { C as MessageSquare, E as Mail, K as Clock, T as MapPin, m as Send, u as Sparkles } from "../_libs/lucide-react.mjs";
 import { n as toast } from "../_libs/sonner.mjs";
 //#region node_modules/.nitro/vite/services/ssr/assets/contact-CMlm_u2Q.js
 var import_react = /* @__PURE__ */ __toESM(require_react());

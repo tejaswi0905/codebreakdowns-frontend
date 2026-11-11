@@ -43,7 +43,7 @@ This document tracks all prioritized items required to bring **CodeBreakdowns** 
   - Polish the zero-enrollment state in [`dashboard.tsx`](file:///c:/Users/surek/OneDrive/Desktop/Coding/codebreakdowns-frontend/src/routes/dashboard.tsx) with recommended starting paths (Blind 75 or Free modules) to guide first-time students.
   - Ensure fast 1-click continuation cards highlight the most recent unfinished lesson.
 
-- [ ] **Item 8: Course Player Fallbacks & Outbound Problem Links**
+- [x] **Item 8: Course Player Fallbacks & Outbound Problem Links**
   - Audit LeetCode external links across all lessons in [`courses.tsx`](file:///c:/Users/surek/OneDrive/Desktop/Coding/codebreakdowns-frontend/src/routes/courses.tsx) with graceful fallback tooltips when problem URLs are not yet populated.
   - Verify video player retry and reconnection behavior on unstable mobile network connections.
 

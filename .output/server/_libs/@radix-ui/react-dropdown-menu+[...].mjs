@@ -2,9 +2,9 @@ import { a as __toESM } from "../../_runtime.mjs";
 import { a as offset, c as useFloating, i as limitShift, n as flip, o as shift, r as hide, s as size, t as arrow, u as require_react } from "../@floating-ui/react-dom+[...].mjs";
 import { c as Presence, d as useControllableState, f as useLayoutEffect2, g as require_jsx_runtime, h as createContextScope, l as Primitive, m as useComposedRefs, o as useDirection, p as createCollection, s as useId, u as dispatchDiscreteCustomEvent } from "./react-accordion+[...].mjs";
 import { n as composeEventHandlers } from "../radix-ui__primitive.mjs";
-import { n as autoUpdate } from "../@floating-ui/dom+[...].mjs";
-import { c as useFocusGuards, d as DismissableLayer, f as ReactRemoveScroll, l as Portal$1, p as hideOthers, u as FocusScope } from "./react-dialog+[...].mjs";
 import { i as useCallbackRef } from "./react-avatar+[...].mjs";
+import { c as useFocusGuards, d as hideOthers, f as Portal$1, l as FocusScope, p as DismissableLayer, u as ReactRemoveScroll } from "./react-dialog+[...].mjs";
+import { n as autoUpdate } from "../@floating-ui/dom+[...].mjs";
 import { t as Root$1 } from "../radix-ui__react-arrow.mjs";
 //#region node_modules/@radix-ui/react-use-size/dist/index.mjs
 var import_react = /* @__PURE__ */ __toESM(require_react(), 1);
@@ -1645,4 +1645,4 @@ var Separator2 = DropdownMenuSeparator;
 var SubTrigger2 = DropdownMenuSubTrigger;
 var SubContent2 = DropdownMenuSubContent;
 //#endregion
-export { Label2 as a, Root2 as c, SubTrigger2 as d, Trigger as f, ItemIndicator2 as i, Separator2 as l, Content2 as n, Portal2 as o, Item2 as r, RadioItem2 as s, CheckboxItem2 as t, SubContent2 as u };
+export { createPopperScope as _, Label2 as a, Root2 as c, SubTrigger2 as d, Trigger as f, Root2$1 as g, Content as h, ItemIndicator2 as i, Separator2 as l, Arrow as m, Content2 as n, Portal2 as o, Anchor as p, Item2 as r, RadioItem2 as s, CheckboxItem2 as t, SubContent2 as u };
