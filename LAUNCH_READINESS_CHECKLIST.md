@@ -17,7 +17,7 @@ This document tracks all prioritized items required to bring **CodeBreakdowns** 
   - Create `PATCH /api/v1/users/me` endpoint in [`CB-backend`](file:///c:/Users/surek/OneDrive/Desktop/Coding/CB-backend/src/modules/users) to allow users to update their profile info.
   - Connect frontend [`profile.tsx`](file:///c:/Users/surek/OneDrive/Desktop/Coding/codebreakdowns-frontend/src/routes/profile.tsx) to real database mutations with loading and error states.
 
-- [ ] **Item 3: Working Contact Form & Support Ingestion**
+- [x] **Item 3: Working Contact Form & Support Ingestion**
   - Eliminate the `setTimeout` mock in [`src/routes/contact.tsx`](file:///c:/Users/surek/OneDrive/Desktop/Coding/codebreakdowns-frontend/src/routes/contact.tsx) that silently drops student inquiries.
   - Implement a real backend support ingestion endpoint (`POST /api/v1/users/contact` or transactional email integration via Resend/Nodemailer) forwarding inquiries to `codebreakdowns@gmail.com`.
   - Add client-side validation, error handling, and delivery confirmation.
@@ -51,18 +51,18 @@ This document tracks all prioritized items required to bring **CodeBreakdowns** 
 
 ## 🟢 Category 3: Production Infrastructure, Auth & Operations
 
-- [ ] **Item 9: Production Cross-Domain Cookie & CORS Audit**
+- [x] **Item 9: Production Cross-Domain Cookie & CORS Audit**
   - Verify that JWT HTTP-only authentication cookies support cross-subdomain sharing (`domain: ".codebreakdowns.in"`, `sameSite: "none"`, `secure: true`) between `https://codebreakdowns.in` and `https://api.codebreakdowns.in`.
   - Prevent Safari/iOS Intelligent Tracking Prevention (ITP) cookie drops during OAuth redirects.
 
-- [ ] **Item 10: Post-Purchase Automated Transactional Email**
+- [x] **Item 10: Post-Purchase Automated Transactional Email**
   - Configure automated order confirmation & enrollment receipt email triggered by the Razorpay `order.paid` webhook.
   - Include direct login link, receipt ID, and curriculum onboarding guide.
 
 - [ ] **Item 11: Production Error Monitoring (Sentry / LogRocket)**
   - Configure frontend and backend error tracking to capture client-side video playback failures or server-side webhook discrepancies in real time.
 
-- [ ] **Item 12: End-to-End Live Payment & DRM Smoke Test**
+- [x] **Item 12: End-to-End Live Payment & DRM Smoke Test**
   - Run a real ₹1 live Razorpay payment transaction on the production domain via mobile UPI.
   - Verify:
     1. Instant database receipt creation (`UserProduct`).

@@ -306,3 +306,29 @@ export const verifyPayment = async (payload: VerifyPaymentPayload): Promise<bool
   return true;
 };
 
+export interface ContactPayload {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+}
+
+export const submitContactForm = async (payload: ContactPayload): Promise<{ success: boolean; message: string }> => {
+  const response = await fetch(`${API_BASE_URL}/users/contact`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(data.error || data.message || "Failed to send message. Please try again.");
+  }
+
+  return data;
+};
+
+

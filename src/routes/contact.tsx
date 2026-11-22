@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Mail, MapPin, Phone, Clock, Send, Sparkles, MessageSquare } from "lucide-react";
+import { Mail, MapPin, Clock, Send, Sparkles, MessageSquare, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { useState } from "react";
+import { submitContactForm } from "@/services/api";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -20,15 +21,48 @@ export const Route = createFileRoute("/contact")({
 
 function ContactPage() {
   const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    subject: "",
+    message: "",
+  });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.name.trim() || !formData.email.trim() || !formData.subject.trim() || !formData.message.trim()) {
+      toast.error("Please fill in all required fields.");
+      return;
+    }
+
     setLoading(true);
-    setTimeout(() => {
+    try {
+      const response = await submitContactForm({
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        subject: formData.subject,
+        message: formData.message.trim(),
+      });
+
+      toast.success(response.message || "Message sent successfully! Our team will get back to you within 24 hours.");
+      setFormData({
+        name: "",
+        email: "",
+        subject: "",
+        message: "",
+      });
+    } catch (error: any) {
+      toast.error(error.message || "Failed to send message. Please try again.");
+    } finally {
       setLoading(false);
-      toast.success("Message sent successfully! Our team will get back to you within 24 hours.");
-      (e.target as HTMLFormElement).reset();
-    }, 1000);
+    }
   };
 
   return (
@@ -57,8 +91,8 @@ function ContactPage() {
               <div>
                 <h3 className="font-semibold text-foreground">Email Support</h3>
                 <p className="text-xs text-muted-foreground mt-1">Our team responds within 24 hours.</p>
-                <a href="mailto:codebreakdowns@gmail.com" className="text-sm text-primary font-medium mt-2 inline-block hover:underline">
-                  codebreakdowns@gmail.com
+                <a href="mailto:hello@codebreakdowns.in" className="text-sm text-primary font-medium mt-2 inline-block hover:underline">
+                  hello@codebreakdowns.in
                 </a>
               </div>
             </div>
@@ -111,6 +145,9 @@ function ContactPage() {
                 <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Your Name</label>
                 <input
                   type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
                   required
                   placeholder="John Doe"
                   className="w-full rounded-md border border-border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
@@ -120,6 +157,9 @@ function ContactPage() {
                 <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Email Address</label>
                 <input
                   type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
                   required
                   placeholder="john@example.com"
                   className="w-full rounded-md border border-border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
@@ -130,20 +170,26 @@ function ContactPage() {
             <div className="space-y-2">
               <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Subject / Topic</label>
               <select
+                name="subject"
+                value={formData.subject}
+                onChange={handleChange}
                 required
                 className="w-full rounded-md border border-border bg-background px-3 py-2.5 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
               >
                 <option value="" className="bg-background text-foreground">Select a topic...</option>
-                <option value="course-support" className="bg-background text-foreground">Course Access / Technical Support</option>
-                <option value="billing" className="bg-background text-foreground">Billing / Payment / Refund Issue</option>
-                <option value="partnership" className="bg-background text-foreground">Business / Partnership Inquiry</option>
-                <option value="other" className="bg-background text-foreground">Other Question</option>
+                <option value="Course Access / Technical Support" className="bg-background text-foreground">Course Access / Technical Support</option>
+                <option value="Billing / Payment / Refund Issue" className="bg-background text-foreground">Billing / Payment / Refund Issue</option>
+                <option value="Business / Partnership Inquiry" className="bg-background text-foreground">Business / Partnership Inquiry</option>
+                <option value="General Question" className="bg-background text-foreground">General Question</option>
               </select>
             </div>
 
             <div className="space-y-2">
               <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Message</label>
               <textarea
+                name="message"
+                value={formData.message}
+                onChange={handleChange}
                 required
                 rows={5}
                 placeholder="How can we help you today? Please provide details such as your registered email or transaction ID if applicable."
@@ -152,8 +198,17 @@ function ContactPage() {
             </div>
 
             <Button type="submit" className="w-full sm:w-auto px-8 font-medium flex items-center gap-2" disabled={loading}>
-              {loading ? "Sending..." : "Send Message"}
-              <Send className="h-4 w-4" />
+              {loading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                <>
+                  <Send className="h-4 w-4" />
+                  Send Message
+                </>
+              )}
             </Button>
           </form>
         </Card>
